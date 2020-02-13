@@ -7,7 +7,7 @@ import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Storage;
 import org.jbei.ice.storage.model.Strain;
@@ -30,8 +30,8 @@ public class SampleServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.initializeMock();
+        HibernateConfiguration.beginTransaction();
         service = new SampleService();
     }
 
@@ -384,6 +384,6 @@ public class SampleServiceTest {
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
+        HibernateConfiguration.commitTransaction();
     }
 }

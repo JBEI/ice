@@ -4,7 +4,7 @@
 package org.jbei.ice.lib.account;
 
 import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.Account;
 import org.junit.After;
 import org.junit.Assert;
@@ -22,14 +22,14 @@ public class AccountControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.initializeMock();
+        HibernateConfiguration.beginTransaction();
         controller = new AccountController();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.rollbackTransaction();
+        HibernateConfiguration.rollbackTransaction();
     }
 
     @Test

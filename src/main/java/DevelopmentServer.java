@@ -47,6 +47,7 @@ public class DevelopmentServer {
                 "path-prefix('search') or " +
                         "path-prefix('folders') or " +
                         "path-prefix('download') or " +
+                        "path-prefix('config') or " +
                         "path-prefix('entry') or path-prefix('admin') and regex('/.+') -> rewrite('/')",
                 ClassLoader.getSystemClassLoader()), servletHandler);
 

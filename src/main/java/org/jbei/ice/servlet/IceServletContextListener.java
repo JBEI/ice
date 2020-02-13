@@ -1,10 +1,9 @@
 package org.jbei.ice.servlet;
 
-import org.hibernate.SessionFactory;
 import org.jbei.ice.ApplicationInitialize;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.executor.IceExecutorService;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -30,9 +29,7 @@ public class IceServletContextListener implements ServletContextListener {
 
         // shutdown executor service
         IceExecutorService.getInstance().stopService();
-
-        closeSessionFactory(HibernateUtil.getSessionFactory());
-
+        HibernateConfiguration.close();
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
             Driver driver = drivers.nextElement();
@@ -45,18 +42,13 @@ public class IceServletContextListener implements ServletContextListener {
         }
     }
 
-    // work
-    private void closeSessionFactory(SessionFactory factory) {
-        factory.close();
-    }
-
     protected void init() {
         try {
-            HibernateUtil.beginTransaction();
+//            HibernateUtil.beginTransaction();
             ApplicationInitialize.startUp();
-            HibernateUtil.commitTransaction();
+//            HibernateUtil.commitTransaction();
         } catch (Throwable e) {
-            HibernateUtil.rollbackTransaction();
+//            HibernateUtil.rollbackTransaction();
             e.printStackTrace();
             throw new RuntimeException(e);
         }

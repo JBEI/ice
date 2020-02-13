@@ -7,7 +7,7 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.junit.After;
@@ -22,13 +22,13 @@ public class CollectionEntriesTest {
 
     @Before
     public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.initializeMock();
+        HibernateConfiguration.beginTransaction();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.rollbackTransaction();
+        HibernateConfiguration.rollbackTransaction();
     }
 
     @Test

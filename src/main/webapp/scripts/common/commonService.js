@@ -34,6 +34,10 @@ angular.module('ice.common.service', [])
                         type = "danger";
                         break;
 
+                    case 503:
+                        $location.path('/config');
+                        break;
+
                     default:
                         errorMsg = "Unknown server error";
                         type = "danger";

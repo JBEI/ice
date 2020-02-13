@@ -9,7 +9,7 @@ import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ConfigurationDAO;
-import org.jbei.ice.storage.model.Configuration;
+import org.jbei.ice.storage.model.ConfigurationModel;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 
@@ -45,14 +45,14 @@ public class ConfigurationSettings {
     }
 
     public String getPropertyValue(ConfigurationKey key) {
-        Configuration config = dao.get(key);
+        ConfigurationModel config = dao.get(key);
         if (config == null)
             return key.getDefaultValue();
         return config.getValue();
     }
 
     public Setting getPropertyValue(String key) {
-        Configuration config = dao.get(key);
+        ConfigurationModel config = dao.get(key);
         if (config == null)
             return null;
         return config.toDataTransferObject();
@@ -80,23 +80,23 @@ public class ConfigurationSettings {
     }
 
     private Setting getConfigValue(ConfigurationKey key) {
-        Configuration configuration = dao.get(key);
-        if (configuration == null)
+        ConfigurationModel configurationModel = dao.get(key);
+        if (configurationModel == null)
             return new Setting(key.name(), "");
-        return new Setting(configuration.getKey(), configuration.getValue());
+        return new Setting(configurationModel.getKey(), configurationModel.getValue());
     }
 
-    public Configuration setPropertyValue(ConfigurationKey key, String value) {
-        Configuration configuration = dao.get(key);
-        if (configuration == null) {
-            configuration = new Configuration();
-            configuration.setKey(key.name());
-            configuration.setValue(value);
-            return dao.create(configuration);
+    public ConfigurationModel setPropertyValue(ConfigurationKey key, String value) {
+        ConfigurationModel configurationModel = dao.get(key);
+        if (configurationModel == null) {
+            configurationModel = new ConfigurationModel();
+            configurationModel.setKey(key.name());
+            configurationModel.setValue(value);
+            return dao.create(configurationModel);
         }
 
-        configuration.setValue(value);
-        return dao.update(configuration);
+        configurationModel.setValue(value);
+        return dao.update(configurationModel);
     }
 
     public Setting updateSetting(String userId, Setting setting, String url) {
@@ -105,7 +105,7 @@ public class ConfigurationSettings {
             throw new PermissionException("Cannot update system setting without admin privileges");
 
         ConfigurationKey key = ConfigurationKey.valueOf(setting.getKey());
-        Configuration configuration = setPropertyValue(key, setting.getValue());
+        ConfigurationModel configurationModel = setPropertyValue(key, setting.getValue());
 
         // check if the setting being updated is related to the web of registries
         if (key == ConfigurationKey.JOIN_WEB_OF_REGISTRIES) {
@@ -114,7 +114,7 @@ public class ConfigurationSettings {
             woRController.setEnable(userId, enable, url);
         }
 
-        return configuration.toDataTransferObject();
+        return configurationModel.toDataTransferObject();
     }
 
     // update the setting automatically. Currently works only for blast installations
@@ -123,12 +123,15 @@ public class ConfigurationSettings {
         if (!accountController.isAdministrator(userId))
             throw new PermissionException("Cannot auto update system setting without admin privileges");
 
-        Configuration configuration = dao.get(setting.getKey());
-        if (configuration == null) {
+        ConfigurationModel configurationModel = dao.get(setting.getKey());
+        if (configurationModel == null) {
             Logger.warn("Could not retrieve setting " + setting.getKey() + ". Creating...");
             if (setting.getValue() == null)
                 setting.setValue("");
-            configuration = dao.create(new Configuration(setting.getKey(), setting.getValue()));
+            configurationModel = new ConfigurationModel();
+            configurationModel.setKey(setting.getKey());
+            configurationModel.setValue(setting.getValue());
+            configurationModel = dao.create(configurationModel);
         }
 
         String osName = System.getProperty("os.name").replaceAll("\\s+", "").toLowerCase();
@@ -148,7 +151,7 @@ public class ConfigurationSettings {
             archiver.extract(path.toFile(), dest.toFile());
 
             Path valuePath = Paths.get(dest.toString(), "ncbi-blast-2.6.0+", "bin");
-            configuration.setValue(valuePath.toString());
+            configurationModel.setValue(valuePath.toString());
             Files.list(valuePath).forEach(dirPath -> {
                 try {
                     Files.setPosixFilePermissions(dirPath, PosixFilePermissions.fromString("rwxrwxrwx"));
@@ -157,7 +160,7 @@ public class ConfigurationSettings {
                 }
             });
 
-            return dao.update(configuration).toDataTransferObject();
+            return dao.update(configurationModel).toDataTransferObject();
         } catch (Exception e) {
             Logger.error(e);
             return null;
@@ -169,7 +172,7 @@ public class ConfigurationSettings {
      */
     public void initPropertyValues() {
         for (ConfigurationKey key : ConfigurationKey.values()) {
-            Configuration config = dao.get(key);
+            ConfigurationModel config = dao.get(key);
             if (config != null || key.getDefaultValue().isEmpty())
                 continue;
 
@@ -203,5 +206,9 @@ public class ConfigurationSettings {
         }
 
         return null;
+    }
+
+    public boolean hasDataDirectory() {
+        return false;
     }
 }

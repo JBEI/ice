@@ -6,6 +6,7 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 
 import javax.servlet.http.HttpServletRequest;
@@ -79,6 +80,9 @@ public class RestResource {
      * @throws WebApplicationException with status 401 if the user id cannot be retrieved
      */
     protected String requireUserId() {
+        if (!new ConfigurationSettings().hasDataDirectory())
+            throw new WebApplicationException(Response.Status.SERVICE_UNAVAILABLE);
+
         String userId = getUserId();
         if (userId == null)
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);

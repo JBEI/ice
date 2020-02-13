@@ -3,10 +3,8 @@ package org.jbei.ice.storage.hibernate.search;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.search.*;
-import org.hibernate.Session;
 import org.hibernate.search.FullTextQuery;
 import org.hibernate.search.FullTextSession;
-import org.hibernate.search.Search;
 import org.hibernate.search.engine.ProjectionConstants;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hibernate.search.query.dsl.TermContext;
@@ -26,7 +24,7 @@ import org.jbei.ice.lib.search.filter.SearchFieldFactory;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.ModelToInfoFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.Entry;
 
 import java.util.*;
@@ -85,9 +83,8 @@ public class HibernateSearch {
             entryTypes = new ArrayList<>(Arrays.asList(EntryType.values()));
         }
 
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         int resultCount;
-        FullTextSession fullTextSession = Search.getFullTextSession(session);
+        FullTextSession fullTextSession = HibernateConfiguration.getFullTextSession();
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
 
@@ -198,8 +195,7 @@ public class HibernateSearch {
      */
     public SearchResults filterBlastResults(String userId, int start, int count, SearchQuery searchQuery,
                                             final HashMap<String, SearchResult> blastResults) {
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        FullTextSession fullTextSession = Search.getFullTextSession(session);
+        FullTextSession fullTextSession = HibernateConfiguration.getFullTextSession();
 
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
         Query query = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
@@ -256,9 +252,8 @@ public class HibernateSearch {
     public SearchResults executeSearch(String userId, HashMap<String, QueryType> terms,
                                        SearchQuery searchQuery,
                                        HashMap<String, SearchResult> blastResults) {
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         int resultCount;
-        FullTextSession fullTextSession = Search.getFullTextSession(session);
+        FullTextSession fullTextSession = HibernateConfiguration.getFullTextSession();
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
         // get classes for search

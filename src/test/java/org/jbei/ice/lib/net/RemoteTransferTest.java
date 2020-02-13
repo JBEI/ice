@@ -4,7 +4,7 @@ import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Plasmid;
@@ -24,13 +24,13 @@ public class RemoteTransferTest {
     @Before
     public void setUp() throws Exception {
         transfer = new RemoteTransfer();
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.initializeMock();
+        HibernateConfiguration.beginTransaction();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.rollbackTransaction();
+        HibernateConfiguration.rollbackTransaction();
     }
 
     @Test

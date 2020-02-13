@@ -9,7 +9,7 @@ import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.junit.After;
@@ -28,14 +28,14 @@ public class SearchIndexesTest {
 
     @Before
     public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.initializeMock();
+        HibernateConfiguration.beginTransaction();
         controller = new SearchIndexes();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
+        HibernateConfiguration.commitTransaction();
     }
 
     @Test
@@ -76,9 +76,9 @@ public class SearchIndexesTest {
 
         Assert.assertNotNull(entry);
         Assert.assertTrue(entry.getId() > 0);
-        HibernateUtil.commitTransaction();   // commit triggers indexing
+        HibernateConfiguration.commitTransaction();   // commit triggers indexing
 
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.beginTransaction();
         SearchQuery query = new SearchQuery();
         query.setQueryString("testPlasmid");
         SearchResults results = controller.runSearch(account.getEmail(), query);

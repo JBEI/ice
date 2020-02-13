@@ -23,6 +23,7 @@ angular
             console.log(event, next, current);
         });
 
+
         $rootScope.logout = function () {
             Authentication.logout();
         };
@@ -65,6 +66,11 @@ angular
 
         // angular ui
         $stateProvider
+            .state('config', {
+                url: '/config',
+                templateUrl: 'scripts/config/config.html',
+                controller: 'ConfigurationController'
+            })
             .state('main', {
                 url: '/',
                 templateUrl: 'views/folder.html',

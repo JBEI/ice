@@ -7,7 +7,7 @@ import org.jbei.ice.lib.dto.DNAFeature;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceFeatureDAO;
 import org.jbei.ice.storage.model.Account;
@@ -29,13 +29,13 @@ public class AnnotationsTest {
 
     @Before
     public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.initializeMock();
+        HibernateConfiguration.beginTransaction();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
+        HibernateConfiguration.commitTransaction();
     }
 
     @Test

@@ -14,7 +14,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "configuration")
 @SequenceGenerator(name = "configuration_id", sequenceName = "configuration_id_seq", allocationSize = 1)
-public class Configuration implements DataModel {
+public class ConfigurationModel implements DataModel<Setting> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "configuration_id")
@@ -26,15 +26,10 @@ public class Configuration implements DataModel {
     @Column(name = "value", length = 1024, nullable = false)
     private String value;
 
-    public Configuration() {
-        super();
+    public ConfigurationModel() {
     }
 
-    public Configuration(String key, String value) {
-        setKey(key);
-        setValue(value);
-    }
-
+    @Override
     public long getId() {
         return id;
     }

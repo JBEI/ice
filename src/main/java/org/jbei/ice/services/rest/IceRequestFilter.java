@@ -1,6 +1,6 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -18,6 +18,6 @@ public class IceRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.beginTransaction();
     }
 }

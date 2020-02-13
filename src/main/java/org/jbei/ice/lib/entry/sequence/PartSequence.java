@@ -597,10 +597,10 @@ public class PartSequence {
         FeaturedDNASequence featuredDNASequence = SequenceUtil.sequenceToDNASequence(sequence, sequenceFeatures);
         featuredDNASequence.setCanEdit(canEdit);
         featuredDNASequence.setIdentifier(entry.getPartNumber());
-        Configuration configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
+        ConfigurationModel configurationModel = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
 
-        if (configuration != null) {
-            String uriPrefix = configuration.getValue();
+        if (configurationModel != null) {
+            String uriPrefix = configurationModel.getValue();
             featuredDNASequence.setUri(uriPrefix + "/entry/" + entry.getId());
         }
         return featuredDNASequence;

@@ -1,7 +1,7 @@
 package org.jbei.ice.services.rest;
 
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -23,14 +23,14 @@ public class IceResponseFilter implements ContainerResponseFilter {
         int status = responseContext.getStatus();
         if (status != 401) {
             if (status == 500)
-                HibernateUtil.rollbackTransaction();
+                HibernateConfiguration.rollbackTransaction();
             else {
                 try {
-                    HibernateUtil.commitTransaction();
+                    HibernateConfiguration.commitTransaction();
                 } catch (Throwable e) {
                     Logger.error(e);
                     responseContext.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-                    HibernateUtil.rollbackTransaction();
+                    HibernateConfiguration.rollbackTransaction();
                 }
             }
         }
