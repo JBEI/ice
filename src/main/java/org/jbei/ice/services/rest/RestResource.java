@@ -1,7 +1,6 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.auth.hmac.HmacSignature;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.account.UserSessions;
@@ -24,8 +23,8 @@ import javax.ws.rs.core.Response;
  */
 public class RestResource {
 
-    private final String AUTHENTICATION_PARAM_NAME = Headers.AUTHENTICATION_PARAM_NAME;
     final String WOR_PARTNER_TOKEN = Headers.WOR_PARTNER_TOKEN;
+    private final String AUTHENTICATION_PARAM_NAME = Headers.AUTHENTICATION_PARAM_NAME;
     private final String API_KEY_TOKEN = Headers.API_KEY_TOKEN;               // token for validation
     private final String API_KEY_USER = Headers.API_KEY_USER;           // optional user. system checks and uses assigned token user if not specified
     private final String API_KEY_CLIENT_ID = Headers.API_KEY_CLIENT_ID;    // client id
@@ -151,18 +150,6 @@ public class RestResource {
             // being a bit generous in terms of allowing other auth methods to be attempted even though apiToken is set
             if (userId != null)
                 return userId;
-        }
-
-        // check hmac signature
-        final Object hmac = request.getAttribute(AuthenticationInterceptor.HMAC_SIGNATURE);
-        final Object valid = request.getAttribute(AuthenticationInterceptor.EXPECTED_SIGNATURE);
-        if (hmac instanceof HmacSignature) {
-            final HmacSignature generated = (HmacSignature) hmac;
-            if (generated.generateSignature().equals(valid)) {
-                // TODO validation of meaningful userId
-                // e.g. "admin" account on EDD won't mean anything to ICE
-                userId = generated.getUserId();
-            }
         }
 
         return userId;
