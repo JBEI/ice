@@ -12,14 +12,13 @@ import org.jbei.ice.storage.IDataTransferModel;
  */
 public enum ConfigurationKey implements IDataTransferModel {
 
-    APPLICATION_VERSION("4.0.0"),
+    APPLICATION_VERSION("6.0.0"),
     TEMPORARY_DIRECTORY("/tmp"),
     DATA_DIRECTORY("data"),
 
     BULK_UPLOAD_APPROVER_EMAIL(""), //TODO this should be a role
     ADMIN_EMAIL(""),
     SMTP_HOST(""),
-    ERROR_EMAIL_EXCEPTION_PREFIX("ERROR"),
     SEND_EMAIL_ON_ERRORS("NO"),
     PROJECT_NAME(""),
     URI_PREFIX("localhost:8443"),
@@ -33,11 +32,12 @@ public enum ConfigurationKey implements IDataTransferModel {
     PASSWORD_CHANGE_ALLOWED("YES"),
     PROFILE_EDIT_ALLOWED("YES"),
     JOIN_WEB_OF_REGISTRIES("NO"),
-    RESTRICT_PUBLIC_ENABLE("NO"),
+    RESTRICT_PUBLIC_ENABLE("NO"),           // restrict the ability (for non-admins) to make entries "public"
     EMAILER(Type.CUSTOM.name()),
     GMAIL_APPLICATION_PASSWORD(""),
     WEB_OF_REGISTRIES_MASTER("registry.jbei.org"),
     AUTHENTICATION_CLASS(LocalAuthentication.class.getName()),
+    AUTHENTICATION_TYPE("default"),
 
     // sample request config
     SAMPLE_CREATE_APPROVAL_MESSAGE("");

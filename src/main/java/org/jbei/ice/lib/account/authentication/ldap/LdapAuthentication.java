@@ -32,7 +32,7 @@ public class LdapAuthentication implements IAuthentication {
     private LdapProperties properties;
 
     public LdapAuthentication() throws IOException {
-        properties = new LdapProperties();
+        properties = LdapProperties.getInstance();
         properties.load();
     }
 

@@ -8,6 +8,7 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.hibernate.dao.ConfigurationDAO;
 import org.jbei.ice.storage.model.ConfigurationModel;
 import org.rauschig.jarchivelib.Archiver;
@@ -209,6 +210,36 @@ public class ConfigurationSettings {
     }
 
     public boolean hasDataDirectory() {
-        return false;
+        // session valid?
+        return HibernateConfiguration.isInitialized();
+    }
+
+    public SiteSettings getInitialValues() {
+
+        SiteSettings siteSettings = new SiteSettings();
+
+        // get the data directory home
+        String propertyHome = System.getenv("ICE_DATA_HOME");
+        Path iceHome;
+
+        if (StringUtils.isBlank(propertyHome)) {
+            // check system property (-D in startup script)
+            propertyHome = System.getProperty("ICE_DATA_HOME");
+
+            // still nothing, check home directory
+            if (StringUtils.isBlank(propertyHome)) {
+                String userHome = System.getProperty("user.home");
+                iceHome = Paths.get(userHome, ".ICEData");
+            } else {
+                iceHome = Paths.get(propertyHome);
+            }
+        } else {
+            iceHome = Paths.get(propertyHome);
+        }
+        siteSettings.setDataDirectory(iceHome.toString());
+
+        // get the
+
+        return siteSettings;
     }
 }

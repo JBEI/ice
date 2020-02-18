@@ -51,7 +51,7 @@ public class AccessTokenResource extends RestResource {
         // ensure the user is valid
         String userId = requireUserId();
         log(userId, "logging out");
-        accountController.invalidate(userId);
+        UserSessions.invalidateSession(userId);
         return super.respond(Response.Status.OK);
     }
 

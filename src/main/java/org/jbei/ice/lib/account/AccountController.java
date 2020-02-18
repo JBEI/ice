@@ -33,8 +33,7 @@ import java.util.List;
 
 public class AccountController {
 
-    private static final String ADMIN_ACCOUNT_EMAIL = "Administrator";
-    private static final String ADMIN_ACCOUNT_PASSWORD = "Administrator";
+
     private final AccountDAO dao;
     private final GroupDAO groupDAO;
 
@@ -207,8 +206,9 @@ public class AccountController {
         }
 
         // generate salt and encrypt password before storing
-        final String salt = Utils.generateSaltForUserAccount();
-        final String newPassword = Utils.generateUUID().substring(24);
+        TokenHash hash = new TokenHash();
+        final String salt = hash.generateSalt();
+        final String newPassword = hash.generateRandomToken(24);
         final String encryptedPassword = AccountUtils.encryptNewUserPassword(newPassword, salt);
 
         Account account = fromDTO(info);
@@ -262,34 +262,6 @@ public class AccountController {
 
         EmailFactory.getEmail().send(info.getEmail(), subject, stringBuilder.toString());
         return info;
-    }
-
-    /**
-     * @return new admin account
-     */
-    public Account createAdminAccount() {
-        Account adminAccount = getByEmail(ADMIN_ACCOUNT_EMAIL);
-        if (adminAccount != null) {
-            return adminAccount;
-        }
-
-        adminAccount = new Account();
-        adminAccount.setEmail(ADMIN_ACCOUNT_EMAIL);
-        adminAccount.setLastName("Administrator");
-        adminAccount.setFirstName("");
-        adminAccount.setInitials("");
-        adminAccount.setInstitution("");
-        adminAccount.setSalt(Utils.generateSaltForUserAccount());
-        adminAccount.setPassword(AccountUtils.encryptNewUserPassword(ADMIN_ACCOUNT_PASSWORD, adminAccount.getSalt()));
-        adminAccount.setDescription("Administrator Account");
-
-        adminAccount.setIp("");
-        final Date currentTime = Calendar.getInstance().getTime();
-        adminAccount.setCreationTime(currentTime);
-        adminAccount.setModificationTime(currentTime);
-        adminAccount.setLastLoginTime(currentTime);
-        adminAccount.setType(AccountType.ADMIN);
-        return save(adminAccount);
     }
 
     /**
@@ -357,7 +329,8 @@ public class AccountController {
             Class<?> authentication = Class.forName(clazz);
             return (IAuthentication) authentication.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            Logger.error(e);
+            Logger.error("Exception loading authentication class: ", e);
+            Logger.error("Using default authentication");
             return new LocalAuthentication();
         }
     }
@@ -448,15 +421,6 @@ public class AccountController {
         info.setAdmin(isAdmin);
         info.setSessionId(UserSessions.createSessionForUser(email, transfer.getSessionId()));
         return info;
-    }
-
-    /**
-     * De-authenticate the given sessionKey. The user is logged out from the system.
-     *
-     * @param sessionKey unique session identifier
-     */
-    public void invalidate(final String sessionKey) {
-        UserSessions.invalidateSession(sessionKey);
     }
 
     /**

@@ -44,11 +44,14 @@ public class IceServletContextListener implements ServletContextListener {
 
     protected void init() {
         try {
-//            HibernateUtil.beginTransaction();
-            ApplicationInitialize.startUp();
-//            HibernateUtil.commitTransaction();
+            if (!ApplicationInitialize.configure())
+                return;
+
+            HibernateConfiguration.beginTransaction();
+            ApplicationInitialize.loadAuthentication();
+            ApplicationInitialize.start();
+            HibernateConfiguration.commitTransaction();
         } catch (Throwable e) {
-//            HibernateUtil.rollbackTransaction();
             e.printStackTrace();
             throw new RuntimeException(e);
         }

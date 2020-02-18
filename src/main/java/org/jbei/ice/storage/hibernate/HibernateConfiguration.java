@@ -67,8 +67,15 @@ public class HibernateConfiguration {
     private static void configurePostgresDb(Configuration configuration, Properties properties, String dbPath) {
         // load (additional) base configuration
         configuration.configure();
+        String url = properties.getProperty("connectionUrl");
+        String username = properties.getProperty("username");
+        String password = properties.getProperty("password");
+
+        configuration.setProperty("hibernate.connection.url", "jdbc:postgresql://" + url + "/" + username);
+        configuration.setProperty("hibernate.connection.driver_class", "org.postgresql.Driver");
+        configuration.setProperty("hibernate.connection.username", username);
+        configuration.setProperty("hibernate.connection.password", password);
         configuration.setProperty("hibernate.search.default.indexBase", dbPath + "/data/lucene-data");
-        configuration.setProperties(properties);
     }
 
     private static void configureH2Db(Configuration configuration, String dbPath) {
@@ -104,6 +111,10 @@ public class HibernateConfiguration {
      */
     public static Session newSession() {
         return sessionFactory.openSession();
+    }
+
+    public static boolean isInitialized() {
+        return sessionFactory != null && sessionFactory.isOpen();
     }
 
     /**

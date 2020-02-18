@@ -68,7 +68,7 @@ angular
         $stateProvider
             .state('config', {
                 url: '/config',
-                templateUrl: 'scripts/config/config.html',
+                templateUrl: 'scripts/config/config-data-directory.html',
                 controller: 'ConfigurationController'
             })
             .state('main', {
