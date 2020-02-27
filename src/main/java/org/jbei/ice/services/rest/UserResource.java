@@ -194,8 +194,7 @@ public class UserResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/password")
-    public AccountTransfer updatePassword(@PathParam("id") long userId,
-                                          AccountTransfer transfer) {
+    public AccountTransfer updatePassword(@PathParam("id") long userId, AccountTransfer transfer) {
         String user = getUserId();
         log(user, "changing password for user " + userId);
         return controller.updatePassword(user, userId, transfer);
@@ -225,10 +224,11 @@ public class UserResource extends RestResource {
                                         @DefaultValue("15") @QueryParam("limit") int limit,
                                         @DefaultValue("requested") @QueryParam("sort") String sort,
                                         @DefaultValue("false") @QueryParam("asc") boolean asc,
+                                        @DefaultValue("") @QueryParam("filter") String filter,
                                         @DefaultValue("") @QueryParam("status") SampleRequestStatus status) {
         String user = requireUserId();
         return super.respond(Response.Status.OK,
-                requestRetriever.getUserSamples(user, status, offset, limit, sort, asc));
+                requestRetriever.getUserSamples(user, status, offset, limit, sort, asc, filter));
     }
 
     @GET

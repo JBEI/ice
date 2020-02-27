@@ -458,10 +458,7 @@ angular.module('ice.collection.controller', [])
             });
         }
     })
-    .controller('FolderCreateSamplesController', function (Util, $scope, folder, $uibModalInstance, SampleService) {
-        $scope.Plate96Rows = SampleService.getPlate96Rows();
-        $scope.Plate96Cols = SampleService.getPlate96Cols();
-
+    .controller('FolderCreateSamplesController', function (Util, $scope, folder, $uibModalInstance) {
         $scope.submitFolderForSampleCreation = function () {
             $scope.isConflict = false;
             Util.update("rest/folders/" + folder.id + "/SAMPLE", {}, {}, function (result) {

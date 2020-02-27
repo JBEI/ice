@@ -69,7 +69,7 @@ public class RequestDAO extends HibernateRepository<Request> {
         }
     }
 
-    public int getCount(Account account) {
+    public int getCount(String filter, Account account) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Request> from = query.from(Request.class);
@@ -91,7 +91,7 @@ public class RequestDAO extends HibernateRepository<Request> {
             query.select(getBuilder().countDistinct(from.get("id")));
             List<Predicate> predicates = createPredicates(from, filter, status);
             if (!predicates.isEmpty())
-                query.where(predicates.toArray(new Predicate[predicates.size()]));
+                query.where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).uniqueResult().intValue();
         } catch (Exception he) {
             Logger.error(he);
@@ -105,7 +105,7 @@ public class RequestDAO extends HibernateRepository<Request> {
             Root<Request> from = query.from(Request.class);
             List<Predicate> predicates = createPredicates(from, filter, status);
             if (!predicates.isEmpty())
-                query.where(predicates.toArray(new Predicate[predicates.size()]));
+                query.where(predicates.toArray(new Predicate[0]));
 
             query.orderBy(asc ? getBuilder().asc(from.get(sort)) : getBuilder().desc(from.get(sort)));
             return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
@@ -131,7 +131,7 @@ public class RequestDAO extends HibernateRepository<Request> {
     }
 
     public List<Request> getAccountRequests(Account account, SampleRequestStatus status, int start, int limit,
-                                            String sort, boolean asc) {
+                                            String sort, boolean asc, String filter) {
         try {
             CriteriaQuery<Request> query = getBuilder().createQuery(Request.class);
             Root<Request> from = query.from(Request.class);
