@@ -81,7 +81,7 @@ public class SampleCSV implements Closeable {
     }
 
     // similar to parse but instead of creating samples, if verifies
-    public List<String> verify() throws IOException {
+    public List<String> verify() {
         StorageDAO storageDAO = DAOFactory.getStorageDAO();
         List<String> errors = new ArrayList<>();
 

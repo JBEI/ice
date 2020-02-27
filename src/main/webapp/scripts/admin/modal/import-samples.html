@@ -5,45 +5,103 @@
     </span>
 </div>
 
-<div class="modal-body">
+<div class="modal-body" ng-class="{'opacity_4': uploadingFile}">
 
-    <div class="font-90em" ng-if="!processingFile">
-        <div class="alert alert-info">Upload your CSV file below. Expected format is<br><br>
+    <uib-tabset class="pad_top">
+        <uib-tab select="selectSample(0)">
+            <uib-tab-heading>Working Copy</uib-tab-heading>
+        </uib-tab>
 
-            <table class="table table-bordered bg_f1 font-85em">
-                <tr>
-                    <td>Entry ID</td>
-                    <td>Location</td>
-                    <td>00001</td>
-                    <td>00002*</td>
-                    <td>00003*</td>
-                </tr>
-                <tr>
-                    <td>JBx_001</td>
-                    <td>A01</td>
-                    <td>abc</td>
-                    <td>ghi</td>
-                    <td>mno</td>
-                </tr>
-                <tr>
-                    <td>JBx_002</td>
-                    <td>A02</td>
-                    <td>def</td>
-                    <td>jkl</td>
-                    <td>opq</td>
-                </tr>
-            </table>
-            where <code>00001</code> <code>00002</code> and <code>00003</code> are plate names for the main, backup 1
-            and backup 2 plates respectively, and should be changed for the actual upload. Columns with * are optional
+        <uib-tab select="selectSample(1)">
+            <uib-tab-heading>Backup Sample 1</uib-tab-heading>
+        </uib-tab>
+
+        <uib-tab select="selectSample(2)">
+            <uib-tab-heading>Backup Sample 2</uib-tab-heading>
+        </uib-tab>
+    </uib-tabset>
+
+    <div class="row">
+        <div class="col-sm-7">
+            <sample-plate96 location-barcodes="currentPlate.locationBarcodes" plate-name="currentPlate.name"
+                            entries="plates[0].locationBarcodes"
+                            ngf-drop="uploadSelectedFile(file)" ng-model="file" class="drop-box"
+                            ngf-drag-over-class="'dragover'" ngf-multiple="false" ngf-allow-dir="false">
+            </sample-plate96>
         </div>
 
-        <input nv-file-select uploader="sampleImportUploader" type="file"/>
-    </div>
+        <div class="col-sm-5" ng-if="!plates[0].folder">
+            <div class="pad_top">
+                <table style="width: 98%; border-top: 1px solid #CCCCCC"
+                       class="table table-responsive table-condensed table-hover table-border-bottom font-95em">
+                    <thead>
+                    <tr>
+                        <td style="width: 250px; font-size: 11px"><b>SELECT FOLDER</b>
+                            <input type="text" class="pull-right" ng-model="folderRequests.params.filter"
+                                   style="padding: 3px"
+                                   ng-change="folderRequestPageChanged()" placeholder="Filter by folder name">
+                        </td>
+                    </tr>
+                    </thead>
+                    <tbody ng-if='folderRequests && folderRequests.results.length'
+                           ng-class="{'opacity_4':folderRequests.loadingPage}">
+                    <tr ng-repeat="request in folderRequests.results" class="highlight-row-icons">
+                        <td style="cursor: pointer" ng-click="selectFolderForSample(request)">
+                            <a>{{request.folderDetails.folderName}}</a>
+                            <br>
+                            <small><b>{{request.folderDetails.count}}</b>
+                                <ng-pluralize count="request.folderDetails.count"
+                                              when="{'1': 'entry', 'other': 'entries'}"></ng-pluralize>
+                            </small>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tbody ng-if="!folderRequests || !folderRequests.results.length">
+                    <tr>
+                        <td>No folders available</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
 
-    <!--<div> &lt;!&ndash; ng-if="processingFile && progress < 100"> &ndash;&gt;-->
-    <!--<img src="img/loader-mini.gif" ng-if="progress!= '100'"> Uploading File....-->
-    <!--<uib-progressbar value="progress">{{progress}}%</uib-progressbar>-->
-    <!--</div>-->
+            <div ng-if='folderRequests && folderRequests.results.length'>
+                <div style="padding-left: 0">
+                    <ul uib-pagination total-items="folderRequests.available" ng-change="folderRequestPageChanged()"
+                        ng-model="folderRequests.params.currentPage" max-size="5" previous-text="&laquo;"
+                        next-text="&raquo;" class="pagination-sm" items-per-page="folderRequests.params.limit"></ul>
+                </div>
+                <div style="margin-top: 20px">
+                    <strong class="small">
+                        <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
+                        {{pageCounts(folderRequests.params.currentPage, folderRequests.available,
+                        folderRequests.params.limit)}}
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-5 pad_top" ng-if="plates[0].folder">
+            <a ng-click="showFolders()"> << Back</a>
+            <span class="pull-right">{{plates[0].folder.folderDetails.folderName}}</span>
+            <div class="pad_top" style="overflow-y: scroll; height: 450px">
+                <table class="table table-hover" style="width: 98%; table-layout: fixed">
+                    <thead>
+                    <tr>
+                        <th style="width: 200px" class="entry-table-header">Part Number</th>
+                        <th style="width: 60px" class="entry-table-header">Location</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="highlight-row-icons"
+                        ng-repeat="key in keys(plates[0].locationBarcodes) | orderBy: key">
+                        <td class="font-95em">{{plates[0].locationBarcodes[key].partId}}</td>
+                        <td class="small text-muted" style="text-align: center">{{key}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <div ng-if="processingFile">
         <img src="img/loader-mini.gif"> Processing File...
@@ -74,10 +132,15 @@
             </span>
         </div>
     </div>
-
-
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-sm btn-primary" ng-click="$dismiss('cancel')">Close</button>
+    <div class="pull-left">
+        <span ng-if="messages.processing"><img src="img/loader-mini.gif"> {{messages.processing}}</span>
+        <span ng-if="messages.warning"><i class="fa fa-fw fa-exclamation-triangle dark-orange"></i> {{messages.warning}}</span>
+        <span ng-if="messages.error"><i class="fa fa-fw fa-exclamation-circle red"></i> {{messages.error}}</span>
+        <span ng-if="messages.success"><i class="fa fa-fw fa-check green"></i> {{messages.success}}</span>
+    </div>
+    <button class="btn btn-sm btn-primary" ng-click="submitPlateInformation()">Submit</button>
+    <button class="btn btn-sm btn-default" ng-click="$dismiss('cancel')">Close</button>
 </div>

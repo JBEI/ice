@@ -23,11 +23,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
 
     public boolean hasSample(Entry entry) {
         try {
-            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
-            Root<Sample> from = query.from(Sample.class);
-            query.select(getBuilder().countDistinct(from.get("id")));
-            query.where(getBuilder().equal(from.get("entry"), entry));
-            return currentSession().createQuery(query).setMaxResults(1).uniqueResult() > 0;
+            return getSampleCount(entry) > 0;
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);

@@ -1,5 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.storage.DAOException;
@@ -8,6 +9,7 @@ import org.jbei.ice.storage.model.Folder;
 import org.jbei.ice.storage.model.SampleCreateModel;
 
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 import java.util.List;
 
@@ -23,16 +25,28 @@ public class SampleCreateModelDAO extends HibernateRepository<SampleCreateModel>
         return super.get(SampleCreateModel.class, id);
     }
 
-    public List<SampleCreateModel> list(int offset, int limit, String sort, boolean asc) {
+    public List<SampleCreateModel> list(int offset, int limit, String sort, boolean asc, String folderNameFilter) {
         CriteriaQuery<SampleCreateModel> query = getBuilder().createQuery(SampleCreateModel.class).distinct(true);
         Root<SampleCreateModel> from = query.from(SampleCreateModel.class);
+        if (StringUtils.isNotBlank(folderNameFilter)) {
+            // filter by folder name
+            folderNameFilter = folderNameFilter.toLowerCase();
+            Join<SampleCreateModel, Folder> folder = from.join("folder");
+            query.where(getBuilder().like(getBuilder().lower(folder.get("name")), "%" + folderNameFilter + "%"));
+        }
         query.orderBy(asc ? getBuilder().asc(from.get(sort)) : getBuilder().desc(from.get(sort)));
         return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(offset).list();
     }
 
-    public long availableCount() {
+    public long availableCount(String folderNameFilter) {
         CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
         Root<SampleCreateModel> from = query.from(SampleCreateModel.class);
+        if (StringUtils.isNotBlank(folderNameFilter)) {
+            // filter by folder name
+            folderNameFilter = folderNameFilter.toLowerCase();
+            Join<SampleCreateModel, Folder> folder = from.join("folder");
+            query.where(getBuilder().like(getBuilder().lower(folder.get("name")), "%" + folderNameFilter + "%"));
+        }
         query.select(getBuilder().countDistinct(from.get("id")));
         return currentSession().createQuery(query).uniqueResult();
     }
