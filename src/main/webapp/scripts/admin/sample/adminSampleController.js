@@ -403,6 +403,8 @@ angular.module('ice.admin.sample.controller', [])
                     Util.setFeedback("Error uploading file", "error");
 
                 $scope.currentPlate.locationBarcodes = resp.data.locationBarcodes;
+                if (resp.data.name && !$scope.currentPlate.name)
+                    $scope.currentPlate.name = resp.data.name;
 
                 if ($scope.currentPlate.id === 0) {
                     $scope.currentPlate.cleanLocationBarcodes = angular.copy(resp.data.locationBarcodes);
