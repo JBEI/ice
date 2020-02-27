@@ -234,12 +234,13 @@ public class SampleResource extends RestResource {
                 List<Storage> result = DAOFactory.getStorageDAO().retrieveStorageTube(tube.getBarcode());
                 tube.setBarcodeAvailable(result == null || result.isEmpty());
                 // check if user is specifying part number
-                if (next.length >= 3) {
+                if (next.length >= 3 && StringUtils.isNotBlank(next[2])) {
                     String partNumber = next[2];
                     Entry entry = DAOFactory.getEntryDAO().getByPartNumber(partNumber);
                     if (entry == null) {
                         Logger.error("Could not retrieve entry with part number : " + partNumber);
                     } else {
+                        plate.setHasUserSpecifiedPartIds(true);
                         tube.setPartId(entry.getPartNumber());
                     }
 

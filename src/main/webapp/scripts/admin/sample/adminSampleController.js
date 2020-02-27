@@ -409,9 +409,14 @@ angular.module('ice.admin.sample.controller', [])
                 if ($scope.currentPlate.id === 0) {
                     $scope.currentPlate.cleanLocationBarcodes = angular.copy(resp.data.locationBarcodes);
 
-                    // if a folder has already been selected then assign the part numbers
-                    if ($scope.currentPlate.folder)
-                        $scope.selectFolderForSample($scope.currentPlate.folder);
+                    // check if user uploaded part Ids
+                    if (resp.data.hasUserSpecifiedPartIds) {
+                        $scope.currentPlate.folder = {folderDetails: {folderName: "User Specified"}}
+                    } else {
+                        // if a folder has already been selected then assign the part numbers
+                        if ($scope.currentPlate.folder)
+                            $scope.selectFolderForSample($scope.currentPlate.folder);
+                    }
                 }
 
             }, null, function (evt) {
@@ -464,6 +469,11 @@ angular.module('ice.admin.sample.controller', [])
             $scope.messages = {processing: "Creating " + sampleCount + " samples for working copy"};
             Util.post("rest/samples", plateToUpload, function () {
 
+                if (!$scope.plates[1].locationBarcodes) {
+                    $scope.messages = {success: "Samples created successfully for working copy only"};
+                    return;
+                }
+
                 // process backup 1 copies if available
                 let backup1CopiesAvailable = false;
                 for (let i = 0; i < uploadPlateKeys.length; i += 1) {
@@ -481,6 +491,12 @@ angular.module('ice.admin.sample.controller', [])
                 $scope.messages = {processing: "Creating " + sampleCount + " samples for backup 1"};
                 Util.post("rest/samples", plateToUpload, function () {
 
+                    if (!$scope.plates[2].locationBarcodes) {
+                        $scope.messages = {success: "Samples created successfully for working copy & backup 1"};
+                        return;
+                    }
+
+
                     // process backup 1 copies if available
                     let backup2CopiesAvailable = false;
                     for (let i = 0; i < uploadPlateKeys.length; i += 1) {
@@ -488,7 +504,7 @@ angular.module('ice.admin.sample.controller', [])
                         const backupTube = $scope.plates[2].locationBarcodes[backupWell];
                         backup2CopiesAvailable = backupTube !== undefined;
                         if (!backup2CopiesAvailable) {
-                            $scope.messages = {success: "Samples created successfully for working copy and backup 1"};
+                            $scope.messages = {success: "Samples created successfully for working copy & backup 1"};
                             return;
                         }
 
