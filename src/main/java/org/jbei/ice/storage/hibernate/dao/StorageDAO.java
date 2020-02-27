@@ -28,11 +28,29 @@ public class StorageDAO extends HibernateRepository<Storage> {
      */
     public List<Storage> retrieveStorageTube(String barcode) {
         List<Storage> results = retrieveStorageByIndex(barcode, SampleType.TUBE);
-
         if (results == null || results.isEmpty()) {
             return null;
         }
         return results;
+    }
+
+    public Storage getPlateWell(String well, long parentId) {
+        Storage parent = this.get(parentId);
+        if (parent == null)
+            return null;
+
+        try {
+            CriteriaQuery<Storage> query = getBuilder().createQuery(Storage.class);
+            Root<Storage> from = query.from(Storage.class);
+            query.where(
+                    getBuilder().equal(from.get("index"), well),
+                    getBuilder().equal(from.get("storageType"), SampleType.PLATE96),
+                    getBuilder().equal(from.get("parent"), parent));
+            return currentSession().createQuery(query).uniqueResult();
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
     }
 
     /**

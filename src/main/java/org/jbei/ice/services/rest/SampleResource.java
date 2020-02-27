@@ -1,5 +1,6 @@
 package org.jbei.ice.services.rest;
 
+import com.opencsv.CSVReader;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -7,10 +8,10 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.sample.*;
-import org.jbei.ice.lib.entry.sample.RequestRetriever;
-import org.jbei.ice.lib.entry.sample.SampleCSV;
-import org.jbei.ice.lib.entry.sample.SampleCart;
-import org.jbei.ice.lib.entry.sample.SampleService;
+import org.jbei.ice.lib.entry.sample.*;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Storage;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -19,7 +20,9 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -78,7 +81,7 @@ public class SampleResource extends RestResource {
         String userId = requireUserId();
         Logger.info(userId + ": retrieving sample requests");
         if (isFolder) {
-            UserSamples samples = requestRetriever.getFolderRequests(userId, offset, limit, sort, asc);
+            UserSamples samples = requestRetriever.getFolderRequests(userId, offset, limit, sort, asc, filter);
             return super.respond(samples);
         } else {
             List<SampleRequestStatus> sampleList = new ArrayList<>(options.size());
@@ -116,8 +119,7 @@ public class SampleResource extends RestResource {
     @POST
     @Path("/requests/file")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response getRequestFile(@QueryParam("sid") String sid,
-                                   ArrayList<Long> requestIds) {
+    public Response getRequestFile(@QueryParam("sid") String sid, ArrayList<Long> requestIds) {
         // only supports csv for now
         if (StringUtils.isEmpty(sessionId))
             sessionId = sid;
@@ -171,10 +173,11 @@ public class SampleResource extends RestResource {
                                     @DefaultValue("requested") @QueryParam("sort") String sort,
                                     @DefaultValue("false") @QueryParam("asc") boolean asc,
                                     @PathParam("userId") long uid,
+                                    @QueryParam("filter") String filter,
                                     @DefaultValue("IN_CART") @QueryParam("status") SampleRequestStatus status) {
         String userId = requireUserId();
         Logger.info(userId + ": retrieving user sample requests ");
-        UserSamples userSamples = requestRetriever.getUserSamples(userId, status, offset, limit, sort, asc);
+        UserSamples userSamples = requestRetriever.getUserSamples(userId, status, offset, limit, sort, asc, filter);
         return super.respond(Response.Status.OK, userSamples);
     }
 
@@ -191,15 +194,50 @@ public class SampleResource extends RestResource {
         return super.respond(cart.addRequest(request));
     }
 
+    // only works for plates at this time
+    // creates samples and associated locations
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addSamples(@DefaultValue("JBEI-") @QueryParam("samplePrefix") String samplePrefix, Plate plate) {
+        String userId = requireUserId();
+        log(userId, "creating samples for plate " + plate.getName());
+        PlateStorage plateStorage = new PlateStorage(userId);
+        plateStorage.setStrainNamePrefix(samplePrefix);
+        plateStorage.create(plate);
+        return super.respond(true);
+    }
+
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addSamples(@FormDataParam("file") InputStream fileInputStream,
-                               @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
-        String userId = requireUserId();
-        try {
-            SampleCSV sampleCSV = new SampleCSV(userId, fileInputStream);
-            return super.respond(sampleCSV.parse());
+    @Path("/map")
+    public Response createSampleMap(@FormDataParam("file") InputStream fileInputStream,
+                                    @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
+        InputStreamReader reader = new InputStreamReader(fileInputStream);
+        try (CSVReader csvReader = new CSVReader(reader)) {
+            Iterator<String[]> iterator = csvReader.iterator();
+            Plate plate = new Plate();
+            while (iterator.hasNext()) {
+                String[] next = iterator.next();
+                Tube tube = new Tube();
+                tube.setBarcode(next[1]);
+                List<Storage> result = DAOFactory.getStorageDAO().retrieveStorageTube(tube.getBarcode());
+                tube.setBarcodeAvailable(result == null || result.isEmpty());
+                // check if user is specifying part number
+                if (next.length >= 3) {
+                    String partNumber = next[2];
+                    Entry entry = DAOFactory.getEntryDAO().getByPartNumber(partNumber);
+                    if (entry == null) {
+                        Logger.error("Could not retrieve entry with part number : " + partNumber);
+                    } else {
+                        tube.setPartId(entry.getPartNumber());
+                    }
+
+                }
+                plate.getLocationBarcodes().put(next[0], tube);
+            }
+            return super.respond(plate);
         } catch (IOException e) {
             throw new WebApplicationException(e);
         }

@@ -50,7 +50,7 @@ Command line installation steps (linux environment):
 * [Documentation](http://ice.jbei.org/) including user manual and API documentation
 
 ## Build Status:
-[![Build Status](https://travis-ci.org/JBEI/ice.svg?branch=dev)](https://travis-ci.org/JBEI/ice)
+[![Build Status](https://travis-ci.org/JBEI/ice.svg?branch=master)](https://travis-ci.org/JBEI/ice)
 
 ## Related Projects
 [Open Vector Editor](https://github.com/TeselaGen/openVectorEditor) is used in ICE to display and edit sequences

@@ -1,0 +1,56 @@
+<table class="entry_sample_panel" style="width: 450px">
+    <tr>
+        <td colspan="{{Plate96Cols.length+1}}">
+            <strong style="color: #a52a2a">PLATE LABEL</strong> &nbsp;
+            <input type="text" ng-model="plateName" placeholder="Enter Plate Label">
+        </td>
+    </tr>
+    <tr style="height: 35px;">
+        <td colspan="{{Plate96Cols.length+1}}" class="small">
+            <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+    <tr>
+        <td>&nbsp;</td>
+        <td class="text-center" ng-repeat="col in Plate96Cols">
+            <strong ng-class="{'opacity_4': !isSelectedColumn(selected.location, col)}">{{col}}</strong>
+        </td>
+    </tr>
+    <tr ng-repeat="row in Plate96Rows">
+        <td>
+            <strong ng-class="{'opacity_4': !isSelectedRow(selected.location, row)}">{{row}}</strong>
+            &nbsp;&nbsp;
+        </td>
+
+        <td ng-repeat="col in Plate96Cols track by $id(col)">
+            <div style="position: absolute; cursor: pointer" ng-init="location=row + (10+col+'').slice(-2)">
+                <div ng-if="locationBarcodes[location].barcode && locationBarcodes[location].barcode !== 'No Tube'">
+                    <i class="fa fa-circle" uib-tooltip="{{locationBarcodes[location].barcode}}"
+                       ng-class="{
+                       'green': locationBarcodes[location].barcode != 'No Tube' && locationBarcodes[location].barcode != 'No Read',
+                       'dark-orange': locationBarcodes[location].barcode === 'No Read',
+                       'red': !locationBarcodes[location].barcodeAvailable,
+                       'opacity_4': !entries[location].partId && locationBarcodes[location].barcodeAvailable
+                       }"
+                       ng-click="showBarCode(location)" style="font-size: 35px"></i>
+                </div>
+            </div>
+
+            <i class="fa fa-circle-thin" style="font-size: 35px"></i>
+        </td>
+    </tr>
+
+    <tr style="height: 67px;">
+        <td colspan="{{Plate96Cols.length+1}}" class="small">
+            <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+
+            <strong ng-if="selected.label">{{selected.label}}</strong><br>
+
+            <div ng-if="selected.location.type=='TUBE'"><b>Barcode</b> {{selected.location.display}}</div>
+            <span class="text-muted" ng-if="selected.partId">
+                {{selected.creationTime | date : 'short'}} -
+            </span>
+            <a ng-href="profile/{{selected.depositor.id}}">{{selected.depositor.firstName}}
+                {{selected.depositor.lastName}}
+            </a>
+        </td>
+    </tr>
+</table>

@@ -38,13 +38,13 @@ public class RequestRetriever {
     }
 
     public UserSamples getUserSamples(String userId, SampleRequestStatus status, int start, int limit, String sort,
-                                      boolean asc) {
+                                      boolean asc, String filter) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         UserSamples samples = new UserSamples();
-        int count = dao.getCount(account);
+        int count = dao.getCount(filter, account);
         samples.setCount(count);
 
-        List<Request> requestList = dao.getAccountRequests(account, status, start, limit, sort, asc);
+        List<Request> requestList = dao.getAccountRequests(account, status, start, limit, sort, asc, filter);
 
         for (Request request : requestList)
             samples.getRequests().add(request.toDataTransferObject());
@@ -52,12 +52,12 @@ public class RequestRetriever {
         return samples;
     }
 
-    public UserSamples getFolderRequests(String userId, int start, int limit, String sort, boolean asc) {
+    public UserSamples getFolderRequests(String userId, int start, int limit, String sort, boolean asc, String folderNameFilter) {
         // admin feature
         if (!new AccountController().isAdministrator(userId))
             throw new PermissionException("Admin privileges required for this action");
 
-        List<SampleCreateModel> models = DAOFactory.getSampleCreateModelDAO().list(start, limit, sort, asc);
+        List<SampleCreateModel> models = DAOFactory.getSampleCreateModelDAO().list(start, limit, sort, asc, folderNameFilter);
         UserSamples result = new UserSamples();
 
         for (SampleCreateModel model : models) {
@@ -75,7 +75,7 @@ public class RequestRetriever {
             result.getRequests().add(request);
         }
 
-        long available = DAOFactory.getSampleCreateModelDAO().availableCount();
+        long available = DAOFactory.getSampleCreateModelDAO().availableCount(folderNameFilter);
         result.setCount(Long.valueOf(available).intValue());
 
         return result;
@@ -85,7 +85,7 @@ public class RequestRetriever {
                                    List<SampleRequestStatus> status, String filter) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         if (account.getType() != AccountType.ADMIN)
-            return getUserSamples(userId, null, start, limit, sort, asc);
+            return getUserSamples(userId, null, start, limit, sort, asc, filter);
 
         int count = dao.getCount(filter, status);
         UserSamples samples = new UserSamples();
