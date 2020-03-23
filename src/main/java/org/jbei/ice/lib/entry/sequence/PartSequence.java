@@ -295,7 +295,7 @@ public class PartSequence {
             // sometimes the whole sequence is sent in the string portion (when there are no features)
             // no features to add
             updatedSequence = GeneralParser.parse(updatedSequence.getSequence());
-        } else if (updatedSequence.getSequence().isEmpty()) {
+        } else if (updatedSequence.getSequence().isEmpty() && StringUtils.isNotBlank(existing.getSequence())) {
             updatedSequence.setSequence(existing.getSequence());
         }
 
@@ -304,14 +304,15 @@ public class PartSequence {
         if (sequence == null)
             return;
 
+        // todo : commenting out for now
         if (existing != null) {
 
             SequenceVersionHistory history = new SequenceVersionHistory(userId, existing.getId());
 
-            // diff //todo : check if sequence features is set
+            // get features for existing entry
             existing.setSequenceFeatures(new HashSet<>(sequenceFeatureDAO.getEntrySequenceFeatures(this.entry)));
 
-            // 1. check sequence string
+            // 1. check sequence string to see if it has changed
             checkSequenceString(history, existing, sequence);
 
             // 2. check features
@@ -319,6 +320,9 @@ public class PartSequence {
 
             // 3. check for removed features
             checkRemovedFeatures(existing, sequence);
+
+            // 4. check if any existing features are updated
+            checkForUpdatedFeatures(existing, sequence);
 
             // rebuild the trace sequence alignments // todo : this might not be needed for all updates
             rebuildTraceAlignments();
@@ -363,6 +367,18 @@ public class PartSequence {
         }
 
         existing.getSequenceFeatures().removeAll(toRemoveFeatures);
+    }
+
+    private void checkForUpdatedFeatures(Sequence existing, Sequence updated) {
+        if (existing == null || existing.getSequenceFeatures() == null || updated.getSequenceFeatures() == null)
+            return;
+
+        for (SequenceFeature existingFeature : existing.getSequenceFeatures()) {
+            // for each existing feature, check with updated for difference in name and type
+            for (SequenceFeature updatedSequenceFeature : updated.getSequenceFeatures()) {
+                Feature sequenceFeature = updatedSequenceFeature.getFeature();
+            }
+        }
     }
 
     private void deleteSequenceFeature(SequenceFeature sequenceFeature) {
@@ -467,8 +483,8 @@ public class PartSequence {
             if (checkSameFeature(existingSequenceFeature, sequenceFeature))
                 return existingSequenceFeature;    // sequence found in list of existing
 
-//            if (isNotEqual(existingSequenceFeature.getName(), sequenceFeature.getName()))
-//                continue;
+            if (!existingSequenceFeature.getName().equals(sequenceFeature.getName()))
+                continue;
 //
 //            if (isNotEqual(existingSequenceFeature.getGenbankType(), sequenceFeature.getGenbankType()))
 //                continue;
