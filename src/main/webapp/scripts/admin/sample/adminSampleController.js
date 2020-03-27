@@ -466,7 +466,9 @@ angular.module('ice.admin.sample.controller', [])
             }
 
             // send data to the server
+            // create working copy samples
             $scope.messages = {processing: "Creating " + sampleCount + " samples for working copy"};
+            plateToUpload.name = $scope.plates[1].name;
             Util.post("rest/samples", plateToUpload, function () {
 
                 if (!$scope.plates[1].locationBarcodes) {
@@ -488,14 +490,15 @@ angular.module('ice.admin.sample.controller', [])
                     plateToUpload.locationBarcodes[backupWell].barcode = backupTube.barcode;
                 }
 
+                // on success for working copy create backup copy 1
                 $scope.messages = {processing: "Creating " + sampleCount + " samples for backup 1"};
+                plateToUpload.name = $scope.plates[2].name;
                 Util.post("rest/samples", plateToUpload, function () {
 
                     if (!$scope.plates[2].locationBarcodes) {
                         $scope.messages = {success: "Samples created successfully for working copy & backup 1"};
                         return;
                     }
-
 
                     // process backup 1 copies if available
                     let backup2CopiesAvailable = false;
@@ -516,8 +519,6 @@ angular.module('ice.admin.sample.controller', [])
                         $scope.messages = {success: "Samples created successfully for working copy, backups 1 and 2"};
                     });
                 });
-
-
             }, {}, function (error) {
                 console.log(error);
                 $scope.messages = {error: "Server error processing data"};
