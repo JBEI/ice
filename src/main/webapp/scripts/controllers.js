@@ -755,24 +755,21 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
 iceControllers.controller('LoginController', function ($scope, $location, $cookies, $rootScope, Util) {
 
     // init
-    $scope.login = {};
-    $scope.canCreateAccount = false;
-    $scope.canChangePassword = false;
-    $scope.errMsg = undefined;
+    $scope.login = {canCreateAccount: false, canChangePassword: false};
 
     Util.get('rest/config/NEW_REGISTRATION_ALLOWED', function (result) {
-        $scope.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
+        $scope.login.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
             && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
 
     Util.get('rest/config/PASSWORD_CHANGE_ALLOWED', function (result) {
-        $scope.canChangePassword = (result !== undefined && result.key === 'PASSWORD_CHANGE_ALLOWED'
+        $scope.login.canChangePassword = (result !== undefined && result.key === 'PASSWORD_CHANGE_ALLOWED'
             && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
 
     // login function
     $scope.getAccessToken = function () {
-        $scope.errMsg = undefined;
+        $scope.login.errMsg = undefined;
         $scope.login.processing = true;
 
         // validate email
@@ -806,7 +803,7 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
                 }
                 $scope.login.processing = false;
             }, null, function (error) {
-                $scope.errMsg = error.statusText;
+                $scope.login.errMsg = error.statusText;
             });
     };
 });
