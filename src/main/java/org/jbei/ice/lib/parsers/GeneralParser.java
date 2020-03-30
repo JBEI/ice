@@ -26,19 +26,19 @@ public class GeneralParser {
         AbstractParser parser;
         try {
             SequenceFormat format = SequenceUtil.detectFormat(sequence);
-            if (format == null) {
-                parser = new PlainParser();
-            } else {
-                switch (format) {
-                    case GENBANK:
-                        parser = new GenBankParser();
-                        break;
+            switch (format) {
+                case PLAIN:
+                    parser = new PlainParser();
+                    break;
 
-                    case FASTA:
-                    default:
-                        parser = new FastaParser();
-                        break;
-                }
+                case GENBANK:
+                    parser = new GenBankParser();
+                    break;
+
+                case FASTA:
+                default:
+                    parser = new FastaParser();
+                    break;
             }
             return parser.parse(IOUtils.lineIterator(new ByteArrayInputStream(sequence.getBytes()), Charset.defaultCharset()));
         } catch (IOException | InvalidFormatParserException e) {
