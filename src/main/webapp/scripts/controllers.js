@@ -803,16 +803,15 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
                 }
                 $scope.login.processing = false;
             }, null, function (error) {
-                $scope.login.errMsg = error.statusText;
+                if (error.status === 401)
+                    $scope.login.errMsg = "Login failed";
             });
     };
 });
 
 // turning out to be pretty specific to the permissions
-iceControllers.controller('GenericTabsController', function ($scope, $cookies) {
-    console.log("GenericTabsController");
-    var panes = $scope.panes = [];
-    var sessionId = $cookies.get("sessionId");
+iceControllers.controller('GenericTabsController', function ($scope) {
+    const panes = $scope.panes = [];
 
     $scope.activateTab = function (pane) {
         angular.forEach(panes, function (pane) {
@@ -823,7 +822,7 @@ iceControllers.controller('GenericTabsController', function ($scope, $cookies) {
 
     this.addPane = function (pane) {
         // activate the first pane that is added
-        if (panes.length == 0)
+        if (panes.length === 0)
             $scope.activateTab(pane);
         panes.push(pane);
     };
@@ -841,7 +840,7 @@ iceControllers.controller('PermanentEntryDeletionConfirmationModalController', f
             // retrieve sub folders for selected collection
             $rootScope.$broadcast("RefreshAfterDeletion");
             $scope.closeModal();
-            var word = allEntries.length == 1 ? 'Entry' : allEntries.length + " entries";
+            const word = allEntries.length === 1 ? 'Entry' : allEntries.length + " entries";
             Util.setFeedback(word + ' successfully deleted', 'success');
             $rootScope.$emit("CollectionSelection", "deleted");
         });
