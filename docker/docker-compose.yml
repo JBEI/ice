@@ -1,34 +1,22 @@
 ---
-version: '2.1'
+version: "3.7"
 volumes:
-  postgres: {}
-  index: {}
-  localdata: {}
+  ice_index:
+  ice_home:
+  postgres_db:
 services:
   ice:
-    build: .
     image: jbei/ice:latest
-    restart: always
-    links:
-      - postgres
     ports:
-      - '127.0.0.1:9999:8080'
+    - 127.0.0.1:9999:8080
     volumes:
-      - index:/var/lib/ice/lucene
-      - localdata:/usr/local/tomcat/data
+    - ice_index:/var/lib/ice/lucene
+    - ice_home:/usr/local/tomcat/data
   postgres:
-    image: library/postgres:9.6
-    restart: always
+    image: library/postgres:latest
     environment:
       POSTGRES_DB: ice
-      POSTGRES_PASSWORD: icepass
+      POSTGRES_PASS: icepass
       POSTGRES_USER: iceuser
     volumes:
-      - postgres:/var/lib/postgresql/data
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: 1m
-        max-file: '5'
-    expose:
-      - '5432'
+    - postgres_db:/var/lib/postgresql/data
