@@ -540,7 +540,7 @@ public class PartSequence {
                         SequenceFile sequenceFile = new SequenceFile(sequenceString);
                         return new InputStreamWrapper(sequenceFile.getStream(), name);
                     } catch (Exception e) {
-                        Logger.error(e);
+                        Logger.error(e.getMessage());
                         break;
                     }
 
