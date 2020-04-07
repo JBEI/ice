@@ -40,6 +40,8 @@ public class SequenceFile {
             Files.createDirectory(directoryPath);
         this.fileName = fileName;
         path = Paths.get(directoryPath.toString(), fileName);
+        if (!Files.exists(path))
+            throw new IOException("Invalid sequence file path. Might be using sequence string instead");
     }
 
     public InputStream getStream() throws FileNotFoundException {
