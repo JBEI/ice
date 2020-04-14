@@ -216,7 +216,7 @@ public class StandardBlastDatabase extends BlastDatabase {
     public void addSequence(String partId) {
         Entry entry = new HasEntry().getEntry(partId);
         if (entry == null) {
-            Logger.error("Could not retrieve entry with id " + partId);
+            Logger.error("Could not retrieve entry with id " + partId + ". Sequence was not added to blast");
             return;
         }
 
