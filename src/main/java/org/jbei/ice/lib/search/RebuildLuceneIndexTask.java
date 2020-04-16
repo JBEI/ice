@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.search;
 
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.MassIndexer;
@@ -19,18 +18,18 @@ public class RebuildLuceneIndexTask extends Task {
     @Override
     public void execute() {
         Logger.info("Rebuilding lucene index in background");
+        Session session = HibernateUtil.newSession();
+        FullTextSession fullTextSession = Search.getFullTextSession(session);
+        MassIndexer indexer = fullTextSession.createIndexer();
+        indexer.idFetchSize(20);
+        indexer.progressMonitor(IndexerProgressMonitor.getInstance());
+
         try {
-            Session session = HibernateUtil.newSession();
-            FullTextSession fullTextSession = Search.getFullTextSession(session);
-            MassIndexer indexer = fullTextSession.createIndexer();
-            indexer.idFetchSize(20);
-            indexer.progressMonitor(IndexerProgressMonitor.getInstance());
             indexer.startAndWait();
-        } catch (HibernateException he) {
-            Logger.error(he);
         } catch (InterruptedException e) {
             Thread.interrupted();
-            Logger.warn("Indexing incomplete");
         }
+        fullTextSession.close();
+        Logger.info("Lucene rebuild complete");
     }
 }
