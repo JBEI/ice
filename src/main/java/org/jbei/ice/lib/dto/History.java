@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.dto;
 
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.storage.IDataTransferModel;
 
@@ -15,7 +15,7 @@ public class History implements IDataTransferModel {
     private String userId;
     private AccountTransfer account;
     private RegistryPartner partner;
-    private EntryField entryField;
+    private EntryFieldLabel entryFieldLabel;
     private String oldValue;
     private long time;
     private boolean isCustom;
@@ -76,12 +76,12 @@ public class History implements IDataTransferModel {
         this.oldValue = oldValue;
     }
 
-    public EntryField getEntryField() {
-        return entryField;
+    public EntryFieldLabel getEntryFieldLabel() {
+        return entryFieldLabel;
     }
 
-    public void setEntryField(EntryField entryField) {
-        this.entryField = entryField;
+    public void setEntryFieldLabel(EntryFieldLabel entryFieldLabel) {
+        this.entryFieldLabel = entryFieldLabel;
     }
 
     public boolean isCustom() {

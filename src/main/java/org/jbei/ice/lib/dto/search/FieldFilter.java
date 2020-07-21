@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dto.search;
 
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.storage.IDataTransferModel;
 
 /**
@@ -10,14 +10,14 @@ import org.jbei.ice.storage.IDataTransferModel;
  */
 public class FieldFilter implements IDataTransferModel {
 
-    private EntryField field;
+    private EntryFieldLabel field;
     private String filter;
 
-    public EntryField getField() {
+    public EntryFieldLabel getField() {
         return field;
     }
 
-    public void setField(EntryField field) {
+    public void setField(EntryFieldLabel field) {
         this.field = field;
     }
 

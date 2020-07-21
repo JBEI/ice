@@ -86,7 +86,7 @@ public class Entries extends HasEntry {
             EntryHistory history = new EntryHistory(userId, partId);
             history.addEdit();
         } else if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
-            List<EntryField> invalidFields = EntryUtil.validates(partData);
+            List<EntryFieldLabel> invalidFields = EntryUtil.validates(partData);
             if (invalidFields.isEmpty())
                 entry.setVisibility(Visibility.OK.getValue());
         }
@@ -105,7 +105,7 @@ public class Entries extends HasEntry {
     }
 
     public void updateField(String partId, String fieldLabel, List<String> values) {
-        EntryField field = EntryField.fromString(fieldLabel);
+        EntryFieldLabel field = EntryFieldLabel.fromString(fieldLabel);
         if (field == null) {
             Logger.error("Cannot find field for label \"" + fieldLabel + "\"");
             return;

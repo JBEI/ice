@@ -10,7 +10,7 @@ import java.util.Iterator;
  */
 public class PartDataUtil {
 
-    public static String entryFieldToValue(PartData data, EntryField field) {
+    public static String entryFieldToValue(PartData data, EntryFieldLabel field) {
 
         String value = getCommonFieldValues(data, field);
         if (value != null)
@@ -64,7 +64,7 @@ public class PartDataUtil {
         return buffer.toString();
     }
 
-    protected static String getCommonFieldValues(PartData data, EntryField field) {
+    protected static String getCommonFieldValues(PartData data, EntryFieldLabel field) {
         switch (field) {
             case PI:
                 return data.getPrincipalInvestigator();
@@ -119,7 +119,7 @@ public class PartDataUtil {
         }
     }
 
-    protected static String getStrainFieldValues(StrainData strainData, EntryField field) {
+    protected static String getStrainFieldValues(StrainData strainData, EntryFieldLabel field) {
         if (strainData == null)
             return "";
 
@@ -135,7 +135,7 @@ public class PartDataUtil {
         }
     }
 
-    protected static String getPlasmidFieldValues(PlasmidData plasmidData, EntryField field) {
+    protected static String getPlasmidFieldValues(PlasmidData plasmidData, EntryFieldLabel field) {
         if (plasmidData == null)
             return "";
 
@@ -159,7 +159,7 @@ public class PartDataUtil {
         }
     }
 
-    protected static String getSeedFieldValues(SeedData seed, EntryField field) {
+    protected static String getSeedFieldValues(SeedData seed, EntryFieldLabel field) {
         if (seed == null)
             return "";
 
@@ -190,7 +190,7 @@ public class PartDataUtil {
         }
     }
 
-    protected static String getProteinFieldValues(ProteinData proteinData, EntryField field) {
+    protected static String getProteinFieldValues(ProteinData proteinData, EntryFieldLabel field) {
         if (proteinData == null)
             return "";
 

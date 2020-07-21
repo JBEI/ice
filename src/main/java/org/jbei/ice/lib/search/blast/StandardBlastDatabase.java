@@ -35,7 +35,6 @@ import static org.jbei.ice.lib.utils.SequenceUtils.breakUpLines;
 public class StandardBlastDatabase extends BlastDatabase {
 
     private static StandardBlastDatabase INSTANCE;
-    private final Object LOCK;
     private BlastPlus blastPlus;
     private BlastFastaFile blastFastaFile;
     private SequenceDAO sequenceDAO;
@@ -45,7 +44,6 @@ public class StandardBlastDatabase extends BlastDatabase {
         blastPlus = new BlastPlus();
         sequenceDAO = DAOFactory.getSequenceDAO();
         blastFastaFile = new BlastFastaFile(indexPath);
-        LOCK = new Object();
     }
 
     public static StandardBlastDatabase getInstance() {

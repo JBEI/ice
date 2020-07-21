@@ -7,7 +7,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.sample.PartSample;
@@ -239,8 +239,8 @@ public class BulkUploadEntries {
         BulkUploadValidation validation = new BulkUploadValidation(draft);
         if (!validation.isValid()) {
             processedBulkUpload.setSuccess(false);
-            for (EntryField entryField : validation.getFailedFields()) {
-                processedBulkUpload.getHeaders().add(new EntryHeaderValue(entryField));
+            for (EntryFieldLabel entryFieldLabel : validation.getFailedFields()) {
+                processedBulkUpload.getHeaders().add(new EntryHeaderValue(entryFieldLabel));
             }
             processedBulkUpload.setUserMessage("Cannot submit your bulk upload due to a validation failure");
             return processedBulkUpload;
@@ -305,9 +305,9 @@ public class BulkUploadEntries {
         }
 
         // now update the values (for strain with plasmid, some values are for both
-        for (Map.Entry<EntryField, String> set : autoUpdate.getKeyValue().entrySet()) {
+        for (Map.Entry<EntryFieldLabel, String> set : autoUpdate.getKeyValue().entrySet()) {
             String value = set.getValue();
-            EntryField field = set.getKey();
+            EntryFieldLabel field = set.getKey();
             InfoToModelFactory.infoToEntryForField(entry, new String[]{value}, field);
         }
 

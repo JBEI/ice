@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.account.PreferencesController;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
@@ -64,5 +65,20 @@ public class PartDefaults {
 
         // set the entry type defaults
         return EntryUtil.setPartDefaults(partData);
+    }
+
+    public String getForLabel(EntryFieldLabel label) {
+        switch (label) {
+            default:
+                return "";
+
+            case PI:
+                break;
+
+            case FUNDING_SOURCE:
+                break;
+        }
+
+        return "";
     }
 }

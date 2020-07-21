@@ -373,7 +373,7 @@ public class InfoToModelFactory {
      * @param values list of value to set. some fields like selections markers can handle multiple values.
      * @param field  to set
      */
-    public static void infoToEntryForField(Entry entry, String[] values, EntryField field) {
+    public static void infoToEntryForField(Entry entry, String[] values, EntryFieldLabel field) {
         if (entry == null || values.length == 0)
             return;
 
@@ -506,7 +506,7 @@ public class InfoToModelFactory {
         }
     }
 
-    private static void infoToStrainForField(Entry entry, String value, EntryField field) {
+    private static void infoToStrainForField(Entry entry, String value, EntryFieldLabel field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString()))
             return;
 
@@ -523,7 +523,7 @@ public class InfoToModelFactory {
         }
     }
 
-    private static void infoToPlasmidForField(Entry entry, String value, EntryField field) {
+    private static void infoToPlasmidForField(Entry entry, String value, EntryFieldLabel field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.toString()))
             return;
 
@@ -556,7 +556,7 @@ public class InfoToModelFactory {
         }
     }
 
-    private static void infoToSeedForField(Entry entry, String value, EntryField field) {
+    private static void infoToSeedForField(Entry entry, String value, EntryFieldLabel field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.SEED.toString()))
             return;
 
@@ -602,7 +602,7 @@ public class InfoToModelFactory {
         }
     }
 
-    private static void infoToProteinForField(Entry entry, String value, EntryField field) {
+    private static void infoToProteinForField(Entry entry, String value, EntryFieldLabel field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.PROTEIN.toString()))
             return;
 

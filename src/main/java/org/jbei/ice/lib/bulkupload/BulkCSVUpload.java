@@ -32,7 +32,7 @@ public class BulkCSVUpload {
 
     protected final InputStream inputStream;
     protected final String userId;
-    final List<EntryField> invalidFields; // fields that failed validation
+    final List<EntryFieldLabel> invalidFields; // fields that failed validation
     final long uploadId;
     private final EntryType addType;
     private EntryType subType;    // optional subType'
@@ -63,7 +63,7 @@ public class BulkCSVUpload {
             if (updates == null) {
                 processedBulkUpload.setSuccess(false);
                 processedBulkUpload.setUserMessage("Validation failed");
-                for (EntryField field : invalidFields) {
+                for (EntryFieldLabel field : invalidFields) {
                     processedBulkUpload.getHeaders().add(new EntryHeaderValue(field));
                 }
                 return processedBulkUpload;
@@ -82,7 +82,7 @@ public class BulkCSVUpload {
             // validation exception; convert entries to headers
             processedBulkUpload.setSuccess(false);
             processedBulkUpload.setUserMessage("Validation failed");
-            for (EntryField field : invalidFields) {
+            for (EntryFieldLabel field : invalidFields) {
                 processedBulkUpload.getHeaders().add(new EntryHeaderValue(field));
             }
             Logger.error(e);
@@ -98,7 +98,7 @@ public class BulkCSVUpload {
     }
 
     private HeaderValue detectHeaderValue(EntryType type, String fieldStr, boolean isSubType) {
-        EntryField field = EntryField.fromString(fieldStr);
+        EntryFieldLabel field = EntryFieldLabel.fromString(fieldStr);
         if (field != null) {
             // field header maps as is to EntryField which indicates it is not a sub Type
             return new EntryHeaderValue(field, isSubType, false, fieldStr);
@@ -242,7 +242,7 @@ public class BulkCSVUpload {
                 }
 
                 // validate
-                List<EntryField> fields = EntryUtil.validates(partData);
+                List<EntryFieldLabel> fields = EntryUtil.validates(partData);
                 if (!fields.isEmpty()) {
                     invalidFields.clear();
                     invalidFields.addAll(fields);
@@ -295,7 +295,7 @@ public class BulkCSVUpload {
     }
 
     private void setExistingField(String value, PartData partData, EntryHeaderValue headerValue) throws IOException {
-        EntryField field = headerValue.getEntryField();
+        EntryFieldLabel field = headerValue.getEntryFieldLabel();
         PartData data;
 
         boolean isSubType = headerValue.isSubType();
