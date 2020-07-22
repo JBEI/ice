@@ -2,7 +2,7 @@ package org.jbei.ice.storage.model;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.History;
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -56,7 +56,7 @@ public class Audit implements DataModel {
 
     @Column(name = "entry_field")
     @Enumerated(EnumType.STRING)
-    private EntryField entryField;
+    private EntryFieldLabel entryFieldLabel;
 
     @Column(name = "old_value")
     private String oldValue;
@@ -137,12 +137,12 @@ public class Audit implements DataModel {
         this.oldValue = oldValue;
     }
 
-    public EntryField getEntryField() {
-        return entryField;
+    public EntryFieldLabel getEntryFieldLabel() {
+        return entryFieldLabel;
     }
 
-    public void setEntryField(EntryField entryField) {
-        this.entryField = entryField;
+    public void setEntryFieldLabel(EntryFieldLabel entryFieldLabel) {
+        this.entryFieldLabel = entryFieldLabel;
     }
 
     @Override
@@ -158,7 +158,7 @@ public class Audit implements DataModel {
         if (StringUtils.isNotBlank(oldValue))
             history.setOldValue(oldValue);
 
-        history.setEntryField(entryField);
+        history.setEntryFieldLabel(entryFieldLabel);
         return history;
     }
 }

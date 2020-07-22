@@ -6,7 +6,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.DNAFeature;
 import org.jbei.ice.lib.dto.DNAFeatureLocation;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.IceSequenceOntology;
 import org.sbolstandard.core.DnaComponent;
@@ -54,12 +54,12 @@ public class ICESBOLParserVisitor extends SBOLBaseVisitor<RuntimeException> {
             if (update != null) {
                 String name = component.getName();
                 if (name == null || name.trim().isEmpty())
-                    update.getKeyValue().put(EntryField.NAME, name);
+                    update.getKeyValue().put(EntryFieldLabel.NAME, name);
                 else {
-                    update.getKeyValue().put(EntryField.NAME, name);
-                    update.getKeyValue().put(EntryField.ALIAS, component.getDisplayId());
+                    update.getKeyValue().put(EntryFieldLabel.NAME, name);
+                    update.getKeyValue().put(EntryFieldLabel.ALIAS, component.getDisplayId());
                 }
-                update.getKeyValue().put(EntryField.SUMMARY, component.getDescription());
+                update.getKeyValue().put(EntryFieldLabel.SUMMARY, component.getDescription());
             }
 
             featuredDNASequence.setName(component.getName());

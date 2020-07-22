@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.dto.user;
 
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 
 /**
- * Preset key for user preferences. Those that map to {@link EntryField}
+ * Preset key for user preferences. Those that map to {@link EntryFieldLabel}
  * should have the same toString().ignoreCase() value when the "_" is replaced with a key. e.g.
  * PRINCIPAL_INVESTIGATOR -> Principal Investigator.
  * <p/>

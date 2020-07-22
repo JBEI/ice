@@ -22,11 +22,13 @@
                             </h4>
                         </td>
 
+                        <!-- link options-->
                         <td style="padding-left: 25px">
                             <div class="uib-dropdown" uib-dropdown>
-                        <span class="opacity_hover uib-dropdown-toggle" uib-dropdown-toggle><i class="fa fa-link"></i> Link To
-                            <span class="caret"></span>
-                        </span>
+                                <span class="opacity_hover uib-dropdown-toggle" uib-dropdown-toggle><i
+                                        class="fa fa-link"></i> Link To
+                                    <span class="caret"></span>
+                                </span>
                                 <ul class="dropdown-menu" uib-dropdown-menu>
                                     <li class="cursor_pointer font-80em"><a ng-click="addExisting=true">Existing
                                         Entry</a></li>
@@ -89,9 +91,9 @@
             <!-- show form for selected new entry -->
             <div class="row pad-top-5" ng-repeat="field in activePart.fields">
                 <div class="col-md-2 text-right">
-        <span style="white-space:nowrap" ng-class="{'font-bold':field.edit}">{{field.label}}
-            <span ng-if="field.required" class="required">*</span>
-        </span>
+                    <span style="white-space:nowrap" ng-class="{'font-bold':field.edit}">{{field.label}}
+                        <span ng-if="field.required" class="required">*</span>
+                    </span>
                 </div>
 
                 <!--short input field-->

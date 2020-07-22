@@ -101,6 +101,7 @@ public class PartResource extends RestResource {
      *
      * @param type the type of entry i.e. <code>PLASMID</code>, <code>PART</code>, <code>STRAIN</code> or
      *             <code>SEED</code>. Used to retrieve the default values for that entry
+     * @deprecated This is has been replaced by /rest/parts/fields/{type}
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -115,6 +116,26 @@ public class PartResource extends RestResource {
         PartData partData = partDefaults.get(entryType);
         partData.setCustomEntryFields(new CustomFields().get(entryType).getData());
         return super.respond(partData);
+    }
+
+    /**
+     * Retrieves list of fields for the specified entry type. If also includes
+     * the default user values and custom fields for the type
+     *
+     * @param type type of entry.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/fields/{type}")
+    public Response getPartFields(@PathParam("type") String type,
+                                  @QueryParam("includeCustom") @DefaultValue("true") boolean includeCustom) {
+        String userId = requireUserId();
+        final EntryType entryType = EntryType.nameToType(type);
+        if (entryType == null)
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+
+        PartFields partFields = new PartFields(userId, entryType);
+        return super.respond(partFields.get());
     }
 
     /**

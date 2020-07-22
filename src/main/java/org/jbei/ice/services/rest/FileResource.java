@@ -11,7 +11,7 @@ import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.Entries;
@@ -315,17 +315,17 @@ public class FileResource extends RestResource {
                                 EntrySelection selection) {
         String userId = super.requireUserId();
         EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId, sequenceFormats.toArray(new String[0]));
-        List<EntryField> entryFields = new ArrayList<>();
+        List<EntryFieldLabel> entryFieldLabels = new ArrayList<>();
         try {
             if (fields != null) {
-                entryFields.addAll(fields.stream().map(EntryField::fromString).collect(Collectors.toList()));
+                entryFieldLabels.addAll(fields.stream().map(EntryFieldLabel::fromString).collect(Collectors.toList()));
             }
         } catch (Exception e) {
             Logger.error(e);
         }
 
         boolean success = entriesAsCSV.setSelectedEntries(selection,
-                entryFields.toArray(new EntryField[0]));
+                entryFieldLabels.toArray(new EntryFieldLabel[0]));
         if (!success)
             return super.respond(false);
 

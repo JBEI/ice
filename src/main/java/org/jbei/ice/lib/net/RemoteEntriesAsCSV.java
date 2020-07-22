@@ -5,7 +5,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.common.Results;
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.web.PartnerEntries;
 import org.jbei.ice.lib.entry.EntryFields;
@@ -64,14 +64,14 @@ public class RemoteEntriesAsCSV {
         }
     }
 
-    protected String[] getCSVHeaders(List<EntryField> fields) {
+    protected String[] getCSVHeaders(List<EntryFieldLabel> fields) {
         String[] headers = new String[fields.size() + 4];
         headers[0] = "Registry";
         headers[1] = "Created";
         headers[2] = "Part ID";
 
         int i = 2;
-        for (EntryField field : fields) {
+        for (EntryFieldLabel field : fields) {
             i += 1;
             headers[i] = field.getLabel();
         }
@@ -85,7 +85,7 @@ public class RemoteEntriesAsCSV {
         csvPath = tmpFile.toPath();
 
         FileWriter fileWriter = new FileWriter(tmpFile);
-        List<EntryField> fields = getEntryFields();
+        List<EntryFieldLabel> fields = getEntryFields();
         String[] headers = getCSVHeaders(fields);
 
         // csv file headers
@@ -133,7 +133,7 @@ public class RemoteEntriesAsCSV {
         return true;
     }
 
-    protected void writeDataEntries(RemotePartner partner, List<PartData> entries, List<EntryField> fields,
+    protected void writeDataEntries(RemotePartner partner, List<PartData> entries, List<EntryFieldLabel> fields,
                                     CSVWriter writer, ZipOutputStream zos) {
         if (entries == null)
             return;
@@ -145,7 +145,7 @@ public class RemoteEntriesAsCSV {
             line[2] = partData.getPartId();
 
             int i = 2;
-            for (EntryField field : fields) {
+            for (EntryFieldLabel field : fields) {
                 line[i + 1] = PartDataUtil.entryFieldToValue(partData, field);
                 i += 1;
             }
@@ -184,7 +184,7 @@ public class RemoteEntriesAsCSV {
         }
     }
 
-    protected void writeLocalEntries(List<Long> entries, List<EntryField> fields, CSVWriter writer, ZipOutputStream zos) {
+    protected void writeLocalEntries(List<Long> entries, List<EntryFieldLabel> fields, CSVWriter writer, ZipOutputStream zos) {
         if (entries == null)
             return;
 
@@ -200,7 +200,7 @@ public class RemoteEntriesAsCSV {
             line[2] = entry.getPartNumber();
 
             int i = 2;
-            for (EntryField field : fields) {
+            for (EntryFieldLabel field : fields) {
                 line[i + 1] = EntryUtil.entryFieldToValue(entry, field);
                 i += 1;
             }
@@ -231,8 +231,8 @@ public class RemoteEntriesAsCSV {
         }
     }
 
-    protected List<EntryField> getEntryFields() {
-        List<EntryField> fields = EntryFields.getCommonFields();
+    protected List<EntryFieldLabel> getEntryFields() {
+        List<EntryFieldLabel> fields = EntryFields.getCommonFields();
 
         EntryFields.addArabidopsisSeedHeaders(fields);
         EntryFields.addStrainHeaders(fields);

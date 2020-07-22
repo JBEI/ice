@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.entry;
 
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
@@ -27,7 +27,7 @@ public class EntrySelection implements IDataTransferModel {
     private String folderId;                        // personal, available, shared, drafts, pending, actual folderId
     private List<Long> entries;                     // if no context, then ad hoc selection
     private List<PartData> remoteEntries;           // record Ids of adhoc remote entry selection
-    private List<EntryField> fields;                // for functionality that allow customization .e.g. csv export
+    private List<EntryFieldLabel> fields;                // for functionality that allow customization .e.g. csv export
 
     public EntrySelection() {
         entries = new ArrayList<>();
@@ -95,7 +95,7 @@ public class EntrySelection implements IDataTransferModel {
         return this.remoteEntries;
     }
 
-    public List<EntryField> getFields() {
+    public List<EntryFieldLabel> getFields() {
         return fields;
     }
 }

@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.EntryFields;
 
@@ -14,11 +14,11 @@ import java.util.List;
  */
 class BulkCSVUploadHeaders {
 
-    static List<EntryField> getHeadersForType(EntryType type) {
+    static List<EntryFieldLabel> getHeadersForType(EntryType type) {
         if (type == null)
             return null;
 
-        List<EntryField> list = EntryFields.getCommonFields();
+        List<EntryFieldLabel> list = EntryFields.getCommonFields();
 
         switch (type) {
             case SEED:
@@ -43,11 +43,11 @@ class BulkCSVUploadHeaders {
         return list;
     }
 
-    static List<EntryField> getFileHeaders() {
-        List<EntryField> headers = new ArrayList<>(3);
-        headers.add(EntryField.SEQ_TRACE_FILES);
-        headers.add(EntryField.SEQ_FILENAME);
-        headers.add(EntryField.ATT_FILENAME);
+    static List<EntryFieldLabel> getFileHeaders() {
+        List<EntryFieldLabel> headers = new ArrayList<>(3);
+        headers.add(EntryFieldLabel.SEQ_TRACE_FILES);
+        headers.add(EntryFieldLabel.SEQ_FILENAME);
+        headers.add(EntryFieldLabel.ATT_FILENAME);
         return headers;
     }
 }

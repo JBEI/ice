@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.search.filter;
 
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.storage.model.*;
 
@@ -131,14 +131,14 @@ public class SearchFieldFactory {
     /**
      * Determines the search field for the specified entry field
      *
-     * @param entryField entry field
+     * @param entryFieldLabel entry field
      * @return corresponding lucene search field for defined entry field; empty string if no field is found
      */
-    public static String searchFieldForEntryField(EntryField entryField) {
-        if (entryField == null)
+    public static String searchFieldForEntryField(EntryFieldLabel entryFieldLabel) {
+        if (entryFieldLabel == null)
             return "";
 
-        switch (entryField) {
+        switch (entryFieldLabel) {
             default:
                 return "";
 

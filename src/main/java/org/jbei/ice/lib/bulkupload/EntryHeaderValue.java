@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 
 /**
  * @author Hector Plahar
@@ -9,26 +9,26 @@ public class EntryHeaderValue implements HeaderValue {
 
     private boolean isSubType;
     private boolean isCustom;
-    private EntryField entryField;
+    private EntryFieldLabel entryFieldLabel;
     private String label;
 
-    EntryHeaderValue(EntryField entryField, boolean subType, boolean isCustom, String value) {
+    EntryHeaderValue(EntryFieldLabel entryFieldLabel, boolean subType, boolean isCustom, String value) {
         this.isSubType = subType;
-        this.entryField = entryField;
+        this.entryFieldLabel = entryFieldLabel;
         this.isCustom = isCustom;
         this.label = value;
     }
 
-    EntryHeaderValue(EntryField entryField) {
-        this.entryField = entryField;
+    EntryHeaderValue(EntryFieldLabel entryFieldLabel) {
+        this.entryFieldLabel = entryFieldLabel;
     }
 
     boolean isSubType() {
         return isSubType;
     }
 
-    EntryField getEntryField() {
-        return entryField;
+    EntryFieldLabel getEntryFieldLabel() {
+        return entryFieldLabel;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
@@ -20,7 +20,7 @@ import java.util.Set;
 public class BulkUploadValidation {
 
     private final BulkUpload upload;
-    private final Set<EntryField> failedFields;
+    private final Set<EntryFieldLabel> failedFields;
 
     public BulkUploadValidation(BulkUpload upload) {
         if (upload == null)
@@ -45,7 +45,7 @@ public class BulkUploadValidation {
      * @return the list of fields that have failed validation if called after isValid()
      * otherwise returns an empty list
      */
-    public Set<EntryField> getFailedFields() {
+    public Set<EntryFieldLabel> getFailedFields() {
         return new HashSet<>(this.failedFields);
     }
 
@@ -103,7 +103,7 @@ public class BulkUploadValidation {
      */
     private void validateStrain(Strain strain) {
         if (strain.getSelectionMarkers().isEmpty())
-            failedFields.add(EntryField.SELECTION_MARKERS);
+            failedFields.add(EntryFieldLabel.SELECTION_MARKERS);
     }
 
     /**
@@ -112,12 +112,12 @@ public class BulkUploadValidation {
      */
     private void validatePlasmid(Plasmid plasmid) {
         if (plasmid.getSelectionMarkers().isEmpty())
-            failedFields.add(EntryField.SELECTION_MARKERS);
+            failedFields.add(EntryFieldLabel.SELECTION_MARKERS);
     }
 
     private void validateSeedFields(ArabidopsisSeed arabidopsisSeed) {
         if (arabidopsisSeed.getSelectionMarkers().isEmpty())
-            failedFields.add(EntryField.SELECTION_MARKERS);
+            failedFields.add(EntryFieldLabel.SELECTION_MARKERS);
     }
 
     private void validateProtein(Protein protein) {
@@ -131,24 +131,24 @@ public class BulkUploadValidation {
      */
     private void validateCommonFields(Entry entry) {
         if (!BioSafetyOption.isValidOption(entry.getBioSafetyLevel()))
-            failedFields.add(EntryField.BIO_SAFETY_LEVEL);
+            failedFields.add(EntryFieldLabel.BIO_SAFETY_LEVEL);
 
         if (StatusType.displayValueOf(entry.getStatus()).isEmpty())
-            failedFields.add(EntryField.STATUS);
+            failedFields.add(EntryFieldLabel.STATUS);
 
         if (entry.getName() == null)
-            failedFields.add(EntryField.NAME);
+            failedFields.add(EntryFieldLabel.NAME);
 
         if (StringUtils.isBlank(entry.getCreator()))
-            failedFields.add(EntryField.CREATOR);
+            failedFields.add(EntryFieldLabel.CREATOR);
 
         // if (StringUtils.isBlank(entry.getCreatorEmail()))
         //     failedFields.add(EntryField.CREATOR_EMAIL);
 
         if (StringUtils.isBlank(entry.getPrincipalInvestigator()))
-            failedFields.add(EntryField.PI);
+            failedFields.add(EntryFieldLabel.PI);
 
         if (StringUtils.isBlank(entry.getShortDescription()))
-            failedFields.add(EntryField.SUMMARY);
+            failedFields.add(EntryFieldLabel.SUMMARY);
     }
 }

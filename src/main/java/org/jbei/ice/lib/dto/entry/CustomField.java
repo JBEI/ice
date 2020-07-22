@@ -17,6 +17,11 @@ public class CustomField implements IDataTransferModel {
     public CustomField() {
     }
 
+    public CustomField(String nameValue) {
+        this.name = nameValue;
+        this.value = nameValue;
+    }
+
     public CustomField(String name, String value) {
         this.name = name;
         this.value = value;
