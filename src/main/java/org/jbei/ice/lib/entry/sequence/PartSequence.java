@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -36,7 +37,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
+
+import static org.jbei.ice.lib.entry.sequence.SequenceFormat.SBOL2;
 
 /**
  * Sequence information for a biological part in ICE
@@ -126,102 +133,77 @@ public class PartSequence {
      */
     public SequenceInfo parseSequenceFile(InputStream inputStream, String fileName, boolean extractHierarchy)
             throws IOException {
+        AbstractParser parser;
+
+        // write sequence file to disk (tmp)
+        String tmpDir = new ConfigurationSettings().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+        if (StringUtils.isEmpty(tmpDir))
+            throw new IllegalArgumentException("Cannot parse sequence without valid tmp directory");
+
+        Path tmpPath = Paths.get(tmpDir);
+        if (!Files.isDirectory(tmpPath) || !Files.isWritable(tmpPath))
+            throw new IllegalArgumentException("Cannot write to tmp directory: " + tmpPath.toString());
+
+        Path sequencePath = Paths.get(tmpPath.toString(), UUID.randomUUID().toString() + "-" + fileName);
+        Files.copy(inputStream, sequencePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // detect sequence
+        SequenceFormat format;
+
+        try (InputStream fileInputStream = Files.newInputStream(sequencePath);
+             LineIterator iterator = IOUtils.lineIterator(fileInputStream, StandardCharsets.UTF_8)) {
+            if (!iterator.hasNext())
+                throw new IOException("Cannot read stream for " + fileName);
+
+            String firstLine = iterator.next();
+            format = SequenceUtil.detectFormat(firstLine);
+        }
+
+        // special handling for sbol format
         try {
-            AbstractParser parser;
-            try (LineIterator iterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8)) {
-                if (!iterator.hasNext())
-                    throw new IOException("Cannot read stream for " + fileName);
-
-                String firstLine = iterator.next();
-                SequenceFormat format = SequenceUtil.detectFormat(firstLine);
-
-                switch (format) {
-                    case GENBANK:
-                        parser = new GenBankParser();
-                        break;
-
-                    case SBOL2:
-                        SBOLParser sbolParser = new SBOLParser(this.userId, Long.toString(this.entry.getId()), extractHierarchy);
-                        return sbolParser.parseToEntry(inputStream, fileName);
-
-                    case FASTA:
-                        parser = new FastaParser();
-                        break;
-
-                    default:
-                    case PLAIN:
-                        parser = new PlainParser();
-                        break;
-                }
-
-                SequenceFile sequenceFile = new SequenceFile();
-
-                // using a custom iterator that is backed by a line iterator
-                // since the first line has already been retrieved. This iterator detects if the first line has
-                // been requested, and if not, returns firstLine otherwise transfers the duties to the line iterator
-                Iterator<String> customIterator = new Iterator<String>() {
-
-                    private boolean firstLineRetrieved = false;
-                    private boolean exceptionWhileWriting = false;
-
-                    @Override
-                    public boolean hasNext() {
-                        if (firstLineRetrieved)
-                            return iterator.hasNext();
-                        return true;
-                    }
-
-                    @Override
-                    public String next() {
-                        String line;
-                        if (firstLineRetrieved)
-                            line = iterator.next();
-                        else {
-                            firstLineRetrieved = true;
-                            line = firstLine;
-                        }
-
-                        // if an IOException is caught at least once while writing to file, do not attempt to write to
-                        // file anymore
-                        if (!exceptionWhileWriting) {
-                            try {
-                                sequenceFile.writeLine(line);
-                            } catch (IOException e) {
-                                Logger.error("Exception caught writing sequence to file: ", e);
-                                exceptionWhileWriting = true;
-                                try {
-                                    sequenceFile.delete();
-                                } catch (IOException ie) {
-                                    Logger.error("Exception while deleting corrupted sequence file", ie);
-                                }
-                            }
-                        }
-
-                        // write line
-                        return line;
-                    }
-                };
-
-                // parse actual sequence
-                String entryType = this.entry.getRecordType();
-
-                FeaturedDNASequence dnaSequence = parser.parse(customIterator, entryType);
-                Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
-                if (sequence == null)
-                    throw new IOException("Could not create sequence object");
-
-                sequence.setSequenceUser(sequenceFile.getFileName());
-                sequence.setFileName(fileName);
-                sequence.setFormat(format);
-                sequence = saveSequenceObject(sequence);
-
-                SequenceInfo info = sequence.toDataTransferObject();
-                info.setSequence(dnaSequence);
-                return info;
+            if (format == SBOL2) {
+                SBOLParser sbolParser = new SBOLParser(this.userId, Long.toString(this.entry.getId()), extractHierarchy);
+                return sbolParser.parseToEntry(Files.newInputStream(sequencePath), fileName);
             }
-        } catch (InvalidFormatParserException e) {
-            Logger.error(e);
-            throw new IOException(e);
+
+            switch (format) {
+                case GENBANK:
+                    parser = new GenBankParser();
+                    break;
+
+                case FASTA:
+                    parser = new FastaParser();
+                    break;
+
+                default:
+                case PLAIN:
+                    parser = new PlainParser();
+                    break;
+            }
+
+            LineIterator iterator = IOUtils.lineIterator(Files.newInputStream(sequencePath), StandardCharsets.UTF_8);
+            SequenceFile sequenceFile = new SequenceFile();
+            String entryType = this.entry.getRecordType();
+
+            // special handling for SBOL (todo: clean this up in future release)
+            FeaturedDNASequence dnaSequence = parser.parse(iterator, entryType);
+            Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
+            if (sequence == null)
+                throw new IOException("Could not create sequence object");
+
+            sequence.setSequenceUser(sequenceFile.getFileName());
+            sequence.setFileName(fileName);
+            sequence.setFormat(format);
+            sequence = saveSequenceObject(sequence);
+
+            SequenceInfo info = sequence.toDataTransferObject();
+            info.setSequence(dnaSequence);
+            return info;
+        } catch (InvalidFormatParserException ifpe) {
+            Logger.error(ifpe);
+            return null;
+        } finally {
+            Files.deleteIfExists(sequencePath);
         }
     }
 
