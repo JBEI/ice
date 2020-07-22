@@ -2,79 +2,74 @@ package org.jbei.ice.lib.dto.entry;
 
 import org.jbei.ice.storage.IDataTransferModel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Represents the complete (default) list of fields for parts.
+ * Encapsulates details of the field associated with a specific type of entry
  *
  * @author Hector Plahar
  */
-public enum EntryField implements IDataTransferModel {
+public class EntryField implements IDataTransferModel {
 
-    PI("Principal Investigator", true),
-    PI_EMAIL("Principal Investigator Email", false),
-    PART_NUMBER("Part Number", false),
-    FUNDING_SOURCE("Funding Source", false),
-    IP("Intellectual Property", false),
-    BIO_SAFETY_LEVEL("BioSafety Level", true),
-    NAME("Name", true),
-    ALIAS("Alias", false),
-    KEYWORDS("Keywords", false),
-    SUMMARY("Summary", true),
-    NOTES("Notes", false),
-    REFERENCES("References", false),
-    LINKS("Links", false),
-    STATUS("Status", true),
-    CREATOR("Creator", true),
-    CREATOR_EMAIL("Creator Email", true),
-    SEQ_FILENAME("Sequence File", false),
-    ATT_FILENAME("Attachment File", false),
-    SEQ_TRACE_FILES("Sequence Trace File(s)", false),
-    SELECTION_MARKERS("Selection Markers", true),
-    HOST("Host", false),
-    GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype", false),
-    CIRCULAR("Circular", false),
-    BACKBONE("Backbone", false),
-    PROMOTERS("Promoters", false),
-    REPLICATES_IN("Replicates In", false),
-    ORIGIN_OF_REPLICATION("Origin of Replication", false),
-    HOMOZYGOSITY("Homozygosity", false),
-    ECOTYPE("Ecotype", false),
-    HARVEST_DATE("Harvest Date", false),
-    GENERATION("Generation", false),
-    SENT_TO_ABRC("Sent to ABRC?", false),
-    PLANT_TYPE("Plant Type", false),
-    PARENTS("Parents", false),
-    EXISTING_PART_NUMBER("Existing Part Number", false),
-    ORGANISM("Organism", false),
-    FULL_NAME("Full Name", false),
-    GENE_NAME("Gene Name", false),
-    UPLOADED_FROM("Uploaded From", false);
-
+    private long id;
+    private EntryType entryType;
     private String label;
     private boolean required;
+    private boolean custom;
+    private String value;
 
-    EntryField(String label, boolean required) {
-        this.label = label;
-        this.required = required;
+    private final List<CustomField> options = new ArrayList<>();
+
+    public long getId() {
+        return id;
     }
 
-    public static EntryField fromString(String label) {
-        for (EntryField field : EntryField.values()) {
-            if (field.label.equalsIgnoreCase(label))
-                return field;
-        }
-        return null;
+    public void setId(long id) {
+        this.id = id;
     }
 
-    @Override
-    public String toString() {
-        return this.name();
+    public EntryType getEntryType() {
+        return entryType;
     }
 
-    public String getLabel() {
-        return this.label;
+    public void setEntryType(EntryType entryType) {
+        this.entryType = entryType;
+    }
+
+    public List<CustomField> getOptions() {
+        return options;
     }
 
     public boolean isRequired() {
-        return this.required;
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public boolean isCustom() {
+        return this.custom;
+    }
+
+    public void setCustom(boolean custom) {
+        this.custom = custom;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return this.value;
     }
 }
