@@ -157,7 +157,8 @@ public class Sequences {
 
     /**
      * Bulk update sequences based on uploaded zip file
-     * containing sequences, where the sequence name is the (unique) part name
+     * containing sequences, where the sequence name is the (unique) part number of the entry.
+     * If there is an existing sequence associated with the entry, it is deleted.
      *
      * @param userId          userId of user making request
      * @param fileInputStream input stream of zip file
@@ -167,6 +168,7 @@ public class Sequences {
             throw new PermissionException("Must have admin privileges to use this feature");
 
         List<String> errors = new ArrayList<>();
+        Logger.info("Starting bulk update of sequences");
 
         try (ZipInputStream stream = new ZipInputStream(fileInputStream)) {
             ZipEntry zipEntry;
@@ -192,10 +194,9 @@ public class Sequences {
                 stream.closeEntry();
 
                 String entryName = name.substring(0, name.indexOf('.'));
-                List<Entry> entries = DAOFactory.getEntryDAO().getByName(entryName);
+                Entry entry = DAOFactory.getEntryDAO().getByPartNumber(entryName);
 
-                // todo : allowing multiple entries update for now
-                if (entries == null || entries.isEmpty()) {
+                if (entry == null) {
                     errors.add(name);
                     continue;
                 }
@@ -208,13 +209,14 @@ public class Sequences {
                     continue;
                 }
 
-                for (Entry entry : entries) {
-                    Logger.info("Updating sequence for entry " + entry.getPartNumber());
-                    PartSequence partSequence = new PartSequence(userId, entry.getPartNumber());
-                    partSequence.update(dnaSequence, false);
-                }
+                Logger.info("Updating sequence for entry " + entry.getPartNumber() + " as part of bulk update");
+                PartSequence partSequence = new PartSequence(userId, entry.getPartNumber());
+                partSequence.delete();
+                partSequence.save(dnaSequence);
             }
         }
+
+        Logger.info("Completed bulk upload of sequences with " + errors.size() + " errors");
 
         return errors;
     }

@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.search.blast;
 
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.symbol.IllegalAlphabetException;
@@ -108,7 +109,7 @@ public class FeaturesBlastDatabase extends BlastDatabase {
             }
 
             return hashMap;
-        } catch (IOException e) {
+        } catch (IOException | CsvException e) {
             Logger.error(e);
             return null;
         }

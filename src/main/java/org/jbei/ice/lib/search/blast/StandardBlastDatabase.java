@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.search.blast;
 
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.RNATools;
@@ -34,7 +35,6 @@ import static org.jbei.ice.lib.utils.SequenceUtils.breakUpLines;
 public class StandardBlastDatabase extends BlastDatabase {
 
     private static StandardBlastDatabase INSTANCE;
-    private final Object LOCK;
     private BlastPlus blastPlus;
     private BlastFastaFile blastFastaFile;
     private SequenceDAO sequenceDAO;
@@ -44,7 +44,6 @@ public class StandardBlastDatabase extends BlastDatabase {
         blastPlus = new BlastPlus();
         sequenceDAO = DAOFactory.getSequenceDAO();
         blastFastaFile = new BlastFastaFile(indexPath);
-        LOCK = new Object();
     }
 
     public static StandardBlastDatabase getInstance() {
@@ -154,7 +153,7 @@ public class StandardBlastDatabase extends BlastDatabase {
                 // if there is an existing record for same entry with a lower relative score then replace
                 hashMap.putIfAbsent(idString, info);
             }
-        } catch (IOException e) {
+        } catch (IOException | CsvException e) {
             Logger.error(e);
             return null;
         }
@@ -216,7 +215,7 @@ public class StandardBlastDatabase extends BlastDatabase {
     public void addSequence(String partId) {
         Entry entry = new HasEntry().getEntry(partId);
         if (entry == null) {
-            Logger.error("Could not retrieve entry with id " + partId);
+            Logger.error("Could not retrieve entry with id " + partId + ". Sequence was not added to blast");
             return;
         }
 

@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.entry;
 
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
@@ -85,7 +86,7 @@ public class Entries extends HasEntry {
             EntryHistory history = new EntryHistory(userId, partId);
             history.addEdit();
         } else if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
-            List<EntryField> invalidFields = EntryUtil.validates(partData);
+            List<EntryFieldLabel> invalidFields = EntryUtil.validates(partData);
             if (invalidFields.isEmpty())
                 entry.setVisibility(Visibility.OK.getValue());
         }
@@ -104,7 +105,7 @@ public class Entries extends HasEntry {
     }
 
     public void updateField(String partId, String fieldLabel, List<String> values) {
-        EntryField field = EntryField.fromString(fieldLabel);
+        EntryFieldLabel field = EntryFieldLabel.fromString(fieldLabel);
         if (field == null) {
             Logger.error("Cannot find field for label \"" + fieldLabel + "\"");
             return;
@@ -257,6 +258,8 @@ public class Entries extends HasEntry {
                     }
                 }
             }
+        } catch (CsvException exception) {
+            Logger.error("Exception reading file: " + exception);
         }
         return accepted;
     }

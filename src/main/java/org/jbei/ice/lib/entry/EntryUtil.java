@@ -20,7 +20,7 @@ import java.util.Set;
  */
 public class EntryUtil {
 
-    public static String entryFieldToValue(Entry entry, EntryField field) {
+    public static String entryFieldToValue(Entry entry, EntryFieldLabel field) {
         String value = getCommonFieldValues(entry, field);
         if (value != null)
             return value;
@@ -72,7 +72,7 @@ public class EntryUtil {
         return result;
     }
 
-    private static String getCommonFieldValues(Entry entry, EntryField field) {
+    private static String getCommonFieldValues(Entry entry, EntryFieldLabel field) {
         switch (field) {
             case PI:
                 return entry.getPrincipalInvestigator();
@@ -127,7 +127,7 @@ public class EntryUtil {
         }
     }
 
-    private static String getStrainFieldValues(Strain strain, EntryField field) {
+    private static String getStrainFieldValues(Strain strain, EntryFieldLabel field) {
         switch (field) {
             case HOST:
                 return strain.getHost();
@@ -140,7 +140,7 @@ public class EntryUtil {
         }
     }
 
-    private static String getPlasmidFieldValues(Plasmid plasmid, EntryField field) {
+    private static String getPlasmidFieldValues(Plasmid plasmid, EntryFieldLabel field) {
         switch (field) {
             case BACKBONE:
                 return plasmid.getBackbone();
@@ -161,7 +161,7 @@ public class EntryUtil {
         }
     }
 
-    private static String getSeedFieldValues(ArabidopsisSeed seed, EntryField field) {
+    private static String getSeedFieldValues(ArabidopsisSeed seed, EntryFieldLabel field) {
         switch (field) {
             case HOMOZYGOSITY:
                 return seed.getHomozygosity();
@@ -193,7 +193,7 @@ public class EntryUtil {
         }
     }
 
-    private static String getProteinFieldValues(Protein protein, EntryField field) {
+    private static String getProteinFieldValues(Protein protein, EntryFieldLabel field) {
         switch (field) {
             case ORGANISM:
                 return protein.getOrganism();
@@ -234,26 +234,26 @@ public class EntryUtil {
      * @param partData DTO whose fields are being validated
      * @return list which contains fields (if any) that are invalid
      */
-    public static List<EntryField> validates(PartData partData) {
-        List<EntryField> invalidFields = new ArrayList<>();
+    public static List<EntryFieldLabel> validates(PartData partData) {
+        List<EntryFieldLabel> invalidFields = new ArrayList<>();
 
         if (StringUtils.isEmpty(partData.getName()))
-            invalidFields.add(EntryField.NAME);
+            invalidFields.add(EntryFieldLabel.NAME);
 
         if (partData.getBioSafetyLevel() == null)
-            invalidFields.add(EntryField.BIO_SAFETY_LEVEL);
+            invalidFields.add(EntryFieldLabel.BIO_SAFETY_LEVEL);
 
         if (StringUtils.isEmpty(partData.getStatus()))
-            invalidFields.add(EntryField.STATUS);
+            invalidFields.add(EntryFieldLabel.STATUS);
 
         if (StringUtils.isEmpty(partData.getCreator()))
-            invalidFields.add(EntryField.CREATOR);
+            invalidFields.add(EntryFieldLabel.CREATOR);
 
         if (StringUtils.isEmpty(partData.getCreatorEmail()))
-            invalidFields.add(EntryField.CREATOR_EMAIL);
+            invalidFields.add(EntryFieldLabel.CREATOR_EMAIL);
 
         if (StringUtils.isEmpty(partData.getShortDescription()))
-            invalidFields.add(EntryField.SUMMARY);
+            invalidFields.add(EntryFieldLabel.SUMMARY);
 
         return invalidFields;
     }
@@ -271,7 +271,7 @@ public class EntryUtil {
         return partData;
     }
 
-    private static StrainData setStrainDataFromField(StrainData strainData, String value, EntryField field) {
+    private static StrainData setStrainDataFromField(StrainData strainData, String value, EntryFieldLabel field) {
         if (strainData == null)
             strainData = new StrainData();
 
@@ -288,7 +288,7 @@ public class EntryUtil {
         return strainData;
     }
 
-    private static PlasmidData setPlasmidDataFromField(PlasmidData plasmidData, String value, EntryField field) {
+    private static PlasmidData setPlasmidDataFromField(PlasmidData plasmidData, String value, EntryFieldLabel field) {
         if (plasmidData == null)
             plasmidData = new PlasmidData();
 
@@ -317,7 +317,7 @@ public class EntryUtil {
         return plasmidData;
     }
 
-    private static SeedData setSeedDataFromField(SeedData seedData, String value, EntryField field) {
+    private static SeedData setSeedDataFromField(SeedData seedData, String value, EntryFieldLabel field) {
         if (seedData == null)
             seedData = new SeedData();
 
@@ -358,7 +358,7 @@ public class EntryUtil {
         return seedData;
     }
 
-    private static ProteinData setProteinDataFromField(ProteinData proteinData, String value, EntryField field) {
+    private static ProteinData setProteinDataFromField(ProteinData proteinData, String value, EntryFieldLabel field) {
         if (proteinData == null)
             proteinData = new ProteinData();
 
@@ -391,7 +391,7 @@ public class EntryUtil {
      * @param value value to be set
      * @param field entry field whose value is to be set
      */
-    public static void setPartDataFromField(PartData data, String value, EntryField field) {
+    public static void setPartDataFromField(PartData data, String value, EntryFieldLabel field) {
         switch (field) {
             case PI:
                 data.setPrincipalInvestigator(value);

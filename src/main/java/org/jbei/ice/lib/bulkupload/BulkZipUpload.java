@@ -2,7 +2,7 @@ package org.jbei.ice.lib.bulkupload;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.PartData;
 
 import java.io.*;
@@ -91,7 +91,7 @@ public class BulkZipUpload extends BulkCSVUpload {
             if (updates == null) {
                 processedBulkUpload.setSuccess(false);
                 processedBulkUpload.setUserMessage("Validation failed");
-                for (EntryField field : invalidFields) {
+                for (EntryFieldLabel field : invalidFields) {
                     processedBulkUpload.getHeaders().add(new EntryHeaderValue(field));
                 }
                 return processedBulkUpload;

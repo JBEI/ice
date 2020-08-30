@@ -8,24 +8,24 @@
         <div class="col-md-6">
             <form name="loginForm" data-ng-submit="getAccessToken()">
                 <div class="form-group">
-                    <br><img ng-src="{{siteSettings.logo}}"><br><br>
+                    <br><img ng-src="{{siteSettings.logo}}" style="max-height: 100px; width: auto"><br><br>
 
-                    <div class="alert alert-danger" style="width: 220px; padding: 8px" ng-if="errMsg">
+                    <div class="alert alert-danger" style="width: 220px; padding: 8px" ng-if="login.errMsg">
                         <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
                         <span class="font-90em">Login failed. Please try again.</span>
                     </div>
                 </div>
 
-                <div class="form-group" ng-if="canChangePassword">
-                    <input type="text" ng-disabled="login.processing&&!errMsg"
+                <div class="form-group" ng-if="login.canChangePassword">
+                    <input type="text" ng-disabled="login.processing&&!login.errMsg"
                            ng-class="{'login_input':!login.emailError, 'login_input_error':login.emailError}"
                            placeholder="Username" ng-model="login.email"
                            ng-change="login.emailError=undefined;login.processing=undefined"/>
-                    <img src="img/loader-mini.gif" ng-if="login.processing&&!errMsg">
+                    <img src="img/loader-mini.gif" ng-if="login.processing&&!login.errMsg">
                     <br><br>
 
                     <div class="input-group">
-                        <input type="password" ng-disabled="login.processing&&!errMsg"
+                        <input type="password" ng-disabled="login.processing&&!login.errMsg"
                                ng-class="{'login_input':!login.passwordError, 'login_input_error':login.passwordError}"
                                placeholder="Password" ng-model="login.password"
                                ng-change="login.passwordError=undefined;login.processing=undefined"
@@ -47,15 +47,16 @@
                     </div>
                 </div>
 
-                <div class="form-group" ng-if="!canChangePassword">
-                    <input type="text" ng-disabled="login.processing&&!errMsg"
+                <div class="form-group" ng-if="!login.canChangePassword">
+                    <input type="text" ng-disabled="login.processing&&!login.errMsg"
                            ng-class="{'login_input':!login.emailError, 'login_input_error':login.emailError}"
                            placeholder="Username" ng-model="login.email"
                            ng-change="login.emailError=undefined;login.processing=undefined"/>
-                    <img src="img/loader-mini.gif" ng-if="login.processing&&!errMsg">
+                    <img src="img/loader-mini.gif" ng-if="login.processing&&!login.errMsg">
                     <br><br>
 
-                    <input type="password" ng-if="!canChangePassword" ng-disabled="login.processing&&!errMsg"
+                    <input type="password" ng-if="!login.canChangePassword"
+                           ng-disabled="login.processing&&!login.errMsg"
                            ng-class="{'login_input':!login.passwordError, 'login_input_error':login.passwordError}"
                            placeholder="Password" ng-model="login.password"
                            ng-change="login.passwordError=undefined;login.processing=undefined"/>
@@ -69,16 +70,16 @@
 
                 <br>
 
-                <button type="submit" class="btn btn-sm btn-primary" ng-disabled="login.processing&&!errMsg">
+                <button type="submit" class="btn btn-sm btn-primary" ng-disabled="login.processing&&!login.errMsg">
                     <strong>Sign in</strong>
                 </button>
 
-                <div class="btn-group" ng-if="canCreateAccount">
+                <div class="btn-group" ng-if="login.canCreateAccount">
                     <a href="register" class="btn btn-default btn-sm">Create account</a>
                 </div>
             </form>
 
-            <!--<div style="margin-top: 38px;" ng-if="canChangePassword">-->
+            <!--<div style="margin-top: 38px;" ng-if="login.canChangePassword">-->
             <!--<a href="forgot-password" class="font-90em">Forgot your password?</a>-->
             <!--</div>-->
         </div>

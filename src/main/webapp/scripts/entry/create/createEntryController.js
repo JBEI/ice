@@ -37,7 +37,7 @@ angular.module('ice.entry.create.controller', [])
         getPartDefaults($scope.createType, true);
 
         $scope.addLink = function (schema) {
-            $scope.part[schema].push({value: ''});
+            $scope.part[schema].push({ value: '' });
         };
 
         $scope.removeLink = function (schema, index) {
@@ -82,7 +82,7 @@ angular.module('ice.entry.create.controller', [])
                     newActive = indexOf + 1;
                 else {
                     if ($scope.part.linkedParts.length === 0)
-                    // not really needed since when main will not be shown if no other tabs present
+                        // not really needed since when main will not be shown if no other tabs present
                         newActive = 'main';
                     else
                         newActive = indexOf - 1;
@@ -105,7 +105,7 @@ angular.module('ice.entry.create.controller', [])
 
         $scope.getLocation = function (inputField, val) {
             return $http.get('rest/search/filter', {
-                headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
+                headers: { 'X-ICE-Authentication-SessionId': Authentication.getSessionId() },
                 params: {
                     token: val,
                     field: inputField
@@ -177,7 +177,7 @@ angular.module('ice.entry.create.controller', [])
                     $scope.$emit("UpdateCollectionCounts");
                     if ($scope.part.pastedSequence) {
                         // todo : also handle linked parts
-                        Util.update("rest/parts/" + result.id + "/sequence", {sequence: $scope.part.pastedSequence}, {}, function () {
+                        Util.update("rest/parts/" + result.id + "/sequence", { sequence: $scope.part.pastedSequence }, {}, function () {
                             $location.path('/entry/' + result.id);
                             $scope.showSBOL = false;
                         })
@@ -193,7 +193,7 @@ angular.module('ice.entry.create.controller', [])
 
         $scope.getEntriesByPartNumber = function (val) {
             return $http.get('rest/search/filter', {
-                headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
+                headers: { 'X-ICE-Authentication-SessionId': Authentication.getSessionId() },
                 params: {
                     token: val,
                     field: 'PART_NUMBER'
@@ -214,7 +214,7 @@ angular.module('ice.entry.create.controller', [])
         };
 
         $scope.addCustomParameter = function () {
-            $scope.activePart.parameters.push({key: '', value: ''});
+            $scope.activePart.parameters.push({ key: '', value: '' });
         };
 
         $scope.removeCustomParameter = function (index) {
@@ -236,7 +236,7 @@ angular.module('ice.entry.create.controller', [])
             url: "rest/file/sequence",
             method: 'POST',
             removeAfterUpload: true,
-            headers: {"X-ICE-Authentication-SessionId": Authentication.getSessionId()},
+            headers: { "X-ICE-Authentication-SessionId": Authentication.getSessionId() },
             autoUpload: true,
             queueLimit: 1 // can only upload 1 file
         });
@@ -255,9 +255,9 @@ angular.module('ice.entry.create.controller', [])
         uploader.onBeforeUploadItem = function (item) {
             let entryTypeForm;
             if ($scope.active === 'main')
-                entryTypeForm = {entryType: $scope.part.type.toUpperCase()};
+                entryTypeForm = { entryType: $scope.part.type.toUpperCase() };
             else
-                entryTypeForm = {entryType: $scope.part.linkedParts[$scope.active].type};
+                entryTypeForm = { entryType: $scope.part.linkedParts[$scope.active].type };
             item.formData.push(entryTypeForm);
         };
 

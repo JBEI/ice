@@ -218,19 +218,29 @@ public class SampleResource extends RestResource {
         try (CSVReader csvReader = new CSVReader(reader)) {
             Iterator<String[]> iterator = csvReader.iterator();
             Plate plate = new Plate();
+
+            // parse name from filename
+            String filename = contentDispositionHeader.getFileName();
+            filename = filename.substring(0, filename.indexOf("."));
+            plate.setName(filename);
+
             while (iterator.hasNext()) {
                 String[] next = iterator.next();
+                if (next.length <= 1)
+                    continue;
+
                 Tube tube = new Tube();
                 tube.setBarcode(next[1]);
                 List<Storage> result = DAOFactory.getStorageDAO().retrieveStorageTube(tube.getBarcode());
                 tube.setBarcodeAvailable(result == null || result.isEmpty());
                 // check if user is specifying part number
-                if (next.length >= 3) {
+                if (next.length >= 3 && StringUtils.isNotBlank(next[2])) {
                     String partNumber = next[2];
                     Entry entry = DAOFactory.getEntryDAO().getByPartNumber(partNumber);
                     if (entry == null) {
                         Logger.error("Could not retrieve entry with part number : " + partNumber);
                     } else {
+                        plate.setHasUserSpecifiedPartIds(true);
                         tube.setPartId(entry.getPartNumber());
                     }
 

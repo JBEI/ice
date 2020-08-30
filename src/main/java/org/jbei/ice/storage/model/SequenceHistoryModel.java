@@ -1,5 +1,6 @@
 package org.jbei.ice.storage.model;
 
+import org.hibernate.annotations.Type;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IDataTransferModel;
 
@@ -25,6 +26,8 @@ public class SequenceHistoryModel implements DataModel {
     private String userId;
 
     @Column(name = "sequence_string")
+    @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String sequenceString;
 
     @Column(name = "time")

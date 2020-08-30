@@ -59,7 +59,7 @@ public class FileBulkUpload implements Closeable {
     }
 
     public static List<CustomEntryField> getHeaders(EntryType entryType) {
-        List<EntryField> defaultHeaders = BulkCSVUploadHeaders.getHeadersForType(entryType);
+        List<EntryFieldLabel> defaultHeaders = BulkCSVUploadHeaders.getHeadersForType(entryType);
         CustomFields customFields = new CustomFields();
         List<CustomEntryField> fields = customFields.get(entryType).getData();
         for (CustomEntryField customField : fields) {
@@ -71,7 +71,7 @@ public class FileBulkUpload implements Closeable {
         }
 
         List<CustomEntryField> headers = new ArrayList<>();
-        for (EntryField defaultHeader : defaultHeaders) {
+        for (EntryFieldLabel defaultHeader : defaultHeaders) {
             CustomEntryField entryField = new CustomEntryField();
             entryField.setRequired(defaultHeader.isRequired());
             entryField.setLabel(defaultHeader.getLabel());
@@ -82,7 +82,7 @@ public class FileBulkUpload implements Closeable {
         headers.addAll(fields);
 
         // file headers
-        for (EntryField fileHeader : BulkCSVUploadHeaders.getFileHeaders()) {
+        for (EntryFieldLabel fileHeader : BulkCSVUploadHeaders.getFileHeaders()) {
             CustomEntryField entryField = new CustomEntryField();
             entryField.setRequired(fileHeader.isRequired());
             entryField.setLabel(fileHeader.getLabel());

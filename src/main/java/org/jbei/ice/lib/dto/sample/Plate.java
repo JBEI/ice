@@ -9,6 +9,15 @@ public class Plate implements IDataTransferModel {
 
     private String name;
     private Map<String, Tube> locationBarcodes;
+    private boolean hasUserSpecifiedPartIds;
+
+    public boolean isHasUserSpecifiedPartIds() {
+        return hasUserSpecifiedPartIds;
+    }
+
+    public void setHasUserSpecifiedPartIds(boolean hasUserSpecifiedPartIds) {
+        this.hasUserSpecifiedPartIds = hasUserSpecifiedPartIds;
+    }
 
     public Plate() {
         this.locationBarcodes = new HashMap<>();

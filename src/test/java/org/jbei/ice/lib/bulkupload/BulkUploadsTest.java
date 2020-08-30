@@ -2,7 +2,7 @@ package org.jbei.ice.lib.bulkupload;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.shared.BioSafetyOption;
@@ -96,12 +96,12 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
 
         // update
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
-        autoUpdate.getKeyValue().put(EntryField.NAME, "strainPlasmid");
-        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "strainPlasmidSummary");
-        autoUpdate.getKeyValue().put(EntryField.BIO_SAFETY_LEVEL, "Level 2");
-        autoUpdate.getKeyValue().put(EntryField.STATUS, "In Progress");
-        autoUpdate.getKeyValue().put(EntryField.PI, "Principal Investigator");
-        autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "strain selection markers");
+        autoUpdate.getKeyValue().put(EntryFieldLabel.NAME, "strainPlasmid");
+        autoUpdate.getKeyValue().put(EntryFieldLabel.SUMMARY, "strainPlasmidSummary");
+        autoUpdate.getKeyValue().put(EntryFieldLabel.BIO_SAFETY_LEVEL, "Level 2");
+        autoUpdate.getKeyValue().put(EntryFieldLabel.STATUS, "In Progress");
+        autoUpdate.getKeyValue().put(EntryFieldLabel.PI, "Principal Investigator");
+        autoUpdate.getKeyValue().put(EntryFieldLabel.SELECTION_MARKERS, "strain selection markers");
         autoUpdate.setBulkUploadId(info.getId());
         autoUpdate = uploads.autoUpdateBulkUpload(account.getEmail(), autoUpdate);
         Assert.assertNotNull(autoUpdate);
@@ -121,9 +121,9 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
         final int count = new Random().nextInt(10);
         for (int i = 0; i < count; i += 1) {
             autoUpdate = new BulkUploadAutoUpdate(EntryType.PART);
-            autoUpdate.getKeyValue().put(EntryField.NAME, "Name" + i);
-            autoUpdate.getKeyValue().put(EntryField.PI, "PI" + i);
-            autoUpdate.getKeyValue().put(EntryField.SUMMARY, "Summary" + i);
+            autoUpdate.getKeyValue().put(EntryFieldLabel.NAME, "Name" + i);
+            autoUpdate.getKeyValue().put(EntryFieldLabel.PI, "PI" + i);
+            autoUpdate.getKeyValue().put(EntryFieldLabel.SUMMARY, "Summary" + i);
             autoUpdate.setBulkUploadId(info.getId());
             Assert.assertNotNull(uploads.autoUpdateBulkUpload(account2.getEmail(), autoUpdate));
         }
@@ -165,7 +165,7 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
         BulkUploadInfo info = createUpload(account.getEmail(), EntryType.STRAIN);
 
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
-        autoUpdate.getKeyValue().put(EntryField.LINKS, "google");
+        autoUpdate.getKeyValue().put(EntryFieldLabel.LINKS, "google");
         autoUpdate.setBulkUploadId(info.getId());
 
         // first auto update. expect it to create a new entry
@@ -197,12 +197,12 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
 
         // update object
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.SEED);
-        autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
-        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
-        autoUpdate.getKeyValue().put(EntryField.PI, "test");
-        autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
-        autoUpdate.getKeyValue().put(EntryField.BIO_SAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
-        autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "test");
+        autoUpdate.getKeyValue().put(EntryFieldLabel.NAME, "JBEI-0001");
+        autoUpdate.getKeyValue().put(EntryFieldLabel.SUMMARY, "this is a test");
+        autoUpdate.getKeyValue().put(EntryFieldLabel.PI, "test");
+        autoUpdate.getKeyValue().put(EntryFieldLabel.STATUS, StatusType.COMPLETE.toString());
+        autoUpdate.getKeyValue().put(EntryFieldLabel.BIO_SAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
+        autoUpdate.getKeyValue().put(EntryFieldLabel.SELECTION_MARKERS, "test");
         autoUpdate.setBulkUploadId(info.getId());
 
         autoUpdate = uploads.autoUpdateBulkUpload(account.getEmail(), autoUpdate);

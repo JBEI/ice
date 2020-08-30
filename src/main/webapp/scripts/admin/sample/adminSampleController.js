@@ -403,13 +403,20 @@ angular.module('ice.admin.sample.controller', [])
                     Util.setFeedback("Error uploading file", "error");
 
                 $scope.currentPlate.locationBarcodes = resp.data.locationBarcodes;
+                if (resp.data.name && !$scope.currentPlate.name)
+                    $scope.currentPlate.name = resp.data.name;
 
                 if ($scope.currentPlate.id === 0) {
                     $scope.currentPlate.cleanLocationBarcodes = angular.copy(resp.data.locationBarcodes);
 
-                    // if a folder has already been selected then assign the part numbers
-                    if ($scope.currentPlate.folder)
-                        $scope.selectFolderForSample($scope.currentPlate.folder);
+                    // check if user uploaded part Ids
+                    if (resp.data.hasUserSpecifiedPartIds) {
+                        $scope.currentPlate.folder = {folderDetails: {folderName: "User Specified"}}
+                    } else {
+                        // if a folder has already been selected then assign the part numbers
+                        if ($scope.currentPlate.folder)
+                            $scope.selectFolderForSample($scope.currentPlate.folder);
+                    }
                 }
 
             }, null, function (evt) {
@@ -459,8 +466,15 @@ angular.module('ice.admin.sample.controller', [])
             }
 
             // send data to the server
+            // create working copy samples
             $scope.messages = {processing: "Creating " + sampleCount + " samples for working copy"};
+            plateToUpload.name = $scope.plates[1].name;
             Util.post("rest/samples", plateToUpload, function () {
+
+                if (!$scope.plates[1].locationBarcodes) {
+                    $scope.messages = {success: "Samples created successfully for working copy only"};
+                    return;
+                }
 
                 // process backup 1 copies if available
                 let backup1CopiesAvailable = false;
@@ -476,8 +490,15 @@ angular.module('ice.admin.sample.controller', [])
                     plateToUpload.locationBarcodes[backupWell].barcode = backupTube.barcode;
                 }
 
+                // on success for working copy create backup copy 1
                 $scope.messages = {processing: "Creating " + sampleCount + " samples for backup 1"};
+                plateToUpload.name = $scope.plates[2].name;
                 Util.post("rest/samples", plateToUpload, function () {
+
+                    if (!$scope.plates[2].locationBarcodes) {
+                        $scope.messages = {success: "Samples created successfully for working copy & backup 1"};
+                        return;
+                    }
 
                     // process backup 1 copies if available
                     let backup2CopiesAvailable = false;
@@ -486,7 +507,7 @@ angular.module('ice.admin.sample.controller', [])
                         const backupTube = $scope.plates[2].locationBarcodes[backupWell];
                         backup2CopiesAvailable = backupTube !== undefined;
                         if (!backup2CopiesAvailable) {
-                            $scope.messages = {success: "Samples created successfully for working copy and backup 1"};
+                            $scope.messages = {success: "Samples created successfully for working copy & backup 1"};
                             return;
                         }
 
@@ -498,8 +519,6 @@ angular.module('ice.admin.sample.controller', [])
                         $scope.messages = {success: "Samples created successfully for working copy, backups 1 and 2"};
                     });
                 });
-
-
             }, {}, function (error) {
                 console.log(error);
                 $scope.messages = {error: "Server error processing data"};

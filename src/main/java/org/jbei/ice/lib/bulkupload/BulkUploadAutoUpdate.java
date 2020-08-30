@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
-import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryFieldLabel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.storage.IDataTransferModel;
 
@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class BulkUploadAutoUpdate implements IDataTransferModel {
 
-    private HashMap<EntryField, String> keyValue;   // header being updated -> value for that row
+    private HashMap<EntryFieldLabel, String> keyValue;   // header being updated -> value for that row
     private long entryId;
     private long bulkUploadId;
     private EntryType type;
@@ -34,7 +34,7 @@ public class BulkUploadAutoUpdate implements IDataTransferModel {
         this.editMode = mode;
     }
 
-    public HashMap<EntryField, String> getKeyValue() {
+    public HashMap<EntryFieldLabel, String> getKeyValue() {
         return this.keyValue;
     }
 
@@ -58,9 +58,9 @@ public class BulkUploadAutoUpdate implements IDataTransferModel {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         int i = 0;
-        for (Map.Entry<EntryField, String> set : keyValue.entrySet()) {
+        for (Map.Entry<EntryFieldLabel, String> set : keyValue.entrySet()) {
             sb.append("AutoUpdate [mode = ").append(editMode.toString()).append("] (entry:").append(entryId)
-              .append(", bulkupload:").append(bulkUploadId).append(
+                    .append(", bulkupload:").append(bulkUploadId).append(
                     ", field:").append(set.getKey()).append(", value:").append(set.getValue()).append(", row:").append(
                     row).append(")");
             i += 1;

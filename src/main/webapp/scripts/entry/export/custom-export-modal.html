@@ -48,6 +48,14 @@
         </ul>
     </div>
 
+    <br>
+
+    <div class="cursor_pointer" ng-click="onePerFolderClick()">
+        <b style="margin-left: 30px">One Per Folder</b>
+        <i class="fa fa-fw"
+           ng-class="{'fa-square-o': !sequence.onePerFolder, 'fa-check-square-o': sequence.onePerFolder}"></i>
+    </div>
+
 </div>
 
 <div class="modal-footer" ng-if="!processingDownload">

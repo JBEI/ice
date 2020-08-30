@@ -45,8 +45,10 @@ public class HibernateUtil {
     }
 
     public static void commitTransaction() {
-        if (getSessionFactory().getCurrentSession().getTransaction().isActive())
-            getSessionFactory().getCurrentSession().getTransaction().commit();
+        Session session = getSessionFactory().getCurrentSession();
+        if (session.getTransaction().isActive())
+            session.getTransaction().commit();
+        session.close();
     }
 
     public static void rollbackTransaction() {
