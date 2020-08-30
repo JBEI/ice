@@ -226,7 +226,8 @@ public class EntriesAsCSV {
             // get sequence formats
             for (long entryId : sequenceSet) {
                 for (String format : formats) {
-                    InputStreamWrapper wrapper = new PartSequence(userId, Long.toString(entryId)).toFile(SequenceFormat.fromString(format));
+                    InputStreamWrapper wrapper = new PartSequence(userId, Long.toString(entryId))
+                            .toFile(SequenceFormat.fromString(format), true);
                     putZipEntry(wrapper, zos);
                 }
             }
@@ -291,7 +292,8 @@ public class EntriesAsCSV {
         return fields.toArray(new EntryFieldLabel[0]);
     }
 
-    public ByteArrayOutputStream customize(EntrySelection selection, SequenceFormat format) throws IOException {
+    public ByteArrayOutputStream customize(EntrySelection selection, SequenceFormat format, boolean onePerFolder)
+            throws IOException {
         Entries retriever = new Entries(this.userId);
         this.entries = retriever.getEntriesFromSelectionContext(selection);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -306,19 +308,20 @@ public class EntriesAsCSV {
                     continue;
                 }
 
-                Sequence sequence = sequenceDAO.getByEntry(entry);
-                if (sequence == null) {
+                if (!sequenceDAO.hasSequence(entry.getId())) {
                     continue;
                 }
 
                 // get the sequence
-                InputStreamWrapper wrapper = new PartSequence(userId, Long.toString(entryId)).toFile(format);
+                InputStreamWrapper wrapper = new PartSequence(userId, Long.toString(entryId)).toFile(format, onePerFolder);
                 if (wrapper == null) {
                     Logger.error("ERROR : no sequence " + entryId);
                     continue;
                 }
-
-                wrapper.setName(entry.getPartNumber() + File.separatorChar + wrapper.getName());
+                if (onePerFolder)
+                    wrapper.setName(entry.getPartNumber() + File.separatorChar + wrapper.getName());
+                else
+                    wrapper.setName(wrapper.getName());
                 putZipEntry(wrapper, zos);
             }
             this.includeSequences = false;

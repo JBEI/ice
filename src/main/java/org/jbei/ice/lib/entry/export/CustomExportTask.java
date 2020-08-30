@@ -24,11 +24,13 @@ public class CustomExportTask extends Task {
     private final EntrySelection selection;
     private final SequenceFormat format;
     private final Path tmp;
+    private final boolean onePerFolder;
 
-    public CustomExportTask(String userId, EntrySelection selection, SequenceFormat format) {
+    public CustomExportTask(String userId, EntrySelection selection, SequenceFormat format, boolean onePerFolder) {
         this.userId = userId;
         this.selection = selection;
         this.format = format;
+        this.onePerFolder = onePerFolder;
         tmp = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY));
     }
 
@@ -52,7 +54,7 @@ public class CustomExportTask extends Task {
 
         EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId);
         try {
-            ByteArrayOutputStream byteArrayOutputStream = entriesAsCSV.customize(selection, format);
+            ByteArrayOutputStream byteArrayOutputStream = entriesAsCSV.customize(selection, format, this.onePerFolder);
             try (OutputStream outputStream = new FileOutputStream(exportPath.toString())) {
                 byteArrayOutputStream.writeTo(outputStream);
             }

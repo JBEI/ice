@@ -495,10 +495,12 @@ public class PartSequence {
     /**
      * Convert sequence to a byte array of the specified format with the intention of being written to a file
      *
-     * @param format specified format for sequence conversion
+     * @param format      specified format for sequence conversion
+     * @param useFileName whether to use the original filename of the sequence if the original uploaded sequence is
+     *                    available
      * @return wrapper around the outputstream for the converted format and name
      */
-    public InputStreamWrapper toFile(SequenceFormat format) {
+    public InputStreamWrapper toFile(SequenceFormat format, boolean useFileName) {
         entryAuthorization.expectRead(userId, entry);
         Sequence sequence = sequenceDAO.getByEntry(entry);
         if (sequence == null)
@@ -515,9 +517,15 @@ public class PartSequence {
             switch (format) {
                 case ORIGINAL:
                     sequenceString = sequence.getSequenceUser();
-                    name = sequence.getFileName();
+                    if (!useFileName) {
+                        name = entry.getPartNumber() + ".gb";
+                    } else {
+                        name = sequence.getFileName();
+                    }
+
                     if (StringUtils.isEmpty(name))
                         name = entry.getPartNumber() + ".gb";
+
                     try {
                         SequenceFile sequenceFile = new SequenceFile(sequenceString);
                         return new InputStreamWrapper(sequenceFile.getStream(), name);

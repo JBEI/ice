@@ -767,10 +767,13 @@ public class PartResource extends RestResource {
     @POST
     @Path("/custom")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response customExport(@QueryParam("sequenceFormat") String sequenceFormat, EntrySelection selection) {
+    public Response customExport(
+            @QueryParam("sequenceFormat") String sequenceFormat,
+            @DefaultValue("true") @QueryParam("onePerFolder") boolean onePerFolder,
+            EntrySelection selection) {
         String userId = super.requireUserId();
         SequenceFormat format = SequenceFormat.fromString(sequenceFormat.toUpperCase());
-        CustomExportTask task = new CustomExportTask(userId, selection, format);
+        CustomExportTask task = new CustomExportTask(userId, selection, format, onePerFolder);
         IceExecutorService.getInstance().runTask(task);
         return super.respond(true);
     }
