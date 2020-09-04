@@ -210,7 +210,7 @@ public class FileResource extends RestResource {
 
             return addHeaders(Response.ok(stream), wrapper.getName());
         } else {
-            InputStreamWrapper wrapper = new PartSequence(userId, partId).toFile(SequenceFormat.fromString(downloadType), true);
+            InputStreamWrapper wrapper = new PartSequence(userId, partId).toFile(SequenceFormat.fromString(downloadType), true, true);
             StreamingOutput stream = output -> IOUtils.copy(wrapper.getInputStream(), output);
             return addHeaders(Response.ok(stream), wrapper.getName());
         }

@@ -227,7 +227,7 @@ public class EntriesAsCSV {
             for (long entryId : sequenceSet) {
                 for (String format : formats) {
                     InputStreamWrapper wrapper = new PartSequence(userId, Long.toString(entryId))
-                            .toFile(SequenceFormat.fromString(format), true);
+                            .toFile(SequenceFormat.fromString(format), true, false);
                     putZipEntry(wrapper, zos);
                 }
             }
@@ -313,7 +313,7 @@ public class EntriesAsCSV {
                 }
 
                 // get the sequence
-                InputStreamWrapper wrapper = new PartSequence(userId, Long.toString(entryId)).toFile(format, onePerFolder);
+                InputStreamWrapper wrapper = new PartSequence(userId, Long.toString(entryId)).toFile(format, onePerFolder, false);
                 if (wrapper == null) {
                     Logger.error("ERROR : no sequence " + entryId);
                     continue;
