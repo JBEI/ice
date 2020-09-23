@@ -8,6 +8,7 @@ import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.util.HttpString;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.jbei.ice.servlet.IceServletContextListener;
 
@@ -56,7 +57,13 @@ public class DevelopmentServer {
 
         Undertow server = Undertow.builder()
                 .addHttpListener(8080, "localhost")
-                .setHandler(path)
+                .setHandler(exchange -> {
+                    exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Origin"), "*");
+                    exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Methods"), "GET,PUT,POST,DELETE,OPTIONS");
+                    exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Headers"), "Content-Type, X-DIVA-Authentication-SessionId");
+
+                    path.handleRequest(exchange);
+                })
                 .build();
         server.start();
     }

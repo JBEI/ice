@@ -1,0 +1,15 @@
+.login_message_panel {
+    color: #333;
+    padding: 40px;
+    line-height: 21px;
+    background-color: #f3f3f3;
+    width: 320px;
+    font-size: small;
+}
+
+.form-label {
+    color: #999999;
+    font-weight: 700;
+    font-size: .7em;
+    text-transform: uppercase;
+}
