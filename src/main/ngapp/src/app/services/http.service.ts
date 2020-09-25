@@ -49,6 +49,7 @@ export class HttpService {
     post<T>(api: string, payload: T, options?): Observable<any> {
         this.setOptions(options);
         const url = `${this.apiUrl}/${api}`;
+        console.log("post2");
         return this.http.post<T>(url, payload, this.httpOptions);
     }
 

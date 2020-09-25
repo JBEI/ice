@@ -70,6 +70,7 @@ export class LoginComponent implements OnInit {
             return;
         }
 
+        console.log("login");
         this.http.post("accesstokens", this.login).subscribe((result: User) => {
             if (result && result.sessionId) {
                 this.userService.setUser(result);

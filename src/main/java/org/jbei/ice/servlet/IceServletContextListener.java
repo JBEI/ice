@@ -7,6 +7,7 @@ import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.nio.file.Path;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -21,7 +22,21 @@ import java.util.Enumeration;
 public class IceServletContextListener implements ServletContextListener {
 
     public void contextInitialized(ServletContextEvent event) {
-        init();
+        Path path = ApplicationInitialize.configure();
+        if (path == null) {
+            System.err.println("Problem configuring application initialization");
+            return;
+        }
+
+        try {
+            HibernateConfiguration.beginTransaction();
+            ApplicationInitialize.loadAuthentication();
+            ApplicationInitialize.start(path);
+            HibernateConfiguration.commitTransaction();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     public void contextDestroyed(ServletContextEvent event) {
@@ -39,21 +54,6 @@ public class IceServletContextListener implements ServletContextListener {
             } catch (SQLException e) {
                 Logger.error("Error de-registering driver: " + driver, e);
             }
-        }
-    }
-
-    protected void init() {
-        try {
-            if (!ApplicationInitialize.configure())
-                return;
-
-            HibernateConfiguration.beginTransaction();
-            ApplicationInitialize.loadAuthentication();
-            ApplicationInitialize.start();
-            HibernateConfiguration.commitTransaction();
-        } catch (Throwable e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
         }
     }
 }
