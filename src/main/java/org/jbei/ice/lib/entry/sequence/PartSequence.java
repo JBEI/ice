@@ -233,9 +233,9 @@ public class PartSequence {
     private Sequence saveSequenceObject(Sequence sequence) {
         sequence.setEntry(this.entry);
         Set<SequenceFeature> sequenceFeatureSet = null;
-        sequence = SequenceUtil.normalizeAnnotationLocations(sequence);
-        if (sequence == null)
-            throw new IllegalArgumentException("Could not normalize sequence");
+//        sequence = SequenceUtil.normalizeAnnotationLocations(sequence);
+//        if (sequence == null)
+//            throw new IllegalArgumentException("Could not normalize sequence");
 
         if (sequence.getSequenceFeatures() != null) {
             sequenceFeatureSet = new HashSet<>(sequence.getSequenceFeatures());
@@ -384,7 +384,7 @@ public class PartSequence {
         if (feature == null)
             return;
 
-        existing = SequenceUtil.normalizeAnnotationLocations(existing);
+//        existing = SequenceUtil.normalizeAnnotationLocations(existing);
         if (existing == null)
             throw new IllegalArgumentException("cannot normalize sequence");
 
