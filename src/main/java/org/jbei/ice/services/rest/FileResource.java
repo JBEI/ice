@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 @Path("/file")
 public class FileResource extends RestResource {
 
-    private Attachments attachments = new Attachments();
+    private final Attachments attachments = new Attachments();
 
     @GET
     @Path("asset/{assetName}")
@@ -274,7 +274,7 @@ public class FileResource extends RestResource {
             if (info == null)
                 throw new WebApplicationException(Response.serverError().build());
             return Response.status(Response.Status.OK).entity(info).build();
-        } catch (Exception e) {
+        } catch (IOException e) {
             Logger.error(e);
             ErrorResponse response = new ErrorResponse();
             response.setMessage(e.getMessage());
