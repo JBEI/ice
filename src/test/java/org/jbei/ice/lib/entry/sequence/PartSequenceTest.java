@@ -182,4 +182,21 @@ public class PartSequenceTest extends HibernateRepositoryTest {
         partSequence.delete();
         Assert.assertNull(partSequence.get());
     }
+
+    @Test
+    public void testRandomSequence() throws Exception {
+        Account account = AccountCreator.createTestAccount("PartSequenceTest.testRandomSequence", false);
+
+        // generate a random sequence of length 50k bps with 600 features
+        RandomSequence randomSequence = new RandomSequence(50000);
+        FeaturedDNASequence sequence = randomSequence.generate(600);
+
+        // create part for sequence
+        PartSequence partSequence = new PartSequence(account.getEmail(), EntryType.PLASMID);
+        partSequence.save(sequence);
+
+        // retrieve sequence with default of 20 annotations
+        FeaturedDNASequence retrieved = partSequence.get(false);
+        Assert.assertNotNull(retrieved);
+    }
 }
