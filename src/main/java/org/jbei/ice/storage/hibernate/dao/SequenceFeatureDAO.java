@@ -78,7 +78,35 @@ public class SequenceFeatureDAO extends HibernateRepository<SequenceFeature> {
         }
     }
 
-    public List<SequenceFeature> getSequenceFeatures(String userId, List<Group> groups, String nameFilter, int start, int limit) {
+    public List<SequenceFeature> pageSequenceFeatures(Entry entry, int start, int limit) {
+        try {
+            CriteriaQuery<SequenceFeature> query = getBuilder().createQuery(SequenceFeature.class);
+            Root<SequenceFeature> from = query.from(SequenceFeature.class);
+            Join<SequenceFeature, Sequence> sequence = from.join("sequence");
+            query.where(getBuilder().equal(sequence.get("entry"), entry));
+            return currentSession().createQuery(query).setFirstResult(start).setMaxResults(limit).list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    public long countSequenceFeatures(Entry entry) {
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<SequenceFeature> from = query.from(SequenceFeature.class);
+            Join<SequenceFeature, Sequence> sequence = from.join("sequence");
+            query.select(getBuilder().countDistinct(from.get("id")));
+            query.where(getBuilder().equal(sequence.get("entry"), entry));
+            return currentSession().createQuery(query).uniqueResult();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    public List<SequenceFeature> getSequenceFeatures(String userId, List<Group> groups, String nameFilter,
+                                                     int start, int limit) {
         try {
             CriteriaQuery<SequenceFeature> query = getBuilder().createQuery(SequenceFeature.class).distinct(true);
             Root<SequenceFeature> from = query.from(SequenceFeature.class);

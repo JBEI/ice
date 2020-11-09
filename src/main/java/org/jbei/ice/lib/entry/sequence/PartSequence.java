@@ -60,7 +60,7 @@ public class PartSequence {
     private final EntryAuthorization entryAuthorization;
 
     /**
-     * Constructor for creating a new part to associate a sequence with
+     * Constructor for creating a new part to associate with a sequence
      *
      * @param userId unique identifier for user creating new part
      * @param type   type of part to create.
@@ -109,7 +109,13 @@ public class PartSequence {
         return partData.getId();
     }
 
-    public FeaturedDNASequence get() {
+    /**
+     * Retrieves the sequence information for current part
+     *
+     * @param includeAllAnnotations whether to include all annotations (true) or limit to the first 20 (false)
+     * @return found sequence for current part
+     */
+    public FeaturedDNASequence get(boolean includeAllAnnotations) {
         entryAuthorization.expectRead(userId, entry);
 
 //        if (entry.getVisibility() == Visibility.REMOTE.getValue()) {
@@ -307,7 +313,7 @@ public class PartSequence {
             checkForUpdatedFeatures(existing, sequence);
 
             // rebuild the trace sequence alignments // todo : this might not be needed for all updates
-            rebuildTraceAlignments();
+            new TraceSequences().rebuildAllAlignments(entry);
 
             // rebuild blast
             scheduleBlastIndexRebuildTask(Action.UPDATE, this.entry.getPartNumber());
@@ -588,10 +594,6 @@ public class PartSequence {
             Logger.error(e);
         }
         return byteStream.toString();
-    }
-
-    private void rebuildTraceAlignments() {
-        new TraceSequences().rebuildAllAlignments(entry);
     }
 
     private FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {

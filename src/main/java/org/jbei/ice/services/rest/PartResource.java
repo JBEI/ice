@@ -549,7 +549,8 @@ public class PartResource extends RestResource {
                                 @DefaultValue("false") @QueryParam("remote") boolean isRemote,
                                 @QueryParam("token") String remoteUserToken,
                                 @QueryParam("userId") String remoteUserId,
-                                @QueryParam("folderId") long fid) {
+                                @QueryParam("folderId") long fid,
+                                @DefaultValue("true") @QueryParam("annotations") boolean includeAnnotations) {
         final FeaturedDNASequence sequence;
         final String userId = getUserId();
         Sequences sequences = new Sequences(userId);
@@ -562,13 +563,13 @@ public class PartResource extends RestResource {
             if (StringUtils.isEmpty(userId)) {
                 RegistryPartner partner = requireWebPartner();
                 if (StringUtils.isEmpty(remoteUserToken) || fid == 0) {
-                    sequence = new PartSequence(userId, partId).get();
+                    sequence = new PartSequence(userId, partId).get(includeAnnotations);
                 } else {
                     sequence = sequences.getRequestedSequence(partner, remoteUserId, remoteUserToken, partId, fid);
                 }
             } else {
                 // user id can be null if partId is public
-                sequence = new PartSequence(userId, partId).get();
+                sequence = new PartSequence(userId, partId).get(includeAnnotations);
             }
         }
         return Response.status(Response.Status.OK).entity(sequence).build();
