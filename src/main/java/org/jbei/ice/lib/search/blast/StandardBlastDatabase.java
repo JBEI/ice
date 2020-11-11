@@ -220,6 +220,9 @@ public class StandardBlastDatabase extends BlastDatabase {
         }
 
         Sequence sequence = sequenceDAO.getByEntry(entry);
+        if (sequence == null)
+            return;
+
         final String blastFasta = getSequenceFasta(sequence);
         if (blastFasta == null)
             return;

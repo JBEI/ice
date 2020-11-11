@@ -317,7 +317,7 @@ public class FileResource extends RestResource {
         EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId, sequenceFormats.toArray(new String[0]));
         List<EntryFieldLabel> entryFieldLabels = new ArrayList<>();
         try {
-            if (fields != null) {
+            if (fields != null && !fields.isEmpty()) {
                 entryFieldLabels.addAll(fields.stream().map(EntryFieldLabel::fromString).collect(Collectors.toList()));
             }
         } catch (Exception e) {

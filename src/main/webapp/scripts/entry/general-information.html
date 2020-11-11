@@ -491,7 +491,8 @@
         </div>
 
         <div ng-if="entry.hasSequence && entry.basePairCount" style="height: 600px; width: 100%">
-            <ice-vector-viewer entry="entry" remote="remoteParams" reload-info="reloadInfo"></ice-vector-viewer>
+            <ice-vector-viewer entry="entry" remote="remoteParams" on-loaded="sequenceLoaded"
+                               reload-info="reloadInfo"></ice-vector-viewer>
         </div>
 
         <div ng-if="entry.hasSequence && (entry.basePairCount == 'SBOL1' || entry.basePairCount == 'SBOL2')"

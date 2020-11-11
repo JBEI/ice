@@ -4,7 +4,6 @@ import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
-import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Entry;
@@ -34,7 +33,8 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             Root<Sequence> from = query.from(Sequence.class);
             query.where(getBuilder().equal(from.get("entry"), entry));
             Optional<Sequence> sequence = currentSession().createQuery(query).uniqueResultOptional();
-            return sequence.map(SequenceUtil::normalizeAnnotationLocations).orElse(null);
+            return sequence.orElse(null);
+//            return sequence.map(SequenceUtil::normalizeAnnotationLocations).orElse(null);
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
