@@ -205,7 +205,9 @@ public class Entries extends HasEntry {
                 }
 
             case SEARCH:
-                return getSearchResults(context.getSearchQuery());
+                SearchQuery query = context.getSearchQuery();
+                query.getParameters().setRetrieveCount(Integer.MAX_VALUE);
+                return getSearchResults(query);
 
             case COLLECTION:
                 if (!context.getEntries().isEmpty()) {
@@ -336,7 +338,7 @@ public class Entries extends HasEntry {
         // check sequence
         if (sequence != null) {
             PartSequence partSequence = new PartSequence(userId, sourceId);
-            new PartSequence(userId, entry.getPartNumber()).save(partSequence.get());
+            new PartSequence(userId, entry.getPartNumber()).save(partSequence.get(true));
         }
 
         PartData copy = new PartData(EntryType.nameToType(entry.getRecordType()));

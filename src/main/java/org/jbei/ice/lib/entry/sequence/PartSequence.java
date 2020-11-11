@@ -121,7 +121,7 @@ public class PartSequence {
 //        }
 
         boolean canEdit = entryAuthorization.canWrite(userId, entry);
-        return getFeaturedSequence(entry, canEdit);
+        return getFeaturedSequence(entry, canEdit, includeAllAnnotations);
     }
 
     /**
@@ -517,13 +517,19 @@ public class PartSequence {
         return new SequenceAsString(format, entry.getId(), useFileName).get();
     }
 
-    private FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
+    private FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit, boolean includeAllFeatures) {
         Sequence sequence = sequenceDAO.getByEntry(entry);
         if (sequence == null) {
             return null;
         }
 
-        List<SequenceFeature> sequenceFeatures = sequenceFeatureDAO.getEntrySequenceFeatures(entry);
+        List<SequenceFeature> sequenceFeatures;
+        if (includeAllFeatures) {
+            sequenceFeatures = sequenceFeatureDAO.getEntrySequenceFeatures(entry);
+        } else {
+            sequenceFeatures = sequenceFeatureDAO.pageSequenceFeatures(entry, 0, 20);
+        }
+
         FeaturedDNASequence featuredDNASequence = SequenceUtil.sequenceToDNASequence(sequence, sequenceFeatures);
         featuredDNASequence.setCanEdit(canEdit);
         featuredDNASequence.setIdentifier(entry.getPartNumber());

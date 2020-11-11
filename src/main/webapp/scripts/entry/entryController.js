@@ -494,10 +494,21 @@ angular.module('ice.entry.controller', [])
             $scope.isFileUpload = false;
             $scope.existingVectorEditorSequenceModel = undefined;
             $scope.sessionId = Authentication.getSessionId();
+            $scope.loadingAnnotations = true;
 
             $rootScope.$on("VectorEditorSequenceModel", function (event, data) {
-                $scope.existingVectorEditorSequenceModel = data;
+                console.log(data);
+                if ($scope.existingVectorEditorSequenceModel) {
+                    if (data.sequenceData)
+                        $scope.existingVectorEditorSequenceModel.sequenceData = data.sequenceData;
+                } else
+                    $scope.existingVectorEditorSequenceModel = data;
             });
+
+            $scope.sequenceLoaded = function (model) {
+                // $scope.existingVectorEditorSequenceModel
+                console.log("sequence loaded. model", model);
+            };
 
             // determines if the specified field has a value that allows is to be displayed
             $scope.fieldHasValue = function (field) {

@@ -47,7 +47,7 @@ public class PartSequenceTest extends HibernateRepositoryTest {
         Account account = AccountCreator.createTestAccount("PartSequenceTest.testGet", false);
         Strain strain = TestEntryCreator.createTestStrain(account);
         PartSequence partSequence = new PartSequence(account.getEmail(), strain.getRecordId());
-        FeaturedDNASequence sequence = partSequence.get();
+        FeaturedDNASequence sequence = partSequence.get(true);
         Assert.assertNull(sequence);
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(genbank.getBytes());
@@ -57,7 +57,7 @@ public class PartSequenceTest extends HibernateRepositoryTest {
         Assert.assertNotNull(featuredDNASequence);
         Assert.assertEquals(1, featuredDNASequence.getFeatures().size());
 
-        sequence = partSequence.get();
+        sequence = partSequence.get(true);
         Assert.assertNotNull(sequence);
         Assert.assertEquals(234, sequence.getSequence().length());
         Assert.assertEquals(1, sequence.getFeatures().size());
@@ -83,8 +83,8 @@ public class PartSequenceTest extends HibernateRepositoryTest {
         partSequence.save(sequence);
 
         // compare
-        PartSequence existingSequence = new PartSequence(account.getEmail(), partSequence.get().getIdentifier());
-        FeaturedDNASequence dnaSequence = existingSequence.get();
+        PartSequence existingSequence = new PartSequence(account.getEmail(), partSequence.get(true).getIdentifier());
+        FeaturedDNASequence dnaSequence = existingSequence.get(true);
         Assert.assertEquals(1, dnaSequence.getFeatures().size());
         Assert.assertEquals(234, dnaSequence.getSequence().length());
 
@@ -119,7 +119,7 @@ public class PartSequenceTest extends HibernateRepositoryTest {
         Assert.assertNotNull(sequenceInfo);
 
         // remove all existing features and add new feature
-        FeaturedDNASequence dnaSequence = partSequence.get();
+        FeaturedDNASequence dnaSequence = partSequence.get(true);
         dnaSequence.getFeatures().clear();
 
         // todo : what happens when location is specified but no sequence (or they differ?)
@@ -131,7 +131,7 @@ public class PartSequenceTest extends HibernateRepositoryTest {
         partSequence.update(dnaSequence, false);
 
         // check for correct update
-        List<DNAFeature> currentFeatures = partSequence.get().getFeatures();
+        List<DNAFeature> currentFeatures = partSequence.get(true).getFeatures();
         Assert.assertEquals(1, currentFeatures.size());
         Assert.assertEquals(sequenceInfo.getSequence().getSequence(), dnaSequence.getSequence());
         compareFeatures(feature, currentFeatures.get(0));
@@ -144,7 +144,7 @@ public class PartSequenceTest extends HibernateRepositoryTest {
         partSequence.update(dnaSequence, false);
 
         // check for correct update
-        currentFeatures = partSequence.get().getFeatures();
+        currentFeatures = partSequence.get(true).getFeatures();
         Assert.assertEquals(1, currentFeatures.size());
         Assert.assertEquals(sequenceInfo.getSequence().getSequence(), dnaSequence.getSequence());
         compareFeatures(feature, currentFeatures.get(0));
@@ -158,7 +158,7 @@ public class PartSequenceTest extends HibernateRepositoryTest {
         partSequence.update(dnaSequence, false);
 
         // check
-        FeaturedDNASequence featuredDNASequence = partSequence.get();
+        FeaturedDNASequence featuredDNASequence = partSequence.get(true);
         Assert.assertNotNull(featuredDNASequence);
         currentFeatures = featuredDNASequence.getFeatures();
         Assert.assertEquals(2, currentFeatures.size());
@@ -178,9 +178,9 @@ public class PartSequenceTest extends HibernateRepositoryTest {
         FeaturedDNASequence sequence = GeneralParser.parse(genbank);
         Assert.assertNotNull(sequence);
         partSequence.save(sequence);
-        Assert.assertNotNull(partSequence.get());
+        Assert.assertNotNull(partSequence.get(true));
         partSequence.delete();
-        Assert.assertNull(partSequence.get());
+        Assert.assertNull(partSequence.get(true));
     }
 
     @Test
