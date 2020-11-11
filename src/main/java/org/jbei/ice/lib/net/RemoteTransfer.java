@@ -16,6 +16,8 @@ import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.RemotePartner;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -195,8 +197,12 @@ public class RemoteTransfer {
         if (sequenceDAO.hasSequence(data.getId())) {
             InputStreamWrapper wrapper = new SequenceAsString(SequenceFormat.GENBANK, data.getId(), true).get();
             if (wrapper != null && wrapper.getInputStream() != null) {
-                String sequenceString = wrapper.getInputStream().toString();
-                remoteContact.transferSequence(url, data.getRecordId(), data.getType(), sequenceString);
+                try {
+                    String sequenceString = new String(wrapper.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                    remoteContact.transferSequence(url, data.getRecordId(), data.getType(), sequenceString);
+                } catch (IOException e) {
+                    Logger.error("Cannot transfer sequence", e);
+                }
             }
         }
 
