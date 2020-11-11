@@ -15,7 +15,6 @@ import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.GeneralParser;
@@ -32,8 +31,6 @@ import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceFeatureDAO;
 import org.jbei.ice.storage.model.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -517,83 +514,7 @@ public class PartSequence {
         if (useOriginalIfAvailable && sequence.getFormat() == format && DAOFactory.getSequenceDAO().hasOriginalSequence(entry.getId()))
             format = SequenceFormat.ORIGINAL;
 
-        String name;
-        String sequenceString;
-
-        try {
-            switch (format) {
-                case ORIGINAL:
-                    sequenceString = sequence.getSequenceUser();
-                    if (!useFileName) {
-                        name = entry.getPartNumber() + ".gb";
-                    } else {
-                        name = sequence.getFileName();
-                    }
-
-                    if (StringUtils.isEmpty(name))
-                        name = entry.getPartNumber() + ".gb";
-
-                    try {
-                        SequenceFile sequenceFile = new SequenceFile(sequenceString);
-                        return new InputStreamWrapper(sequenceFile.getStream(), name);
-                    } catch (Exception e) {
-                        Logger.error(e.getMessage());
-                        break;
-                    }
-
-                case GENBANK:
-                default:
-                    GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
-                    genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false);
-                    sequenceString = compose(sequence, genbankFormatter);
-                    name = entry.getPartNumber() + ".gb";
-                    break;
-
-                case FASTA:
-                    FastaFormatter formatter = new FastaFormatter();
-                    sequenceString = compose(sequence, formatter);
-                    name = entry.getPartNumber() + ".fa";
-                    break;
-
-                case SBOL1:
-                    sequenceString = compose(sequence, new SBOLFormatter());
-                    name = entry.getPartNumber() + ".xml";
-                    break;
-
-                case SBOL2:
-                    sequenceString = compose(sequence, new SBOL2Formatter());
-                    name = entry.getPartNumber() + ".xml";
-                    break;
-
-                case GFF3:
-                    sequenceString = compose(sequence, new GFF3Formatter());
-                    name = entry.getPartNumber() + ".gff3";
-                    break;
-            }
-        } catch (Exception e) {
-            Logger.error("Failed to generate " + format.name() + " file for download!", e);
-            return null;
-        }
-
-        ByteArrayInputStream stream = new ByteArrayInputStream(sequenceString.getBytes());
-        return new InputStreamWrapper(stream, name);
-    }
-
-    /**
-     * Generate a formatted text of a given {@link IFormatter} from the given {@link Sequence}.
-     *
-     * @param sequence  sequence
-     * @param formatter formatter
-     * @return Text of a formatted sequence.
-     */
-    protected String compose(Sequence sequence, IFormatter formatter) {
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        try {
-            formatter.format(sequence, byteStream);
-        } catch (IOException e) {
-            Logger.error(e);
-        }
-        return byteStream.toString();
+        return new SequenceAsString(format, entry.getId(), useFileName).get();
     }
 
     private FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
