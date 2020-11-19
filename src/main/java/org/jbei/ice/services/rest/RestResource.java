@@ -246,6 +246,9 @@ public class RestResource {
 
     Response addHeaders(Response.ResponseBuilder response, String fileName) {
         response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        if (StringUtils.isEmpty(fileName))
+            return response.build();
+
         int dotIndex = fileName.lastIndexOf('.') + 1;
         if (dotIndex == 0)
             return response.build();
