@@ -647,12 +647,22 @@ angular.module('ice.entry.controller', [])
                                         type: feature.type,
                                         name: feature.name,
                                         strand: feature.forward ? 1 : -1,
-                                        notes: [{name: "note", value: feature.notes}],
                                         locations: [{
                                             genbankStart: feature.start + 1,
                                             end: feature.end + 1
                                         }]
                                     };
+
+                                    // set notes
+                                    if (feature.notes) {
+                                        featureMap[feature.id].notes = [];
+                                        for (const prop in feature.notes) {
+                                            if (!feature.notes.hasOwnProperty(prop))
+                                                continue;
+
+                                            featureMap[feature.id].notes.push({name: "note", value: prop})
+                                        }
+                                    }
                                 }
                             }
 
@@ -662,6 +672,8 @@ angular.module('ice.entry.controller', [])
 
                                 sequence.features.push(featureMap[property]);
                             }
+
+                            console.log(sequence.features);
 
                             Util.update("rest/parts/" + entry.id + "/sequence", sequence, {},
                                 function (result) {
