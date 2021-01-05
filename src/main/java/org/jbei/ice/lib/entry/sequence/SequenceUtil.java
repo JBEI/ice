@@ -137,7 +137,8 @@ public class SequenceUtil {
 
                 dnaFeature.setId(sequenceFeature.getId());
                 dnaFeature.setType(sequenceFeature.getGenbankType());
-                dnaFeature.setName(sequenceFeature.getName());
+                String name = sequenceFeature.getFeature() != null ? sequenceFeature.getFeature().getName() : sequenceFeature.getName();
+                dnaFeature.setName(name);
                 dnaFeature.setStrand(sequenceFeature.getStrand());
 
                 if (sequenceFeature.getAnnotationType() != null) {

@@ -362,6 +362,18 @@ public class PartSequence {
             // for each existing feature, check with updated for difference in name and type
             for (SequenceFeature updatedSequenceFeature : updated.getSequenceFeatures()) {
                 Feature sequenceFeature = updatedSequenceFeature.getFeature();
+                Feature existingFeatureFeature = existingFeature.getFeature();
+
+                if (!sequenceFeature.getHash().equals(existingFeatureFeature.getHash()))
+                    continue;
+
+                if (!sequenceFeature.getName().equals(existingFeatureFeature.getName()) ||
+                        !sequenceFeature.getGenbankType().equals(existingFeatureFeature.getGenbankType())) {
+                    // update
+                    existingFeatureFeature.setName(sequenceFeature.getName());
+                    existingFeatureFeature.setGenbankType(sequenceFeature.getGenbankType());
+                    featureDAO.update(existingFeatureFeature);
+                }
             }
         }
     }
