@@ -494,10 +494,21 @@ angular.module('ice.entry.controller', [])
             $scope.isFileUpload = false;
             $scope.existingVectorEditorSequenceModel = undefined;
             $scope.sessionId = Authentication.getSessionId();
+            $scope.loadingAnnotations = true;
 
             $rootScope.$on("VectorEditorSequenceModel", function (event, data) {
-                $scope.existingVectorEditorSequenceModel = data;
+                console.log(data);
+                if ($scope.existingVectorEditorSequenceModel) {
+                    if (data.sequenceData)
+                        $scope.existingVectorEditorSequenceModel.sequenceData = data.sequenceData;
+                } else
+                    $scope.existingVectorEditorSequenceModel = data;
             });
+
+            $scope.sequenceLoaded = function (model) {
+                // $scope.existingVectorEditorSequenceModel
+                console.log("sequence loaded. model", model);
+            };
 
             // determines if the specified field has a value that allows is to be displayed
             $scope.fieldHasValue = function (field) {
@@ -636,12 +647,22 @@ angular.module('ice.entry.controller', [])
                                         type: feature.type,
                                         name: feature.name,
                                         strand: feature.forward ? 1 : -1,
-                                        notes: [{name: "note", value: feature.notes}],
                                         locations: [{
                                             genbankStart: feature.start + 1,
                                             end: feature.end + 1
                                         }]
                                     };
+
+                                    // set notes
+                                    if (feature.notes) {
+                                        featureMap[feature.id].notes = [];
+                                        for (const prop in feature.notes) {
+                                            if (!feature.notes.hasOwnProperty(prop))
+                                                continue;
+
+                                            featureMap[feature.id].notes.push({name: "note", value: prop})
+                                        }
+                                    }
                                 }
                             }
 
@@ -651,6 +672,8 @@ angular.module('ice.entry.controller', [])
 
                                 sequence.features.push(featureMap[property]);
                             }
+
+                            console.log(sequence.features);
 
                             Util.update("rest/parts/" + entry.id + "/sequence", sequence, {},
                                 function (result) {

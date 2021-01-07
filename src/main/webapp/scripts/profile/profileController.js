@@ -270,7 +270,6 @@ angular.module('ice.profile.controller', [])
         }
     })
     .controller('ProfileSamplesController', function ($scope, $cookies, $location, $stateParams, Util) {
-        $scope.maxSize = 15;
         $scope.params = {currentPage: 1};
         $scope.pendingSampleRequests = undefined;
 

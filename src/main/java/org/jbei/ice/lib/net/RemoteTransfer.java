@@ -1,12 +1,13 @@
 package org.jbei.ice.lib.net;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.EntrySelectionType;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
+import org.jbei.ice.lib.entry.sequence.InputStreamWrapper;
+import org.jbei.ice.lib.entry.sequence.SequenceAsString;
+import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
@@ -14,9 +15,9 @@ import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.RemotePartner;
-import org.jbei.ice.storage.model.Sequence;
 
-import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -110,6 +111,7 @@ public class RemoteTransfer {
 
         for (PartData data : entries) {
             try {
+                // fetch linked parts to enable remote to create the links
                 if (data.getLinkedParts() != null && !data.getLinkedParts().isEmpty()) {
                     List<PartData> linkedParts = new ArrayList<>();
                     for (PartData linkedData : data.getLinkedParts()) {
@@ -124,6 +126,7 @@ public class RemoteTransfer {
                     data.getLinkedParts().addAll(linkedParts);
                 }
 
+                // transfer the part with information about links (if any)
                 PartData object = remoteContact.transferPart(url, data);
                 if (object == null) {
                     exceptionCount += 1;
@@ -134,7 +137,9 @@ public class RemoteTransfer {
                 if (data.getLinkedParts() != null) {
                     remoteIds.addAll(object.getLinkedParts().stream().map(PartData::getId).collect(Collectors.toList()));
                 }
-                performTransfer(partner, data); // transfers attachments and sequences
+
+                // transfers attachments and sequences
+                performTransfer(partner, data);
             } catch (Exception e) {
                 exceptionCount += 1;
                 if (exceptionCount >= 5) {
@@ -190,26 +195,15 @@ public class RemoteTransfer {
 
         // check main entry for sequence
         if (sequenceDAO.hasSequence(data.getId())) {
-            Entry entry = entryDAO.get(data.getId());
-            Sequence sequence = sequenceDAO.getByEntry(entry);
-            String sequenceString = sequence.getSequenceUser();
-
-            if (StringUtils.isEmpty(sequenceString)) {
-                GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
-                genbankFormatter.setCircular(true);
-
+            InputStreamWrapper wrapper = new SequenceAsString(SequenceFormat.GENBANK, data.getId(), true).get();
+            if (wrapper != null && wrapper.getInputStream() != null) {
                 try {
-                    ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                    genbankFormatter.format(sequence, byteStream);
-                    sequenceString = byteStream.toString();
-                } catch (Exception e) {
-                    Logger.error(e);
-                    sequenceString = sequence.getSequence();
+                    String sequenceString = new String(wrapper.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                    remoteContact.transferSequence(url, data.getRecordId(), data.getType(), sequenceString);
+                } catch (IOException e) {
+                    Logger.error("Cannot transfer sequence", e);
                 }
             }
-
-            if (!StringUtils.isEmpty(sequenceString))
-                remoteContact.transferSequence(url, data.getRecordId(), data.getType(), sequenceString);
         }
 
         // todo : check main entry for attachments

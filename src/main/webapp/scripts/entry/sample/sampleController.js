@@ -38,13 +38,13 @@ angular.module('ice.entry.sample.controller', [])
 
         // relies on line 20 setting the actual location (e.g. A01) to the name field
         $scope.isSelectedColumn = function (location, col) {
-            if (location.name[1] == "0")
-                return col == location.name[2];
-            return col == location.name.substring(1);
+            if (location.name[1] === "0")
+                return col === location.name[2];
+            return col === location.name.substring(1);
         };
 
         $scope.isSelectedRow = function (location, row) {
-            return location.name[0] == row;
+            return location.name[0] === row;
         };
 
         $scope.uploadSampleInformation = function () {
@@ -268,7 +268,7 @@ angular.module('ice.entry.sample.controller', [])
 
 // add sample 96 well plate click
         $scope.cellBarcodeClick = function (row, col) { //todo: prevent the popover from opening for multiple wells
-            var rc = row + (10 + col + '').slice(-2);
+            const rc = row + (10 + col + '').slice(-2);
             $scope.newSample.open = {
                 cell: rc
             };
