@@ -194,7 +194,15 @@ public class PartSequence {
             if (sequence == null)
                 throw new IOException("Could not create sequence object");
 
-            sequence.setSequenceUser(sequenceFile.getFileName());
+            // copy original sequence file to file system
+            try {
+                Files.copy(sequencePath, sequenceFile.getFilePath(), StandardCopyOption.REPLACE_EXISTING);
+                sequence.setSequenceUser(sequenceFile.getFileName());
+            } catch (Exception e) {
+                // ok to ignore. Can get back sequence as long as sequence object is saved. cannot download original
+                Logger.warn("Exception writing sequence to file: " + e.getMessage());
+            }
+
             sequence.setFileName(fileName);
             sequence.setFormat(format);
             sequence = saveSequenceObject(sequence);
