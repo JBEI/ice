@@ -28,6 +28,17 @@ public class BlastPlus {
     }
 
     /**
+     * Determines if blast can be run on this instance based on whether there is a valid blast installation
+     * set
+     *
+     * @return true if blast can be run, false otherwise
+     */
+    public boolean canRunBlast() {
+        Path path = getBlastInstallDirectory();
+        return Files.exists(path) && Files.isExecutable(Paths.get(path.toString(), BlastProgram.BLAST_N.getName()));
+    }
+
+    /**
      * Run the bl2seq program on multiple subjects.
      * <p>
      * This method requires disk space write temporary files. It tries to clean up after itself.
@@ -83,6 +94,11 @@ public class BlastPlus {
     }
 
     public void formatBlastDb(BlastFastaFile fastaFile, String dbName) throws BlastException {
+        if (!canRunBlast()) {
+            Logger.error("Cannot format blast db due to invalid blast installation");
+            return;
+        }
+
         ArrayList<String> commands = new ArrayList<>();
         Path filePath = fastaFile.getFilePath();
         String makeBlastDbCmd = getBlastInstallDirectory().toAbsolutePath().toString() + File.separator + "makeblastdb";
