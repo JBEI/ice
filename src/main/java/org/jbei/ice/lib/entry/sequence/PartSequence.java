@@ -531,7 +531,7 @@ public class PartSequence {
             return null;
 
         // if requested format is the same as the original format (if original exist) then get the original instead
-        if (useOriginalIfAvailable && sequence.getFormat() == format && DAOFactory.getSequenceDAO().hasOriginalSequence(entry.getId()))
+        if (useOriginalIfAvailable && sequenceDAO.hasOriginalSequence(entry.getId()))
             format = SequenceFormat.ORIGINAL;
 
         return new SequenceAsString(format, entry.getId(), useFileName).get();
