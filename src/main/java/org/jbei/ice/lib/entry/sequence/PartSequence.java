@@ -518,21 +518,20 @@ public class PartSequence {
     /**
      * Convert sequence to a byte array of the specified format with the intention of being written to a file
      *
-     * @param format                 specified format for sequence conversion
-     * @param useFileName            whether to use the original filename of the sequence if the original uploaded sequence is
-     *                               available
-     * @param useOriginalIfAvailable whether to use specified format if is it the same as the uploaded format
+     * @param format      specified format for sequence conversion
+     * @param useFileName whether to use the original filename of the sequence if the original uploaded sequence is
+     *                    available
      * @return wrapper around the outputstream for the converted format and name
      */
-    public InputStreamWrapper toFile(SequenceFormat format, boolean useFileName, boolean useOriginalIfAvailable) {
+    public InputStreamWrapper toFile(SequenceFormat format, boolean useFileName) {
         entryAuthorization.expectRead(userId, entry);
         Sequence sequence = sequenceDAO.getByEntry(entry);
         if (sequence == null)
             return null;
 
-        // if requested format is the same as the original format (if original exist) then get the original instead
-        if (useOriginalIfAvailable && sequenceDAO.hasOriginalSequence(entry.getId()))
-            format = SequenceFormat.ORIGINAL;
+        // default format of genbank
+        if (format == null)
+            format = SequenceFormat.GENBANK;
 
         return new SequenceAsString(format, entry.getId(), useFileName).get();
     }
