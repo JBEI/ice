@@ -35,7 +35,7 @@ public class SequenceAsString {
         switch (format) {
             case ORIGINAL:
                 sequenceString = sequence.getSequenceUser();
-                if (!useFileName && !StringUtils.isEmpty(sequence.getFileName())) {
+                if (StringUtils.isEmpty(sequence.getFileName()) || !useFileName) {
                     name = entry.getPartNumber() + ".gb";
                 } else {
                     name = sequence.getFileName();
