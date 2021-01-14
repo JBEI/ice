@@ -569,7 +569,9 @@ angular.module('ice.entry.controller', [])
                         isFullscreen: true,
                         shouldAutosave: true,
                         disableSetReadOnly: true,
-                        handleFullscreenClose: function () { // this will make the editor fullscreen by default, and will allow you to handle the close request
+                        showMenuBar: true,
+                        handleFullscreenClose: function () {
+                            // this will make the editor fullscreen by default, and will allow you to handle the close request
                             $scope.vEeditor.close();         // handle vector editor root removal and clean up
                         },
 
@@ -577,6 +579,16 @@ angular.module('ice.entry.controller', [])
                             return openVEData.sequenceData;
                             // teselagenSequenceData
                         },
+
+                        // beforeAnnotationCreate: ({
+                        //                              annotationTypePlural, //one of features/parts/primers
+                        //                              annotation, //annotation info
+                        //                              props //general props to the dialog
+                        //                          }) => {
+                        //     console.log("features", annotationTypePlural);
+                        //     console.log("info", annotation);
+                        //     console.log("general props", props);
+                        // },
 
                         // getVersionList: function () {
                         //     Util.get('rest/sequences/' + openVEData.registryData.identifier + '/history', function (result) {
