@@ -583,6 +583,16 @@ angular.module('ice.entry.controller', [])
                             // teselagenSequenceData
                         },
 
+                        beforeAnnotationCreate: ({
+                                                     annotationTypePlural, //one of "features"/"parts"/"primers"
+                                                     annotation, //annotation info
+                                                     props //general props to the dialog
+                                                 }) => {
+                            console.log("features", annotationTypePlural);
+                            console.log("info", annotation);
+                            console.log("general props", props);
+                        },
+
                         // getVersionList: function () {
                         //     Util.get('rest/sequences/' + openVEData.registryData.identifier + '/history', function (result) {
                         //         return [
