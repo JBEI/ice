@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.model;
 
+import org.jbei.ice.lib.dto.DNAFeatureNote;
 import org.jbei.ice.storage.DataModel;
-import org.jbei.ice.storage.IDataTransferModel;
 
 import javax.persistence.*;
 
@@ -77,7 +77,12 @@ public class SequenceFeatureAttribute implements DataModel {
     }
 
     @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public String toString() {
+        return "(" + this.key + ", " + this.value + ")";
+    }
+
+    @Override
+    public DNAFeatureNote toDataTransferObject() {
+        return new DNAFeatureNote(this.key, this.value);
     }
 }

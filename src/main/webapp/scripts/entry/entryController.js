@@ -549,9 +549,12 @@ angular.module('ice.entry.controller', [])
                                     forward: feature.strand === 1,
                                     type: feature.type,
                                     name: feature.name,
-                                    notes: notes,
+                                    notes: [],
                                     annotationType: feature.type
                                 };
+
+                                // convert notes
+                                console.log("notes", notes);
 
                                 features.push(featureObject);
                             }
@@ -569,13 +572,25 @@ angular.module('ice.entry.controller', [])
                         isFullscreen: true,
                         shouldAutosave: true,
                         disableSetReadOnly: true,
-                        handleFullscreenClose: function () { // this will make the editor fullscreen by default, and will allow you to handle the close request
+                        showMenuBar: true,
+                        handleFullscreenClose: function () {
+                            // this will make the editor fullscreen by default, and will allow you to handle the close request
                             $scope.vEeditor.close();         // handle vector editor root removal and clean up
                         },
 
                         getSequenceAtVersion: function (versionId) {
                             return openVEData.sequenceData;
                             // teselagenSequenceData
+                        },
+
+                        beforeAnnotationCreate: ({
+                                                     annotationTypePlural, //one of "features"/"parts"/"primers"
+                                                     annotation, //annotation info
+                                                     props //general props to the dialog
+                                                 }) => {
+                            console.log("features", annotationTypePlural);
+                            console.log("info", annotation);
+                            console.log("general props", props);
                         },
 
                         // getVersionList: function () {
@@ -660,7 +675,10 @@ angular.module('ice.entry.controller', [])
                                             if (!feature.notes.hasOwnProperty(prop))
                                                 continue;
 
-                                            featureMap[feature.id].notes.push({name: "note", value: prop})
+                                            const values = feature.notes[prop];
+                                            for (let i = 0; i < values.length; i += 1) {
+                                                featureMap[feature.id].notes.push({name: prop, value: values[i]});
+                                            }
                                         }
                                     }
                                 }
@@ -673,11 +691,8 @@ angular.module('ice.entry.controller', [])
                                 sequence.features.push(featureMap[property]);
                             }
 
-                            console.log(sequence.features);
-
                             Util.update("rest/parts/" + entry.id + "/sequence", sequence, {},
                                 function (result) {
-                                    console.log("save completed for", entry.id);
                                     $rootScope.$emit("ReloadVectorViewData", result);
                                     const sequenceModel = {
                                         sequenceData: {
@@ -691,7 +706,8 @@ angular.module('ice.entry.controller', [])
                                     $scope.updatedSequence = result;
                                     onSuccessCallback();
                                 })
-                        },
+                        }
+                        ,
 
                         onCopy: function (event, copiedSequenceData, editorState) {
                             let clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
@@ -700,7 +716,8 @@ angular.module('ice.entry.controller', [])
                             openVEData.openVECopied = copiedSequenceData;
                             clipboardData.setData('application/json', JSON.stringify(openVEData));
                             event.preventDefault();
-                        },
+                        }
+                        ,
 
                         onPaste: function (event, editorState) {
                             let clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
@@ -710,7 +727,8 @@ angular.module('ice.entry.controller', [])
                                 jsonData = jsonData.openVECopied;
                             }
                             return jsonData || {sequence: clipboardData.getData("text/plain")}
-                        },
+                        }
+                        ,
 
                         PropertiesProps: {
                             propertiesList: [
@@ -719,7 +737,8 @@ angular.module('ice.entry.controller', [])
                                 "cutsites",
                                 "orfs"
                             ]
-                        },
+                        }
+                        ,
                         ToolBarProps: {
                             //name the tools you want to see in the toolbar in the order you want to see them
                             toolList: [
