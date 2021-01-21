@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 @Path("/file")
 public class FileResource extends RestResource {
 
-    private Attachments attachments = new Attachments();
+    private final Attachments attachments = new Attachments();
 
     @GET
     @Path("asset/{assetName}")
@@ -274,7 +274,7 @@ public class FileResource extends RestResource {
             if (info == null)
                 throw new WebApplicationException(Response.serverError().build());
             return Response.status(Response.Status.OK).entity(info).build();
-        } catch (Exception e) {
+        } catch (IOException e) {
             Logger.error(e);
             ErrorResponse response = new ErrorResponse();
             response.setMessage(e.getMessage());
@@ -317,7 +317,7 @@ public class FileResource extends RestResource {
         EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId, sequenceFormats.toArray(new String[0]));
         List<EntryFieldLabel> entryFieldLabels = new ArrayList<>();
         try {
-            if (fields != null) {
+            if (fields != null && !fields.isEmpty()) {
                 entryFieldLabels.addAll(fields.stream().map(EntryFieldLabel::fromString).collect(Collectors.toList()));
             }
         } catch (Exception e) {

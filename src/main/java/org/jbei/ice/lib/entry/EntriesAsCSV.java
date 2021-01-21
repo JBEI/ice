@@ -156,12 +156,15 @@ public class EntriesAsCSV {
                 String[] line = new String[fields.length + 4];
                 line[0] = entry.getCreationTime().toString();
                 line[1] = entry.getPartNumber();
+
+                // write field values
                 int i = 1;
                 for (EntryFieldLabel field : fields) {
                     line[i + 1] = EntryUtil.entryFieldToValue(entry, field);
                     i += 1;
                 }
 
+                // write sequence information
                 if (this.includeSequences && sequenceDAO.hasSequence(entryId)) {
                     line[i + 1] = getSequenceName(entry);
                     sequenceSet.add(entryId);
@@ -178,6 +181,8 @@ public class EntriesAsCSV {
                 if (!StringUtils.isEmpty(parents.toString()))
                     parents = new StringBuilder(parents.substring(0, parents.length() - 1));
                 line[i + 2] = ("\"" + parents + "\"");
+
+                // write line
                 writer.writeNext(line);
             }
         }

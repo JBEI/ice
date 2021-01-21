@@ -15,7 +15,6 @@ import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.GeneralParser;
@@ -29,11 +28,10 @@ import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FeatureDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
+import org.jbei.ice.storage.hibernate.dao.SequenceFeatureAttributeDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceFeatureDAO;
 import org.jbei.ice.storage.model.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -60,7 +58,7 @@ public class PartSequence {
     private final EntryAuthorization entryAuthorization;
 
     /**
-     * Constructor for creating a new part to associate a sequence with
+     * Constructor for creating a new part to associate with a sequence
      *
      * @param userId unique identifier for user creating new part
      * @param type   type of part to create.
@@ -109,7 +107,13 @@ public class PartSequence {
         return partData.getId();
     }
 
-    public FeaturedDNASequence get() {
+    /**
+     * Retrieves the sequence information for current part
+     *
+     * @param includeAllAnnotations whether to include all annotations (true) or limit to the first 20 (false)
+     * @return found sequence for current part
+     */
+    public FeaturedDNASequence get(boolean includeAllAnnotations) {
         entryAuthorization.expectRead(userId, entry);
 
 //        if (entry.getVisibility() == Visibility.REMOTE.getValue()) {
@@ -118,7 +122,7 @@ public class PartSequence {
 //        }
 
         boolean canEdit = entryAuthorization.canWrite(userId, entry);
-        return getFeaturedSequence(entry, canEdit);
+        return getFeaturedSequence(entry, canEdit, includeAllAnnotations);
     }
 
     /**
@@ -191,7 +195,15 @@ public class PartSequence {
             if (sequence == null)
                 throw new IOException("Could not create sequence object");
 
-            sequence.setSequenceUser(sequenceFile.getFileName());
+            // copy original sequence file to file system
+            try {
+                Files.copy(sequencePath, sequenceFile.getFilePath(), StandardCopyOption.REPLACE_EXISTING);
+                sequence.setSequenceUser(sequenceFile.getFileName());
+            } catch (Exception e) {
+                // ok to ignore. Can get back sequence as long as sequence object is saved. cannot download original
+                Logger.warn("Exception writing sequence to file: " + e.getMessage());
+            }
+
             sequence.setFileName(fileName);
             sequence.setFormat(format);
             sequence = saveSequenceObject(sequence);
@@ -233,9 +245,9 @@ public class PartSequence {
     private Sequence saveSequenceObject(Sequence sequence) {
         sequence.setEntry(this.entry);
         Set<SequenceFeature> sequenceFeatureSet = null;
-        sequence = SequenceUtil.normalizeAnnotationLocations(sequence);
-        if (sequence == null)
-            throw new IllegalArgumentException("Could not normalize sequence");
+//        sequence = SequenceUtil.normalizeAnnotationLocations(sequence);
+//        if (sequence == null)
+//            throw new IllegalArgumentException("Could not normalize sequence");
 
         if (sequence.getSequenceFeatures() != null) {
             sequenceFeatureSet = new HashSet<>(sequence.getSequenceFeatures());
@@ -307,7 +319,7 @@ public class PartSequence {
             checkForUpdatedFeatures(existing, sequence);
 
             // rebuild the trace sequence alignments // todo : this might not be needed for all updates
-            rebuildTraceAlignments();
+            new TraceSequences().rebuildAllAlignments(entry);
 
             // rebuild blast
             scheduleBlastIndexRebuildTask(Action.UPDATE, this.entry.getPartNumber());
@@ -355,12 +367,81 @@ public class PartSequence {
         if (existing == null || existing.getSequenceFeatures() == null || updated.getSequenceFeatures() == null)
             return;
 
-        for (SequenceFeature existingFeature : existing.getSequenceFeatures()) {
-            // for each existing feature, check with updated for difference in name and type
-            for (SequenceFeature updatedSequenceFeature : updated.getSequenceFeatures()) {
-                Feature sequenceFeature = updatedSequenceFeature.getFeature();
+        final SequenceFeatureAttributeDAO attributeDAO = DAOFactory.getSequenceFeatureAttributeDAO();
+
+        // for each existing feature, check with updated for difference in name and type and notes
+        for (SequenceFeature existingSequenceFeature : existing.getSequenceFeatures()) {
+
+            SequenceFeature updatedSequenceFeature = getUpdatedEquivalent(existingSequenceFeature, updated);
+            if (updatedSequenceFeature == null)
+                continue;
+
+            Feature updatedFeature = updatedSequenceFeature.getFeature();
+            Feature existingFeature = existingSequenceFeature.getFeature();
+
+            // check if existing feature name/type needs to be updated
+            if (!updatedFeature.getName().equals(existingFeature.getName()) ||
+                    !updatedFeature.getGenbankType().equals(existingFeature.getGenbankType())) {
+                existingFeature.setName(updatedFeature.getName());
+                existingFeature.setGenbankType(updatedFeature.getGenbankType());
+                featureDAO.update(existingFeature);
+            }
+
+            // check notes for existing feature TODO : if key same but value is different, update instead
+            // first build cache of updated
+            Map<String, List<String>> updatedCache = new HashMap<>();
+            for (SequenceFeatureAttribute updatedAttribute : updatedSequenceFeature.getSequenceFeatureAttributes()) {
+                String key = updatedAttribute.getKey();
+                String value = updatedAttribute.getValue();
+
+                List<String> values = updatedCache.computeIfAbsent(key, k -> new ArrayList<>());
+                values.add(value);
+            }
+
+            Iterator<SequenceFeatureAttribute> iterator = existingSequenceFeature.getSequenceFeatureAttributes().iterator();
+
+            // remove notes that are not in updated list
+            while (iterator.hasNext()) {
+                SequenceFeatureAttribute attribute = iterator.next();
+                List<String> values = updatedCache.get(attribute.getKey());
+                if (values == null || !values.contains(attribute.getValue())) {
+                    attributeDAO.delete(attribute);
+                    iterator.remove();
+                }
+            }
+
+            // add notes from updated list not present in existing
+            for (SequenceFeatureAttribute updatedAttribute : updatedSequenceFeature.getSequenceFeatureAttributes()) {
+                // check if attribute is available on existing
+                boolean isAvailable = false;
+                for (SequenceFeatureAttribute existingAttribute : existingSequenceFeature.getSequenceFeatureAttributes()) {
+                    isAvailable = updatedAttribute.getKey().equals(existingAttribute.getKey()) &&
+                            updatedAttribute.getValue().equals(existingAttribute.getValue());
+                    if (isAvailable)
+                        break;
+                }
+
+                // if not available add to list
+                if (!isAvailable) {
+                    updatedAttribute.setSequenceFeature(existingSequenceFeature);
+                    updatedAttribute = attributeDAO.create(updatedAttribute);
+                    existingSequenceFeature.getSequenceFeatureAttributes().add(updatedAttribute);
+                }
             }
         }
+    }
+
+    // todo : can cache using hash as key (hash -> sequence) for performance improvements
+    private SequenceFeature getUpdatedEquivalent(SequenceFeature existing, Sequence updatedSequence) {
+        if (updatedSequence.getSequenceFeatures() == null)
+            return null;
+
+        for (SequenceFeature updated : updatedSequence.getSequenceFeatures()) {
+            if (existing.getFeature().getHash().equals(updated.getFeature().getHash()))
+                return updated;
+        }
+        // no match found
+        return null;
     }
 
     private void deleteSequenceFeature(SequenceFeature sequenceFeature) {
@@ -384,7 +465,7 @@ public class PartSequence {
         if (feature == null)
             return;
 
-        existing = SequenceUtil.normalizeAnnotationLocations(existing);
+//        existing = SequenceUtil.normalizeAnnotationLocations(existing);
         if (existing == null)
             throw new IllegalArgumentException("cannot normalize sequence");
 
@@ -506,100 +587,26 @@ public class PartSequence {
         if (sequence == null)
             return null;
 
-        // if requested format is the same as the original format (if original exist) then get the original instead
-        if (sequence.getFormat() == format && DAOFactory.getSequenceDAO().hasOriginalSequence(entry.getId()))
-            format = SequenceFormat.ORIGINAL;
+        // default format of genbank
+        if (format == null)
+            format = SequenceFormat.GENBANK;
 
-        String name;
-        String sequenceString;
-
-        try {
-            switch (format) {
-                case ORIGINAL:
-                    sequenceString = sequence.getSequenceUser();
-                    if (!useFileName) {
-                        name = entry.getPartNumber() + ".gb";
-                    } else {
-                        name = sequence.getFileName();
-                    }
-
-                    if (StringUtils.isEmpty(name))
-                        name = entry.getPartNumber() + ".gb";
-
-                    try {
-                        SequenceFile sequenceFile = new SequenceFile(sequenceString);
-                        return new InputStreamWrapper(sequenceFile.getStream(), name);
-                    } catch (Exception e) {
-                        Logger.error(e.getMessage());
-                        break;
-                    }
-
-                case GENBANK:
-                default:
-                    GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
-                    genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false);
-                    sequenceString = compose(sequence, genbankFormatter);
-                    name = entry.getPartNumber() + ".gb";
-                    break;
-
-                case FASTA:
-                    FastaFormatter formatter = new FastaFormatter();
-                    sequenceString = compose(sequence, formatter);
-                    name = entry.getPartNumber() + ".fa";
-                    break;
-
-                case SBOL1:
-                    sequenceString = compose(sequence, new SBOLFormatter());
-                    name = entry.getPartNumber() + ".xml";
-                    break;
-
-                case SBOL2:
-                    sequenceString = compose(sequence, new SBOL2Formatter());
-                    name = entry.getPartNumber() + ".xml";
-                    break;
-
-                case GFF3:
-                    sequenceString = compose(sequence, new GFF3Formatter());
-                    name = entry.getPartNumber() + ".gff3";
-                    break;
-            }
-        } catch (Exception e) {
-            Logger.error("Failed to generate " + format.name() + " file for download!", e);
-            return null;
-        }
-
-        ByteArrayInputStream stream = new ByteArrayInputStream(sequenceString.getBytes());
-        return new InputStreamWrapper(stream, name);
+        return new SequenceAsString(format, entry.getId(), useFileName).get();
     }
 
-    /**
-     * Generate a formatted text of a given {@link IFormatter} from the given {@link Sequence}.
-     *
-     * @param sequence  sequence
-     * @param formatter formatter
-     * @return Text of a formatted sequence.
-     */
-    protected String compose(Sequence sequence, IFormatter formatter) {
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        try {
-            formatter.format(sequence, byteStream);
-        } catch (IOException e) {
-            Logger.error(e);
-        }
-        return byteStream.toString();
-    }
-
-    private void rebuildTraceAlignments() {
-        new TraceSequences().rebuildAllAlignments(entry);
-    }
-
-    private FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
+    private FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit, boolean includeAllFeatures) {
         Sequence sequence = sequenceDAO.getByEntry(entry);
         if (sequence == null) {
             return null;
         }
 
-        List<SequenceFeature> sequenceFeatures = sequenceFeatureDAO.getEntrySequenceFeatures(entry);
+        List<SequenceFeature> sequenceFeatures;
+        if (includeAllFeatures) {
+            sequenceFeatures = sequenceFeatureDAO.getEntrySequenceFeatures(entry);
+        } else {
+            sequenceFeatures = sequenceFeatureDAO.pageSequenceFeatures(entry, 0, 20);
+        }
+
         FeaturedDNASequence featuredDNASequence = SequenceUtil.sequenceToDNASequence(sequence, sequenceFeatures);
         featuredDNASequence.setCanEdit(canEdit);
         featuredDNASequence.setIdentifier(entry.getPartNumber());

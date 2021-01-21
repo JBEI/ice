@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.entry.sequence;
 
-import org.apache.commons.io.FileUtils;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -48,16 +47,8 @@ public class SequenceFile {
         return new FileInputStream(path.toFile());
     }
 
-    // write a new line in the sequence file
-    public void writeLine(String line) throws IOException {
-        if (line == null)
-            return;
-
-        if (deleted)
-            throw new IOException("File has been deleted");
-
-        line += System.lineSeparator();
-        FileUtils.writeByteArrayToFile(path.toFile(), line.getBytes(), true);
+    public Path getFilePath() {
+        return this.path;
     }
 
     public void delete() throws IOException {

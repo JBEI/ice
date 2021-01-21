@@ -35,9 +35,9 @@ import static org.jbei.ice.lib.utils.SequenceUtils.breakUpLines;
 public class StandardBlastDatabase extends BlastDatabase {
 
     private static StandardBlastDatabase INSTANCE;
-    private BlastPlus blastPlus;
-    private BlastFastaFile blastFastaFile;
-    private SequenceDAO sequenceDAO;
+    private final BlastPlus blastPlus;
+    private final BlastFastaFile blastFastaFile;
+    private final SequenceDAO sequenceDAO;
 
     private StandardBlastDatabase() {
         super("blast");
@@ -205,6 +205,11 @@ public class StandardBlastDatabase extends BlastDatabase {
             return;
         }
 
+        if (!blastPlus.canRunBlast()) {
+            Logger.error("Cannot rebuild blast database. Invalid blast installation");
+            return;
+        }
+
         // delete fasta file and create a new one with all sequences in database
         blastFastaFile.createNew();
         Iterable<String> iterable = () -> new AllSequencesStream(sequenceDAO);
@@ -220,11 +225,14 @@ public class StandardBlastDatabase extends BlastDatabase {
         }
 
         Sequence sequence = sequenceDAO.getByEntry(entry);
+        if (sequence == null)
+            return;
+
         final String blastFasta = getSequenceFasta(sequence);
         if (blastFasta == null)
             return;
 
-        blastFastaFile.write(() -> new Iterator<String>() {
+        blastFastaFile.write(() -> new Iterator<>() {
             private boolean called = false;
 
             @Override
@@ -281,9 +289,9 @@ public class StandardBlastDatabase extends BlastDatabase {
 
     private static class AllSequencesStream implements Iterator<String> {
 
-        private int available;
+        private final int available;
         private int currentOffset;
-        private SequenceDAO dao;
+        private final SequenceDAO dao;
         private String nextValue;
 
         public AllSequencesStream(SequenceDAO sequenceDAO) {

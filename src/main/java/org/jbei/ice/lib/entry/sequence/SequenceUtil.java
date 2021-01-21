@@ -137,7 +137,8 @@ public class SequenceUtil {
 
                 dnaFeature.setId(sequenceFeature.getId());
                 dnaFeature.setType(sequenceFeature.getGenbankType());
-                dnaFeature.setName(sequenceFeature.getName());
+                String name = sequenceFeature.getFeature() != null ? sequenceFeature.getFeature().getName() : sequenceFeature.getName();
+                dnaFeature.setName(name);
                 dnaFeature.setStrand(sequenceFeature.getStrand());
 
                 if (sequenceFeature.getAnnotationType() != null) {
@@ -159,42 +160,43 @@ public class SequenceUtil {
         return featuredDNASequence;
     }
 
-    /**
-     * Normalize {@link AnnotationLocation}s by fixing strangely defined annotationLocations.
-     * <p/>
-     * Fix locations that encompass the entire sequence, but defined strangely. This causes problems
-     * elsewhere.
-     */
-    public static Sequence normalizeAnnotationLocations(Sequence sequence) {
-        if (sequence == null) {
-            return null;
-        }
-
-        if (sequence.getSequenceFeatures() == null) {
-            return sequence;
-        }
-
-        if (StringUtils.isEmpty(sequence.getSequence()))
-            return sequence;
-
-        int length = sequence.getSequence().length();
-        boolean wholeSequence;
-        for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
-            wholeSequence = false;
-            Set<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();
-            for (AnnotationLocation location : locations) {
-                if (location.getGenbankStart() == location.getEnd() + 1) {
-                    wholeSequence = true;
-                }
-            }
-            if (wholeSequence) {
-                sequenceFeature.setStrand(1);
-                sequenceFeature.getAnnotationLocations().clear();
-                sequenceFeature.getAnnotationLocations().add(new AnnotationLocation(1, length, sequenceFeature));
-            }
-        }
-        return sequence;
-    }
+    // todo : this causes problems when the number of annotations are a lot
+//    /**
+//     * Normalize {@link AnnotationLocation}s by fixing strangely defined annotationLocations.
+//     * <p/>
+//     * Fix locations that encompass the entire sequence, but defined strangely. This causes problems
+//     * elsewhere.
+//     */
+//    public static Sequence normalizeAnnotationLocations(Sequence sequence) {
+//        if (sequence == null) {
+//            return null;
+//        }
+//
+//        if (sequence.getSequenceFeatures() == null) {
+//            return sequence;
+//        }
+//
+//        if (StringUtils.isEmpty(sequence.getSequence()))
+//            return sequence;
+//
+//        int length = sequence.getSequence().length();
+//        boolean wholeSequence;
+//        for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
+//            wholeSequence = false;
+//            Set<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();
+//            for (AnnotationLocation location : locations) {
+//                if (location.getGenbankStart() == location.getEnd() + 1) {
+//                    wholeSequence = true;
+//                }
+//            }
+//            if (wholeSequence) {
+//                sequenceFeature.setStrand(1);
+//                sequenceFeature.getAnnotationLocations().clear();
+//                sequenceFeature.getAnnotationLocations().add(new AnnotationLocation(1, length, sequenceFeature));
+//            }
+//        }
+//        return sequence;
+//    }
 
     /**
      * Create a {@link Sequence} object from an {@link DNASequence} object.
