@@ -388,4 +388,25 @@ public class FolderDAO extends HibernateRepository<Folder> {
             throw new DAOException(e);
         }
     }
+
+    /**
+     * Retrieves distinct list of types for the entries contained in the folder
+     *
+     * @param folderId unique identifier for folder whose content types are being retrieved
+     * @return list of content types. e.g. if a folder contains 345 Strains, and 23 plasmids, this will return
+     * [STRAIN, PLASMID]. Any empty folder will result in a return of an empty list
+     */
+    public List<String> getContentTypes(long folderId) {
+        try {
+            CriteriaQuery<String> query = getBuilder().createQuery(String.class);
+            Root<Folder> from = query.from(Folder.class);
+            Join<Folder, Entry> entry = from.join("contents");
+            query.select(entry.get("recordType")).distinct(true);
+            query.where(getBuilder().equal(from.get("id"), folderId));
+            return currentSession().createQuery(query).list();
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
+    }
 }

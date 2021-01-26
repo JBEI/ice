@@ -1,9 +1,13 @@
 package org.jbei.ice.lib.dto.folder;
 
 import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.folder.AbstractFolder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Folder Transfer Object
@@ -23,14 +27,17 @@ public class FolderDetails extends AbstractFolder {
     private FolderDetails parent;
     private RegistryPartner remotePartner;
     private SampleRequest sampleRequest;
+    private final List<EntryType> contentTypes;         // types of entries contained in this folder
 
     public FolderDetails() {
         super();
+        this.contentTypes = new ArrayList<>();
     }
 
     public FolderDetails(long id, String name) {
         super(id);
         this.folderName = name;
+        this.contentTypes = new ArrayList<>();
     }
 
     public String getName() {
@@ -122,5 +129,9 @@ public class FolderDetails extends AbstractFolder {
 
     public void setSampleRequest(SampleRequest sampleRequest) {
         this.sampleRequest = sampleRequest;
+    }
+
+    public List<EntryType> getContentTypes() {
+        return this.contentTypes;
     }
 }
