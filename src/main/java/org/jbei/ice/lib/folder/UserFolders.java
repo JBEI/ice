@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.folder;
 
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
@@ -43,6 +44,14 @@ public class UserFolders {
 
         authorization.expectRead(this.userId, folder);
         FolderDetails folderDetails = folder.toDataTransferObject();
+        List<String> types = dao.getContentTypes(folderId);
+        if (!types.isEmpty()) {
+            for (String type : types) {
+                EntryType entryType = EntryType.nameToType(type);
+                if (entryType != null)
+                    folderDetails.getContentTypes().add(entryType);
+            }
+        }
 
         Account owner = accountDAO.getByEmail(folder.getOwnerEmail());
         if (owner != null) {

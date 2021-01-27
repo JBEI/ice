@@ -67,8 +67,9 @@ angular.module('ice.entry.service', [])
             },
 
             setTypeSelection: function (type) {
+                this.reset();
+
                 if (!type) {
-                    this.reset();
                     return;
                 }
 
@@ -88,7 +89,7 @@ angular.module('ice.entry.service', [])
                 let selected = [];
                 for (let k in selectedEntries) {
                     if (selectedEntries.hasOwnProperty(k) && selectedEntries[k]) {
-                        selected.push({ id: k, visible: selectedEntries[k].visible });
+                        selected.push({id: k, visible: selectedEntries[k].visible});
                     }
                 }
                 return selected;
@@ -120,7 +121,7 @@ angular.module('ice.entry.service', [])
             canRestore: function () {
                 if (allSelection.type && allSelection.type === 'ALL')
                     return false;
-                return this.hasSelection() && this.getSelectedEntries()[0].visible === 'DELETED';
+                return this.hasSelection() && this.getSelectedEntries().length && this.getSelectedEntries()[0].visible === 'DELETED';
             },
 
             isAdmin: function () {
@@ -183,8 +184,8 @@ angular.module('ice.entry.service', [])
         // inputType of "withEmail" uses attribute "bothRequired" to indicate that the email portion is required
         //
         const partFields = [
-            { label: "Name", required: true, schema: 'name', inputType: 'short' },
-            { label: "Alias", schema: 'alias', inputType: 'short' },
+            {label: "Name", required: true, schema: 'name', inputType: 'short'},
+            {label: "Alias", schema: 'alias', inputType: 'short'},
             {
                 label: "Principal Investigator",
                 required: true,
@@ -192,34 +193,34 @@ angular.module('ice.entry.service', [])
                 inputType: 'withEmail',
                 bothRequired: false
             },
-            { label: "Funding Source", schema: 'fundingSource', inputType: 'medium' },
+            {label: "Funding Source", schema: 'fundingSource', inputType: 'medium'},
             {
                 label: "Status", schema: 'status', required: true, options: [
-                    { value: "Complete", text: "Complete" },
-                    { value: "In Progress", text: "In Progress" },
-                    { value: "Abandoned", text: "Abandoned" },
-                    { value: "Planned", text: "Planned" }
+                    {value: "Complete", text: "Complete"},
+                    {value: "In Progress", text: "In Progress"},
+                    {value: "Abandoned", text: "Abandoned"},
+                    {value: "Planned", text: "Planned"}
                 ]
             },
             {
                 label: "BioSafety Level", schema: 'bioSafetyLevel', required: true, options: [
-                    { value: "1", text: "Level 1" },
-                    { value: "2", text: "Level 2" },
-                    { value: "-1", text: "Restricted" }
+                    {value: "1", text: "Level 1"},
+                    {value: "2", text: "Level 2"},
+                    {value: "-1", text: "Restricted"}
                 ]
             },
-            { label: "Creator", required: true, schema: 'creator', inputType: 'withEmail', bothRequired: true },
-            { label: "Keywords", schema: 'keywords', inputType: 'medium' },
-            { label: "External URL", schema: 'links', inputType: 'add' },
-            { label: "Summary", required: true, schema: 'shortDescription', inputType: 'long' },
-            { label: "References", schema: 'references', inputType: 'long' },
-            { label: "Intellectual Property", schema: 'intellectualProperty', inputType: 'long' }
+            {label: "Creator", required: true, schema: 'creator', inputType: 'withEmail', bothRequired: true},
+            {label: "Keywords", schema: 'keywords', inputType: 'medium'},
+            {label: "External URL", schema: 'links', inputType: 'add'},
+            {label: "Summary", required: true, schema: 'shortDescription', inputType: 'long'},
+            {label: "References", schema: 'references', inputType: 'long'},
+            {label: "Intellectual Property", schema: 'intellectualProperty', inputType: 'long'}
         ];
 
         // fields peculiar to plasmids
         const plasmidFields = [
-            { label: "Backbone", schema: 'backbone', subSchema: 'plasmidData', inputType: 'medium' },
-            { label: "Circular", schema: 'circular', inputType: 'bool', subSchema: 'plasmidData' },
+            {label: "Backbone", schema: 'backbone', subSchema: 'plasmidData', inputType: 'medium'},
+            {label: "Circular", schema: 'circular', inputType: 'bool', subSchema: 'plasmidData'},
             {
                 label: "Origin of Replication", schema: 'originOfReplication', inputType: 'autoComplete',
                 autoCompleteField: 'ORIGIN_OF_REPLICATION', subSchema: 'plasmidData'
@@ -255,34 +256,34 @@ angular.module('ice.entry.service', [])
             },
             {
                 label: "Plant Type", schema: 'plantType', subSchema: 'seedData', options: [
-                    { value: "EMS", text: "EMS" },
-                    { value: "OVER_EXPRESSION", text: "OVER_EXPRESSION" },
-                    { value: "RNAI", text: "RNAi" },
-                    { value: "REPORTER", text: "Reporter" },
-                    { value: "T_DNA", text: "T-DNA" },
-                    { value: "OTHER", text: "Other" }
+                    {value: "EMS", text: "EMS"},
+                    {value: "OVER_EXPRESSION", text: "OVER_EXPRESSION"},
+                    {value: "RNAI", text: "RNAi"},
+                    {value: "REPORTER", text: "Reporter"},
+                    {value: "T_DNA", text: "T-DNA"},
+                    {value: "OTHER", text: "Other"}
                 ]
             },
             {
                 label: "Generation", schema: 'generation', subSchema: 'seedData', options: [
-                    { value: "UNKNOWN", text: "UNKNOWN" },
-                    { value: "F1", text: "F1" },
-                    { value: "F2", text: "F2" },
-                    { value: "F3", text: "F3" },
-                    { value: "M0", text: "M0" },
-                    { value: "M1", text: "M1" },
-                    { value: "M2", text: "M2" },
-                    { value: "T0", text: "T0" },
-                    { value: "T1", text: "T1" },
-                    { value: "T2", text: "T2" },
-                    { value: "T3", text: "T3" },
-                    { value: "T4", text: "T4" },
-                    { value: "T5", text: "T5" }
+                    {value: "UNKNOWN", text: "UNKNOWN"},
+                    {value: "F1", text: "F1"},
+                    {value: "F2", text: "F2"},
+                    {value: "F3", text: "F3"},
+                    {value: "M0", text: "M0"},
+                    {value: "M1", text: "M1"},
+                    {value: "M2", text: "M2"},
+                    {value: "T0", text: "T0"},
+                    {value: "T1", text: "T1"},
+                    {value: "T2", text: "T2"},
+                    {value: "T3", text: "T3"},
+                    {value: "T4", text: "T4"},
+                    {value: "T5", text: "T5"}
                 ]
             },
-            { label: "Harvest Date", schema: 'harvestDate', subSchema: 'seedData', inputType: 'date' },
-            { label: "Homozygosity", schema: 'homozygosity', subSchema: 'seedData', inputType: 'medium' },
-            { label: "Ecotype", schema: 'ecotype', subSchema: 'seedData', inputType: 'medium' },
+            {label: "Harvest Date", schema: 'harvestDate', subSchema: 'seedData', inputType: 'date'},
+            {label: "Homozygosity", schema: 'homozygosity', subSchema: 'seedData', inputType: 'medium'},
+            {label: "Ecotype", schema: 'ecotype', subSchema: 'seedData', inputType: 'medium'},
             {
                 label: "Selection Markers", required: true, schema: 'selectionMarkers', inputType: 'autoCompleteAdd',
                 autoCompleteField: 'SELECTION_MARKERS'
@@ -295,48 +296,48 @@ angular.module('ice.entry.service', [])
                 label: "Selection Markers", required: true, schema: 'selectionMarkers',
                 inputType: 'autoCompleteAdd', autoCompleteField: 'SELECTION_MARKERS'
             },
-            { label: "Genotype/Phenotype", schema: 'genotypePhenotype', inputType: 'long', subSchema: 'strainData' },
-            { label: "Host", schema: 'host', inputType: 'short', subSchema: 'strainData' }
+            {label: "Genotype/Phenotype", schema: 'genotypePhenotype', inputType: 'long', subSchema: 'strainData'},
+            {label: "Host", schema: 'host', inputType: 'short', subSchema: 'strainData'}
         ];
 
         // fields peculiar to proteins
         const proteinFields = [
-            { label: "Organism", schema: 'organism', inputType: 'medium', subSchema: 'proteinData' },
-            { label: "Full Name", schema: 'fullName', inputType: 'medium', subSchema: 'proteinData' },
-            { label: "Gene Name", schema: 'geneName', inputType: 'medium', subSchema: 'proteinData' },
-            { label: "Uploaded From", schema: 'uploadedFrom', inputType: 'medium', subSchema: 'proteinData' },
+            {label: "Organism", schema: 'organism', inputType: 'medium', subSchema: 'proteinData'},
+            {label: "Full Name", schema: 'fullName', inputType: 'medium', subSchema: 'proteinData'},
+            {label: "Gene Name", schema: 'geneName', inputType: 'medium', subSchema: 'proteinData'},
+            {label: "Uploaded From", schema: 'uploadedFrom', inputType: 'medium', subSchema: 'proteinData'},
         ];
 
         const generateLinkOptions = function (type) {
             switch (type.toLowerCase()) {
                 case 'plasmid':
                     return [
-                        { type: 'part', display: 'Part' },
-                        { type: 'plasmid', display: 'Plasmid' }
+                        {type: 'part', display: 'Part'},
+                        {type: 'plasmid', display: 'Plasmid'}
                     ];
 
                 case 'part':
                     return [
-                        { type: 'part', display: 'Part' }
+                        {type: 'part', display: 'Part'}
                     ];
 
                 case 'strain':
                     return [
-                        { type: 'part', display: 'Part' },
-                        { type: 'plasmid', display: 'Plasmid' },
-                        { type: 'strain', display: 'Strain' }
+                        {type: 'part', display: 'Part'},
+                        {type: 'plasmid', display: 'Plasmid'},
+                        {type: 'strain', display: 'Strain'}
                     ];
 
                 case 'arabidopsis':
                     return [
-                        { type: 'part', display: 'Part' },
-                        { type: 'arabidopsis', display: 'Seed' }
+                        {type: 'part', display: 'Part'},
+                        {type: 'arabidopsis', display: 'Seed'}
                     ];
 
                 case 'protein':
                     return [
-                        { type: 'part', display: 'Part' },
-                        { type: 'protein', display: 'Protein' }
+                        {type: 'part', display: 'Part'},
+                        {type: 'protein', display: 'Protein'}
                     ];
             }
         };
@@ -492,11 +493,11 @@ angular.module('ice.entry.service', [])
                         customField.options = [];
                         customField.inputType = "options";
                         custom.options.forEach(function (each) {
-                            customField.options.push({ value: each.name, text: each.name })
+                            customField.options.push({value: each.name, text: each.name})
                         });
 
                         if (custom.fieldType === "MULTI_CHOICE_PLUS")
-                            customField.options.push({ value: "Other", text: "Other" });
+                            customField.options.push({value: "Other", text: "Other"});
 
                         fields.push(customField);
                         break;
@@ -619,7 +620,7 @@ angular.module('ice.entry.service', [])
                 fields.forEach(function (field) {
                     if (field.inputType === 'autoCompleteAdd' || field.inputType === 'add') {
                         entry[field.schema] = [
-                            { value: '' }
+                            {value: ''}
                         ];
                         return;
                     }
@@ -709,11 +710,11 @@ angular.module('ice.entry.service', [])
 
             getEntryItems: function () {
                 return [
-                    { name: "Plasmid", type: "plasmid" },
-                    { name: "Strain", type: "strain" },
-                    { name: "Part", type: "part" },
-                    { name: "Seed", type: "seed" },
-                    { name: "Protein", type: "protein" }
+                    {name: "Plasmid", type: "plasmid"},
+                    {name: "Strain", type: "strain"},
+                    {name: "Part", type: "part"},
+                    {name: "Seed", type: "seed"},
+                    {name: "Protein", type: "protein"}
                 ]
             }
         }
