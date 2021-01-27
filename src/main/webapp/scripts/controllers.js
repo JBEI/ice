@@ -31,7 +31,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         }
 
         var i = $scope.selectedFolders.indexOf(folder);
-        if (i == -1) {
+        if (i === -1) {
             $scope.selectedFolders.push(folder);
         } else {
             $scope.selectedFolders.splice(i, 1);
@@ -61,7 +61,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         }
 
         var entrySelection = {
-            all: Selection.getSelection().type == 'ALL',
+            all: Selection.getSelection().type === 'ALL',
             folderId: folderSelected,
             selectionType: selectionType,
             entryType: Selection.getSelection().type,
