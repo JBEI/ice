@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.entry.sequence.composers.formatters;
 
+import org.apache.commons.lang3.StringUtils;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.symbol.Location;
@@ -229,15 +230,13 @@ public class GenbankFormatter extends AbstractFormatter {
      * @return Genbank Feature type.
      */
     protected String getFeatureType(SequenceFeature sequenceFeature) {
-        String featureType;
+        String featureType = sequenceFeature.getFeature() != null && !StringUtils.isEmpty(sequenceFeature.getFeature().getGenbankType()) ? sequenceFeature.getFeature().getGenbankType() : sequenceFeature.getGenbankType();
 
-        if (sequenceFeature.getGenbankType() == null || sequenceFeature.getGenbankType().isEmpty()) {
+        if (StringUtils.isEmpty(featureType)) {
             Logger.warn("SequenceFeature by id: " + sequenceFeature.getId()
                     + " has invalid genbank type.");
 
             featureType = "misc_feature";
-        } else {
-            featureType = sequenceFeature.getGenbankType();
         }
 
         return featureType;
