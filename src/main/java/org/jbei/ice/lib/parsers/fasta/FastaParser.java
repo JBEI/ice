@@ -24,9 +24,11 @@ public class FastaParser extends AbstractParser {
     @Override
     public FeaturedDNASequence parse(Iterator<String> iterator, String... entryType) throws InvalidFormatParserException {
         try {
+            String name = iterator.next();
             String textSequence = getSequence(iterator);
             textSequence = cleanSequence(textSequence);
             textSequence = textSequence.replaceAll("\t", "\n");
+            textSequence = name + "\n" + textSequence;
             try (BufferedReader br = new BufferedReader(new StringReader(textSequence))) {
                 FeaturedDNASequence sequence;
                 RichSequenceIterator richSequences;
@@ -39,6 +41,7 @@ public class FastaParser extends AbstractParser {
                 if (richSequences.hasNext()) {
                     RichSequence richSequence = richSequences.nextRichSequence();
                     sequence = new FeaturedDNASequence(richSequence.seqString(), new LinkedList<>());
+                    sequence.setName(name.substring(1));
                 } else {
                     throw new InvalidFormatParserException("No sequence found in sequence file!");
                 }
