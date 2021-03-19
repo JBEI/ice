@@ -600,6 +600,19 @@ public class PartSequence {
             return null;
         }
 
+        if (StringUtils.isEmpty(sequence.getSequence())) {
+            // retrieve from file
+            String sequenceString;
+            try {
+                SequenceFile sequenceFile = new SequenceFile(sequence.getSequenceUser());
+                sequenceString = IOUtils.toString(sequenceFile.getStream(), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                Logger.error(e);
+                return null;
+            }
+            return GeneralParser.parse(sequenceString);
+        }
+
         List<SequenceFeature> sequenceFeatures;
         if (includeAllFeatures) {
             sequenceFeatures = sequenceFeatureDAO.getEntrySequenceFeatures(entry);
