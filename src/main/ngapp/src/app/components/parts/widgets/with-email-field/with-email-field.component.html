@@ -1,0 +1,5 @@
+<div>
+    <small class="text-muted">{{field.label}}</small><br>
+    <span class="text-capitalize" *ngIf="!id">{{field.value}} <span *ngIf="email">({{email}})</span></span>
+    <a [href]="'/profile/' + id" class="text-capitalize" *ngIf="id">{{field.value}}</a>
+</div>
