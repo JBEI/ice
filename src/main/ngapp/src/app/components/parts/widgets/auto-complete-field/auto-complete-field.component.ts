@@ -10,13 +10,14 @@ import {PartField} from "../../../../models/part-field";
 export class AutoCompleteFieldComponent implements OnInit {
     @Input() part: Part;
     @Input() field: PartField;
-    value: string;
 
     constructor() {
     }
 
     ngOnInit(): void {
         let values: string[] = this.part[this.field.schema];
-        this.value = values.join(', ');
+        if (values && values.length) {
+            this.field.value = values.join(', ');
+        }
     }
 }

@@ -8,25 +8,24 @@
 
             <form name="loginForm" (submit)="getAccessToken()">
 
-                <div class="d-flex justify-content-between">
-                    <span class="form-label">User ID</span>
-                    <a routerLink="/register" class="pr-0 font-80em" *ngIf="canCreateAccount">Register</a>
+                <div class="mb-3">
+                    <label for="userId" class="form-label">User ID</label>
+                    <a routerLink="/register" class="pr-0 font-80em pull-right" *ngIf="canCreateAccount">Register</a>
+
+                    <input type="text" class="form-control" [(ngModel)]="login.email"
+                           [disabled]="validation.processing&&!errMsg" id="userId"
+                           name="userId" [ngClass]="{'is-invalid': !validation.validId}" required>
                 </div>
 
-                <input type="text" placeholder="User ID" class="form-control" [(ngModel)]="login.email"
-                       [disabled]="validation.processing&&!errMsg"
-                       name="userId" [ngClass]="{'is-invalid': !validation.validId}" required>
 
-                <br>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <a routerLink="/forgotPassword" class="font-80em pr-0 pull-right">Forgot?</a>
 
-                <div class="d-flex justify-content-between">
-                    <span class="form-label">Password</span>
-                    <a routerLink="/forgotPassword" class="font-80em pr-0">Forgot?</a>
+                    <input type="password" class="form-control" [(ngModel)]="login.password"
+                           [disabled]="validation.processing && !errMsg" id="password"
+                           name="password" [ngClass]="{'is-invalid': !validation.validPassword}" required>
                 </div>
-
-                <input type="password" placeholder="Password" class="form-control" [(ngModel)]="login.password"
-                       [disabled]="validation.processing && !errMsg"
-                       name="password" [ngClass]="{'is-invalid': !validation.validPassword}" required>
 
                 <div class="mt-1">
                     <label class="font-90em cursor-pointer text-secondary" (click)="setRemember()">

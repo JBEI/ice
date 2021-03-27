@@ -35,7 +35,7 @@ export class HttpService {
             const sid = this.userService.getUser().sessionId;
             this.httpOptions.headers = new HttpHeaders({
                 'Content-Type': 'application/json',
-                'X-DIVA-Authentication-SessionId': sid
+                'X-ICE-Authentication-SessionId': sid
             });
         }
 

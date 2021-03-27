@@ -8,4 +8,5 @@ export class Sequence {
     name: string;
     features: [];
     iceEntryURI?: string;
+    sequence: string;
 }

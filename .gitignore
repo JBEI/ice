@@ -5,3 +5,4 @@ war/
 data/
 ice.iml
 db
+/src/main/ngapp/node_modules/

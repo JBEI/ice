@@ -1,0 +1,22 @@
+.long-input {
+    display: block !important;
+    margin-bottom: 10px;
+}
+
+.short-input {
+    display: inline-block !important;
+    min-width: 300px;
+}
+
+.medium-input, .withEmail-input {
+    display: inline-block !important;
+    min-width: 360px;
+}
+
+.sub-section {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #495057;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    font-weight: 500;
+}

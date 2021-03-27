@@ -4,7 +4,6 @@ import io.undertow.predicate.PredicatesHandler;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.builder.PredicatedHandlersParser;
-import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -28,7 +27,7 @@ public class DevelopmentServer {
                 .addListener(Servlets.listener(IceServletContextListener.class))
                 .setContextPath("/")
                 .setDeploymentName("Inventory for Composable Elements")
-                .setResourceManager(new FileResourceManager(new File("src/main/webapp"), 10)).addWelcomePage("index.htm")
+//                .setResourceManager(new FileResourceManager(new File("src/main/webapp"), 10)).addWelcomePage("index.htm")
                 .addServlets(
                         Servlets.servlet("Jersey REST Servlet", ServletContainer.class)
                                 .addInitParam("jersey.config.server.provider.packages", "org.jbei.ice.services.rest")
@@ -60,7 +59,7 @@ public class DevelopmentServer {
                 .setHandler(exchange -> {
                     exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Origin"), "*");
                     exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Methods"), "GET,PUT,POST,DELETE,OPTIONS");
-                    exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Headers"), "Content-Type, X-DIVA-Authentication-SessionId");
+                    exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Headers"), "Content-Type, X-ICE-Authentication-SessionId");
 
                     path.handleRequest(exchange);
                 })

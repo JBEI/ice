@@ -1,8 +1,59 @@
+@import "~open-vector-editor/umd/main.css";
 @import '~bootstrap/dist/css/bootstrap.css';
 @import "assets/css/font-awesome.min.css";
 
 html body {
     font-family: Arial, sans-serif;
+}
+
+.entry_detail_submenu .selected {
+    color: #4b4a4a;
+    border: 1px solid #e5e5e5;
+    border-left-color: #fff;
+    font-weight: bold;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    background-color: #fff;
+}
+
+.entry_detail_submenu .selected i {
+    color: #4b4a4a;
+}
+
+.entry_detail_submenu {
+    width: 180px;
+    color: #4482C0;
+    font-size: 0.9em;
+    background-color: #f7f7f7;
+}
+
+.entry_detail_submenu:hover {
+    cursor: pointer;
+}
+
+.entry_detail_submenu td:hover {
+    background-color: #fcfcfc;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    color: #4b4a4a;
+}
+
+.entry_detail_submenu td {
+    padding: 8px;
+    border-left: 1px solid #e5e5e5;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.entry_go_back {
+    color: #233559;
+    font-size: 40px;
+    margin-top: 10px;
+}
+
+.go-back-arrow {
+    color: #233559;
+    font-size: 40px;
+    cursor: pointer;
 }
 
 .font-95em {
@@ -11,6 +62,10 @@ html body {
 
 .font-14em {
     font-size: 1.4em;
+}
+
+.font-16em {
+    font-size: 1.6em;
 }
 
 .font-11em {
@@ -51,4 +106,21 @@ html body {
 
 .cursor-pointer {
     cursor: pointer;
+}
+
+.opacity_hover {
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.opacity_hover:hover {
+    opacity: 1;
+}
+
+.veAxisFill {
+    fill: #FFFFB3 !important;
+}
+
+.text-dark-blue {
+    color: #253B56;
 }

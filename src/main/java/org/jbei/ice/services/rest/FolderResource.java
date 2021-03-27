@@ -35,8 +35,8 @@ import java.util.List;
 @Path("/folders")
 public class FolderResource extends RestResource {
 
-    private FolderController controller = new FolderController();
-    private PermissionsController permissionsController = new PermissionsController();
+    private final FolderController controller = new FolderController();
+    private final PermissionsController permissionsController = new PermissionsController();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

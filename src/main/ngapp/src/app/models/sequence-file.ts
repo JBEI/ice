@@ -1,4 +1,3 @@
-import {DnaSequence} from './dna-sequence';
 
 export class SequenceFile {
     id: string;                 // unique identifier for sequence (usually a hash)
@@ -11,5 +10,4 @@ export class SequenceFile {
     hash: string;
     isProtein: boolean;
     bpLength: number;          // length of base pairs
-    sequence: DnaSequence;
 }

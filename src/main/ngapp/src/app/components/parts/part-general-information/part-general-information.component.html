@@ -1,0 +1,70 @@
+<div style="margin-right: 85px;">
+
+    <small class="text-muted">Summary</small>
+    <br>
+    {{part.shortDescription}}
+
+    <br>
+
+    <div class="bg-light mt-2 mb-2 p-3">
+        <div class="pr-5 pb-2 align-text-top short-input">
+            <strong class="text-muted small">Part ID</strong><br>
+            <span>{{this.part.partId}}</span>
+        </div>
+
+        <span *ngFor="let partField of shortFields" [ngSwitch]="partField.inputType">
+            <app-options-field class="pr-5 pb-3 align-text-top short-input" *ngSwitchCase="'option'"
+                               [field]="partField"></app-options-field>
+
+            <app-with-email-field class="pr-5 pb-3 align-text-top short-input" [part]="part"
+                                  *ngSwitchCase="'withEmail'" [field]="partField"></app-with-email-field>
+
+            <app-auto-complete-field *ngSwitchCase="'autoComplete'" class="pr-5 pb-3 align-text-top short-input"
+                                     [part]="part" [field]="partField"></app-auto-complete-field>
+
+            <div [ngClass]="{'d-none': !partField.value, 'short-input': partField.value }"
+                 class="pr-5 pb-3 align-text-top" *ngSwitchDefault>
+                <small class="text-muted">{{partField.label}}</small><br>
+                <span>{{partField.value}}</span>
+            </div>
+        </span>
+    </div>
+
+    <div *ngFor="let partField of longFields"
+         [ngClass]="{'d-none': !partField.value, 'long-input': partField.value }"
+         class="pr-5 pb-2 align-text-top">
+        <small class="text-muted">{{partField.label}}</small><br>
+        <span>{{partField.value}}</span>
+    </div>
+</div>
+
+<div *ngIf="part.linkedParts.length">
+    <div class="border-bottom sub-section pt-4" style="margin-right: 85px">
+        <strong class="pb-3">CONTAINS</strong>
+    </div>
+
+    <div class="d-flex pt-3">
+        <div *ngFor="let linkedPart of part.linkedParts" class="card shadow-sm w-25 font-90em bg-light">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>{{linkedPart.name}}</div>
+                    <div><a [href]="'/entry/' + linkedPart.id">{{linkedPart.partId}}</a></div>
+                </div>
+
+                <div class="mt-2">{{linkedPart.shortDescription}}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="part.hasSequence">
+    <div class="border-bottom sub-section pt-4" style="margin-right: 85px">
+        <strong class="pb-3">SEQUENCE</strong>
+    </div>
+
+    <div style="width: 92%">
+        <app-sequence [part]="part"></app-sequence>
+    </div>
+</div>
+
+<pre>{{ part | json }}</pre>

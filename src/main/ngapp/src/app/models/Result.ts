@@ -1,4 +1,4 @@
 export class Result<T> {
-    available: number;
-    requested: T[];
+    resultCount: number;
+    data: T[];
 }

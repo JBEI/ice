@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {UserService} from '../user.service';
+import {UserService} from "./user.service";
 
 @Injectable({
     providedIn: 'root'
@@ -24,7 +24,7 @@ export class UploadService {
         }
 
         const params = new HttpParams();
-        const headers = new HttpHeaders({'X-DIVA-Authentication-SessionId': this.user.getUser().sessionId});
+        const headers = new HttpHeaders({'X-ICE-Authentication-SessionId': this.user.getUser().sessionId});
 
         const options = {
             headers,
@@ -43,7 +43,7 @@ export class UploadService {
     //   removeAfterUpload: true,
     //   multiple: true,
     //   autoUpload: false,
-    //   headers: {'X-DIVA-Authentication-SessionId': Auth.getSessionId()},
+    //   headers: {'X-ICE-Authentication-SessionId': Auth.getSessionId()},
     // });
     //
     // multipleSequencesUploader.onSuccessItem = function (fileItem, response, status, headers) {

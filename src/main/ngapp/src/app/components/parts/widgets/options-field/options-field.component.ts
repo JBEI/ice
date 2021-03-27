@@ -24,7 +24,7 @@ export class OptionsFieldComponent implements OnInit {
         }
 
         switch (this.field.schema) {
-            case  'status':
+            case 'status':
                 this.displayValue = this.field.value;
 
                 if (this.field.value.toLowerCase() === 'planned') {

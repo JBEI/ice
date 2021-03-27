@@ -500,8 +500,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     @SafeVarargs
-    private final List<Long> getResultList(int start, int limit, ColumnField sort, boolean asc, String filter,
-                                           Map<String, String>... predicatesMap) {
+    private List<Long> getResultList(int start, int limit, ColumnField sort, boolean asc, String filter,
+                                     Map<String, String>... predicatesMap) {
         if (sort == null)
             sort = ColumnField.CREATED;
 

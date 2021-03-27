@@ -26,13 +26,16 @@ export class LoginComponent implements OnInit {
 
     ngOnInit(): void {
         // check remember me setting
-        this.remember = (localStorage.getItem('rememberICEUser') !== null);
+        const rememberICEUserSetting = localStorage.getItem('rememberICEUser');
+        this.remember = (rememberICEUserSetting !== null && localStorage.getItem('rememberICEUser') === 'yes');
 
+        // check if users can register on this instance
         this.http.get('config/NEW_REGISTRATION_ALLOWED').subscribe((result: any) => {
             this.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
                 && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
         });
 
+        // check if users can change the passwords on this instance
         this.http.get('config/PASSWORD_CHANGE_ALLOWED').subscribe((result: any) => {
             this.canChangePassword = (result !== undefined && result.key === 'PASSWORD_CHANGE_ALLOWED'
                 && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));

@@ -1,23 +1,24 @@
-import {Sequence} from './Sequence';
+import {CustomField} from "./custom-field";
 
 export class Part {
-    id: string;
-    position: number;
+    id: number;
     name: string;
-    hasRules: boolean;
-    partDataId: string;
-    fas: string;
-    partId: number;
-    fivePrimeInternalPreferredOverhangs: string;
-    threePrimeInternalPreferredOverhangs: string;
-    genbankStartBP: number;
-    endBP: number;
-    revComp: boolean;
-    sequence: Sequence;
+    alias: string;
+    creationTime: number;
+    status: string;
+    viewCount: number;
+    type: string;
+    shortDescription: string;
+    partId: string;
+    visible: string;
+    hasSample: boolean;
+    hasSequence: boolean;
+    owner: string;
+    ownerEmail: string;
+    ownerId: number;
+    canEdit: boolean;
 
-    showEdit: boolean;
-    editName: boolean;
-    rules: any[];
-
-    sequenceID: number;
+    linkedParts: Part[];
+    parents: Part[];
+    customFields: CustomField[];
 }

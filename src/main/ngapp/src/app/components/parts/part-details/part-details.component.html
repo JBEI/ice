@@ -1,0 +1,226 @@
+<div>
+
+    <div class="d-flex justify-content-between" style="background-color: #233559">
+        <div class="align-middle text-white font-14em p-3">BPS</div>
+        <div class="p-1 align-middle" style="width: 600px">
+            <app-search-bar></app-search-bar>
+        </div>
+    </div>
+
+
+    <div>
+
+        <!--        <div class="col-3 border-right">-->
+        <!--            <div>menu goes here</div>-->
+        <!--        </div>-->
+
+        <div class="col-12 p-0">
+
+            <div class="d-flex border-top p-3" style=" background-color: #f1f5f8">
+
+                <div class="flex-lg-fill">
+
+                    <!-- go back arrow -->
+                    <i (click)="backTo()" class="pull-left fa fa-chevron-circle-left go-back-arrow align-self-center"
+                       title="Back">
+                    </i>
+
+                    <span *ngIf="part.visible=='DRAFT'">
+                        <small class="badge" [ngClass]="{'badge-warning':part.visible=='DRAFT'}"
+                               style="font-size: 9px; position: relative; top: -4px">{{part.visible}}
+                        </small>
+                    </span>
+
+                    <span *ngIf="part.visible=='DELETED' || part.visible=='TRANSFERRED' || part.visible=='PENDING' || part.visible=='REMOTE'">
+                        <small class="badge action-badge" [ngClass]="{
+                        'badge-danger':part.visible=='DELETED',
+                        'badge-info':part.visible=='TRANSFERRED' || part.visible=='REMOTE',
+                        'badge-warning':part.visible=='PENDING'}">{{part.visible}}
+                        </small>
+                    </span>
+
+                    <!--restore/accept/approve button invariants (for admins)-->
+                    <span *ngIf="part.visible=='DELETED'">
+                        <span (click)="restoreSelectedEntries()" class="badge badge-danger action-badge"
+                              ngbTooltip="Restore this entry">
+                            <span style="font-size: 10px"><i class="fa fa-times"></i></span>
+                        </span>
+                    </span>
+
+                    <span *ngIf="part.visible=='PENDING'">
+                        <span (click)="submitSelectedImportEntry()" class="badge badge-warning action-badge"
+                              ngbTooltip="Approve this entry">
+                            <span style="font-size: 11px"><i class="fa fa-check"></i></span>
+                        </span>
+                    </span>
+                    <!--end of button invariants-->
+
+                    <span *ngIf="part.visible!='DRAFT' && part.visible!='OK'">
+                    &nbsp;
+                    </span>
+                    <span *ngIf="part.visible=='DRAFT'">
+                        <small class="badge" [ngClass]="{'badge-warning':part.visible=='DRAFT'}"
+                               style="font-size: 9px; position: relative; top: -4px">{{part.visible}}
+                        </small>
+                    </span>
+
+                    <span *ngIf="part.visible=='DELETED' || part.visible=='TRANSFERRED' || part.visible=='PENDING' || part.visible=='REMOTE'">
+                        <small class="badge action-badge" [ngClass]="{
+                        'badge-danger':part.visible=='DELETED',
+                        'badge-info':part.visible=='TRANSFERRED' || part.visible=='REMOTE',
+                        'badge-warning':part.visible=='PENDING'}">{{part.visible}}
+                        </small>
+                    </span>
+
+                    <!--restore/accept/approve button invariants (for admins)-->
+                    <span *ngIf="part.visible=='DELETED'">
+                        <span (click)="restoreSelectedEntries()" class="badge badge-danger action-badge"
+                              ngbTooltip="Restore this entry">
+                            <span style="font-size: 10px"><i class="fa fa-times"></i></span>
+                        </span>
+                    </span>
+
+                    <span *ngIf="part.visible=='PENDING'">
+                        <span (click)="submitSelectedImportEntry()" class="badge badge-warning action-badge"
+                              ngbTooltip="Approve this entry">
+                            <span style="font-size: 11px"><i class="fa fa-check"></i></span>
+                        </span>
+                    </span>
+                    <!--end of button invariants-->
+
+                    <span *ngIf="part.visible!='DRAFT' && part.visible!='OK'">
+                    &nbsp;
+                    </span>
+
+                    <span class="font-12em">
+                        <span class="text-black-50 font-weight-bold">{{part.type}}</span>&nbsp;
+                        <strong>{{part.name}}</strong>
+                    </span>
+
+                    <span *ngFor="let parent of part.parents">
+                        &nbsp;<a [href]="'entry/' + parent.id" [ngbTooltip]="parent.name"
+                                 style="font-size: 12px; color: white; position: relative; top: -4px"
+                                 class="badge cursor-pointer p-2"
+                                 [ngClass]="{'badge-secondary':parent.visible=='OK',
+                                 'badge-warning': parent.visible=='PENDING' || parent.visible == 'DRAFT',
+                                 'badge-info':parent.visible=='TRANSFERRED',
+                                 'badge-danger': parent.visible=='DELETED'}">
+                        {{parent.type}} <i class="fa fa-level-up"></i></a>
+                    </span>
+
+                    <br>
+
+                    <small class="font-75em">
+                        {{part.creationTime | date:'medium'}}
+                        <span style="color: #ccc; width: 1px"><span class="mr-1 ml-1">|</span></span>
+
+                        <a [href]="'profile/' + part.ownerId">{{part.ownerEmail || part.owner}}</a>
+
+                        <span style="color: #ccc; width: 1px"><span class="mr-1 ml-1">|</span></span>
+
+                        <span ngbDropdown>
+                            <span class="text-muted" ngbDropdownToggle role="button">
+                                Link to
+                            </span>
+                            <div ngbDropdownMenu class="dropdown-menu">
+                                <a ngbDropdownItem href="#"
+                                   (click)="$event.preventDefault(); addLink(undefined, 'PARENT')">Add Parent</a>
+                                <a ngbDropdownItem href="#" (click)="$event.preventDefault()">Add Child</a>
+                            </div>
+                        </span>
+                    </small>
+                </div>
+
+                <div class="align-self-center mr-3">
+                    <i class="fa fa-fw fa-copy font-16em opacity_hover ml-2 mr-2" ngbTooltip="Clone"></i>
+                    <i class="fa fa-fw fa-trash-o font-16em opacity_hover ml-2 mr-2" ngbTooltip="Delete"></i>
+                </div>
+
+                <div class="align-self-center text-center flex-nowrap border-left" style="width: 200px">
+                    <button type="button" class="btn btn-link outline-none" (click)="prevEntryInContext()">
+                        <i class="fa fa-arrow-left context_nav_pager"></i>
+                    </button>
+
+                    <strong class="font-90em">3 / 4</strong>
+
+                    <button type="button" class="btn btn-link outline-none" (click)="nextEntryInContext()">
+                        <i class="fa fa-arrow-right context_nav_pager"></i>
+                    </button>
+                </div>
+            </div>
+
+            <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+                <li [ngbNavItem]="1">
+                    <a ngbNavLink>General Information</a>
+                    <ng-template ngbNavContent>
+                        <app-part-general-information [part]="part"></app-part-general-information>
+                    </ng-template>
+                </li>
+                <li [ngbNavItem]="2" class="mr-3 ml-3">
+                    <a ngbNavLink>Sequence Analysis</a>
+                    <ng-template ngbNavContent>
+                    </ng-template>
+                </li>
+                <li [ngbNavItem]="4" class="mr-3 ml-3">
+                    <a ngbNavLink>Samples</a>
+                    <ng-template ngbNavContent>
+                    </ng-template>
+                </li>
+            </ul>
+
+            <div [ngbNavOutlet]="nav" class="flex-lg-fill p-4"></div>
+
+            <div class="mt-5 text-center text-uppercase font-weight-bold"
+                 style="position: absolute; top: 120px; right: 0; height: 400px">
+                <ul class="list-group" *ngIf="!details">
+                    <li class="list-group-item right-nav list-group-item-action cursor-pointer pr-1 pl-2"
+                        (click)="showDetails()">
+                        <i class="fa fa-fw fa-comments-o font-14em"></i>
+                        <div class="font-60em">Comments</div>
+                    </li>
+                    <li class="list-group-item list-group-item-action right-nav pr-1 pl-2">
+                        <i class="fa fa-fw fa-history font-14em"></i>
+                        <div class="font-60em">history</div>
+                    </li>
+                    <li class="list-group-item list-group-item-action right-nav pr-1 pl-2" *ngIf="part.canEdit">
+                        <i class="fa fa-fw fa-unlock-alt font-14em"></i>
+                        <div class="font-60em">share</div>
+                    </li>
+                    <li class="list-group-item list-group-item-action right-nav pr-1 pl-2">
+                        <i class="fa fa-fw fa-folder-open-o font-14em"></i>
+                        <div class="font-60em">folders</div>
+                    </li>
+                    <li class="list-group-item list-group-item-action right-nav pr-1 pl-2">
+                        <i class="fa fa-fw fa-database font-14em"></i>
+                        <div class="font-60em">experiments</div>
+                    </li>
+                    <li class="list-group-item list-group-item-action right-nav pr-1 pl-2">
+                        <i class="fa fa-fw fa-file font-14em"></i>
+                        <div class="font-60em">attachments</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="mt-5 border-left p-2 shadow-sm text-nowrap border-top" *ngIf="details"
+                 style="position: absolute; top: 120px; right: 0; height: 400px">
+                <div class="border-bottom">
+                    <span class="cursor-pointer" (click)="details =!details">Back</span> content goes here
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--                                <div class="pad_top pull-right">-->
+    <!--                                    <ice-entry-attachment can-edit="part.canEdit" remote="remoteParams"></ice-entry-attachment>-->
+    <!--                                </div>-->
+
+    <!--                                <div class="pad_top pull-right" *ngIf="part.canEdit">-->
+    <!--                                    <ice-entry-permission entry='entry'></ice-entry-permission>-->
+    <!--                                </div>-->
+
+    <!--                                <div class="pad_top pull-right" *ngIf="!part.remote">-->
+    <!--                                    <ice-entry-folders entry="entry"></ice-entry-folders>-->
+    <!--                                </div>-->
+
+</div>

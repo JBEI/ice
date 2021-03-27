@@ -1,0 +1,26 @@
+.entry-type {
+    opacity: 0.7;
+    font-weight: bold;
+    font-size: 0.85em;
+    text-shadow: 0 1px 0 #fff;
+}
+
+.entry-table-header {
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.entry-table-header > span:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.tableFixHead {
+    overflow-y: auto;
+    height: 100px;
+}
+
+.tableFixHead thead th {
+    position: sticky;
+    top: 0;
+}
