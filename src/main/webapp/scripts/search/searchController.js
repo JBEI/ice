@@ -7,6 +7,7 @@ angular.module('ice.search.controller', [])
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
         let query = {entryTypes: ['STRAIN', 'PLASMID', 'PART', 'SEED', 'PROTEIN'], queryString: undefined};
+        $scope.partnerResults = undefined;
 
         $scope.$on("RunSearch", function (event, filters) {
             query = filters;
@@ -25,9 +26,11 @@ angular.module('ice.search.controller', [])
 
             //console.log(filters);
             Util.post("rest/search", filters, function (result) {
-                console.log(result);
-
                 $scope.searchResults = result;
+
+                if ($scope.searchFilters.webSearch)
+                    $scope.partnerResults = $scope.searchResults.results[0].results;
+
                 $scope.loadingSearchResults = false;
             }, {webSearch: filters.webSearch}, function () {
                 $scope.loadingSearchResults = false;
@@ -35,6 +38,16 @@ angular.module('ice.search.controller', [])
             });
         };
 
+        $scope.selectNewPartnerForResults = function (partner) {
+            for (let i = 0; i < $scope.searchResults.results.length; i += 1) {
+                if ($scope.searchResults.results[i].partner.id === partner.id) {
+                    $scope.partnerResults = $scope.searchResults.results[i].results;
+                    return;
+                }
+            }
+        }
+
+        // searchResults.results
         $scope.selectAllClass = function () {
             if (Selection.allSelected()) // || $scope.folder.entries.length === Selection.getSelectedEntries().length)
                 return 'fa-check-square-o';
@@ -48,8 +61,7 @@ angular.module('ice.search.controller', [])
             if (Selection.allSelected()) {
                 Selection.setTypeSelection('none');
                 Selection.setSearch(undefined);
-            }
-            else {
+            } else {
                 Selection.setTypeSelection('all');
                 Selection.setSearch(query);
                 console.log(query);
@@ -336,7 +348,7 @@ angular.module('ice.search.controller', [])
 
             for (var searchType in $scope.searchTypes) {
                 if ($scope.searchTypes.hasOwnProperty(searchType)) {
-                    if ($scope.searchTypes[searchType] != true)
+                    if ($scope.searchTypes[searchType] !== true)
                         return true;
                 }
             }

@@ -1358,7 +1358,7 @@ angular.module('ice.entry.controller', [])
                 $scope.serverError = response.message;
             };
 
-// customer parameter add for entry view
+            // customer parameter add for entry view
             $scope.addNewCustomField = function () {
                 $scope.newParameter.nameInvalid = $scope.newParameter.name == undefined || $scope.newParameter.name == '';
                 $scope.newParameter.valueInvalid = $scope.newParameter.value == undefined || $scope.newParameter.value == '';
@@ -1377,7 +1377,7 @@ angular.module('ice.entry.controller', [])
 
             $scope.showAutoAnnotationPopup = function () {
                 let modalInstance = $uibModal.open({
-                    templateUrl: 'scripts/entry/sequence/modal-auto-annotate-sequence.html',
+                    templateUrl: 'scripts/entry/sequence/modal-auto-annotate-sequence2.html',
                     controller: function ($scope, $uibModalInstance, part, Util) {
                         $scope.selectedFeatures = [];
                         $scope.allSelected = false;
@@ -1399,155 +1399,51 @@ angular.module('ice.entry.controller', [])
                             $scope.annotations = undefined;
                             Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
                                 angular.forEach(result.features, function (feature) {
-                                        //console.log(feature);
-                                        //if (feature.strand == 1)
                                         feature.length = (feature.locations[0].end - feature.locations[0].genbankStart) + 1;
-                                        //else
-                                        //feature.length = (feature.locations[0].genbankStart - feature.locations[0].end) + 1;
                                     }
                                 );
                                 $scope.annotations = result;
                                 $scope.pagingParams.resultCount = result.features.length;
                                 $scope.pagingParams.numberOfPages = Math.ceil(result.features.length / $scope.pagingParams.pageSize);
-                            }, {ownerFeatures: $scope.options.selection.key == "mine"});
-                        };
-                        $scope.fetchAnnotations();
-
-                        /**
-                         * Support for sorting
-                         * @param field field to sort on
-                         */
-                        $scope.sort = function (field) {
-                            if ($scope.pagingParams.sort == field) {
-                                $scope.pagingParams.asc = !$scope.pagingParams.asc;
-                            } else {
-                                $scope.pagingParams.sort = field;
-                                $scope.pagingParams.asc = true;
-                            }
-                            $scope.pagingParams.currentPage = 0;
+                            }, {ownerFeatures: $scope.options.selection.key === "mine"});
                         };
 
-                        /**
-                         * Select all features on the UI
-                         */
-                        $scope.selectAll = function () {
-                            $scope.allSelected = !$scope.allSelected;
-                            if ($scope.allSelected) {
-                                $scope.selectedFeatures = $scope.annotations.features;
-                            } else {
-                                $scope.selectedFeatures = [];
-                            }
-                        };
-
-                        /**
-                         * Check or un-check (on UI) specific feature
-                         * @param feature
-                         */
                         $scope.checkFeature = function (feature) {
                             feature.selected = !feature.selected;
                             let i = $scope.selectedFeatures.indexOf(feature);
-                            if (i == -1) {
+                            if (i === -1) {
                                 $scope.selectedFeatures.push(feature);
                             } else {
                                 $scope.selectedFeatures.splice(i, 1);
                             }
 
-                            $scope.allSelected = ($scope.selectedFeatures.length == $scope.annotations.features.length);
-                        };
+                            if (feature.selected)
+                                $rootScope.$emit("FeatureSelected", feature);
+                            else
+                                $rootScope.$emit("FeatureRemoved", feature);
 
-                        $scope.setClassName = function (feature) {
-                            let classPrefix = feature.strand == -1 ? "reverse-strand-" : "forward-strand-";
-                            feature.className = classPrefix + feature.type.toLowerCase();
-                        };
-
-                        /**
-                         *  Determine background color based on feature type
-                         * @param feature
-                         * @returns {{background-color: string}}
-                         */
-                        $scope.getBgStyle = function (feature) {
-                            let bgColor = "#CCC";
-
-                            switch (feature.type.toLowerCase()) {
-                                case 'cds':
-                                    bgColor = "#EF6500";
-                                    break;
-
-                                case "misc_feature":
-                                    bgColor = "#006FEF";
-                                    break;
-
-                                case "promoter":
-                                    bgColor = "#31B440";
-                                    break;
-
-                                case "terminator":
-                                    bgColor = "red";
-                                    break;
-
-                                case "rep_origin":
-                                    bgColor = "#878787";
-                                    break;
-
-                                case "misc_marker":
-                                    bgColor = "#8DCEB1";
-                                    break;
-                            }
-                            return {'background-color': bgColor};
-                        };
-
-                        $scope.getFirstStyle = function (selectedFeature) {
-                            let width = (selectedFeature.locations[0].genbankStart / $scope.annotations.length) * 100;
-                            return {"width": (Math.floor(width)) + '%'};
-                        };
-
-                        $scope.getSecondStyle = function (selectedFeature) {
-                            let width = ((selectedFeature.locations[0].end - selectedFeature.locations[0].genbankStart) / $scope.annotations.length) * 100;
-                            let style = $scope.getBgStyle(selectedFeature);
-                            style.width = (Math.ceil(width)) + '%';
-                            return style;
-                        };
-
-                        $scope.getThirdStyle = function (selectedFeature) {
-                            let w = (($scope.annotations.length - selectedFeature.locations[0].end) / $scope.annotations.length) * 100;
-                            return {"width": (Math.floor(w)) + '%'};
-                        };
-
-                        $scope.saveAnnotations = function () {
-                            $scope.errorSavingAnnotations = false;
-                            $scope.savingAnnotations = true;
-
-                            //url, obj, successHandler, params, errHandler
-                            Util.update("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, {add: true}, function () {
-                                $uibModalInstance.close(true);
-                            }, function (error) {
-                                $scope.savingAnnotations = false;
-                                $scope.errorSavingAnnotations = true;
-                            })
-                        };
-
-                        // used to show, in table of features, the selected feature
-                        $scope.showAnnotationInTable = function (selectedFeature) {
-                            let index = $scope.annotations.features.indexOf(selectedFeature);
-                            $scope.pagingParams.currentPage = parseInt(index / $scope.pagingParams.pageSize);
+                            $scope.allSelected = ($scope.selectedFeatures.length === $scope.annotations.features.length);
                         }
+
+                        // init
+                        $scope.fetchAnnotations();
                     },
                     size: 'lg',
                     resolve: {
                         part: function () {
                             return $scope.entry;
                         }
-                    }
-                    ,
+                    },
                     backdrop: "static"
                 });
 
+                // refresh page to refresh sequence visualization
                 modalInstance.result.then(function (reload) {
                     if (reload) {
                         $window.location.reload();
                     }
                 });
-            };
+            }
         }
     )
 ;

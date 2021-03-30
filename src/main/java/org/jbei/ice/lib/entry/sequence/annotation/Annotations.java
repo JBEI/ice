@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.entry.sequence.annotation;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -9,6 +11,7 @@ import org.jbei.ice.lib.dto.DNAFeatures;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.search.BlastQuery;
+import org.jbei.ice.lib.entry.sequence.SequenceFile;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.BlastException;
@@ -17,6 +20,8 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
@@ -130,6 +135,17 @@ public class Annotations {
             return null;
 
         String sequenceString = sequence.getSequence();
+        if (StringUtils.isEmpty(sequenceString)) {
+            try {
+                // todo : look @ & reconcile the different ways of retrieving sequences
+                SequenceFile file = new SequenceFile(sequence.getSequenceUser());
+                sequenceString = IOUtils.toString(file.getStream(), Charset.defaultCharset());
+            } catch (IOException e) {
+                Logger.error(e);
+                return null;
+            }
+        }
+
         BlastQuery query = new BlastQuery();
         query.setSequence(sequenceString);
 
@@ -181,7 +197,7 @@ public class Annotations {
      * this generates matching features for the passed sequence
      *
      * @param sequence wrapper around dna sequence
-     * @return wrapper around passed sequence and now with list if annotations for that sequence
+     * @return wrapper around passed sequence and now with list of annotations for that sequence
      */
     public FeaturedDNASequence generate(FeaturedDNASequence sequence) {
         BlastQuery query = new BlastQuery();

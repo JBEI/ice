@@ -83,10 +83,28 @@ angular.module('ice.entry.directives', [])
             },
 
             template: '<div ng-if="fetchingAnnotations"><img src="img/loader-mini.gif"> &nbsp;Fetching annotations...</div>' +
-                '<div id="ve-Root" style="height: 550px; width: 900px"><br><img src="img/loader-mini.gif"> Loading sequence&hellip;</div>',
+                '<div id="ve-Root" style="height: 550px"><br><img src="img/loader-mini.gif"> Loading sequence&hellip;</div>',
 
             controller: function ($rootScope, $scope, Util, $window) {
                 $scope.fetchingAnnotations = false;
+                $scope.currrentData = undefined;
+
+                $rootScope.$on("FeatureSelected", function (event, feature) {
+                    console.log("selected", feature);
+                    convertFeature(feature, $scope.currrentData.sequenceData.features);
+                    $scope.editor.updateEditor({
+                        sequenceData: $scope.currrentData.sequenceData,
+                    });
+                });
+
+                $rootScope.$on("FeatureRemoved", function (event, feature) {
+                    console.log("removed", feature);
+                    $scope.currrentData.sequenceData.features[feature.id] = undefined;
+                    $scope.editor.updateEditor({
+                        sequenceData: $scope.currrentData.sequenceData,
+                    });
+                });
+
                 $rootScope.$on("ReloadVectorViewData", function (event, data) {
                     if (!data)
                         return;
@@ -201,54 +219,58 @@ angular.module('ice.entry.directives', [])
                         openVE = {};
 
                     for (let i = 0; i < features.length; i += 1) {
-                        let feature = features[i];
-                        if (openVE[feature.id]) // feature is keyed by feature database id
-                            continue;
-
-                        // skip any features that do not have any locations specified
-                        if (!feature.locations.length)
-                            continue;
-
-                        if (feature.locations.length > 1)
-                            feature.locations.sort(compareLocations);   // todo: there is a bug here if spanning origin
-
-                        // deal with locations
-                        for (let j = 0; j < feature.locations.length; j += 1) {
-                            let location = feature.locations[j];
-                            let featureObject = openVE[feature.id];
-                            if (featureObject) {
-                                // update locations
-                                let locations = featureObject.locations;
-                                if (!locations) {
-                                    locations = [];
-                                    locations.push({start: featureObject.start, end: featureObject.end});
-                                }
-                                locations.push({start: location.genbankStart - 1, end: location.end - 1});
-                                featureObject.end = location.end - 1;
-                                featureObject.locations = locations;
-
-                                // deal with feature notes
-                                featureObject = convertNotes(feature, featureObject);
-                            } else {
-                                featureObject = {
-                                    start: location.genbankStart - 1,
-                                    end: location.end - 1,
-                                    fid: feature.id,
-                                    forward: feature.strand === 1,
-                                    type: feature.type,
-                                    name: feature.name,
-                                    notes: {},
-                                    annotationType: feature.type
-                                };
-
-                                // deal with feature notes
-                                featureObject = convertNotes(feature, featureObject);
-                            }
-
-                            openVE[featureObject.fid] = featureObject;
-                        }
+                        convertFeature(features[i], openVE);
                     }
+
                     return openVE;
+                }
+
+                const convertFeature = function (feature, openVE) {
+                    if (openVE[feature.id]) // feature is keyed by feature database id
+                        return;
+
+                    // skip any features that do not have any locations specified
+                    if (!feature.locations.length)
+                        return;
+
+                    if (feature.locations.length > 1)
+                        feature.locations.sort(compareLocations);   // todo: there is a bug here if spanning origin
+
+                    // deal with locations
+                    for (let j = 0; j < feature.locations.length; j += 1) {
+                        let location = feature.locations[j];
+                        let featureObject = openVE[feature.id];
+                        if (featureObject) {
+                            // update locations
+                            let locations = featureObject.locations;
+                            if (!locations) {
+                                locations = [];
+                                locations.push({start: featureObject.start, end: featureObject.end});
+                            }
+                            locations.push({start: location.genbankStart - 1, end: location.end - 1});
+                            featureObject.end = location.end - 1;
+                            featureObject.locations = locations;
+
+                            // deal with feature notes
+                            featureObject = convertNotes(feature, featureObject);
+                        } else {
+                            featureObject = {
+                                start: location.genbankStart - 1,
+                                end: location.end - 1,
+                                fid: feature.id,
+                                forward: feature.strand === 1,
+                                type: feature.type,
+                                name: feature.name,
+                                notes: {},
+                                annotationType: feature.type
+                            };
+
+                            // deal with feature notes
+                            featureObject = convertNotes(feature, featureObject);
+                        }
+
+                        openVE[featureObject.fid] = featureObject;
+                    }
                 }
 
                 let convertToVEModel = function (result) {
@@ -312,9 +334,9 @@ angular.module('ice.entry.directives', [])
                         if (!result.sequence)
                             return;
 
-                        const data = convertToVEModel(result);
-                        $rootScope.$emit("VectorEditorSequenceModel", data);
-                        $scope.loadVectorEditor(data);
+                        $scope.currrentData = convertToVEModel(result);
+                        $rootScope.$emit("VectorEditorSequenceModel", $scope.currrentData);
+                        $scope.loadVectorEditor($scope.currrentData);
 
                         if (pageAnnotations)
                             fetchLocalSequenceFeatures(result)

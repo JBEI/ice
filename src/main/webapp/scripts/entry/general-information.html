@@ -82,8 +82,8 @@
                          tooltip-placement="right"></i>
 
                 <span style="padding-top:5px;">
-                    <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Update</a>
-                    <a class="btn btn-default btn-xs" ng-click="field.edit=false; field.invalid=false">Cancel</a>
+                    <a class="btn btn-primary btn-sm" ng-click="quickEditEntry(field)">Update</a>
+                    <a class="btn btn-secondary btn-sm" ng-click="field.edit=false; field.invalid=false">Cancel</a>
                 </span>
             </div>
 
@@ -135,8 +135,8 @@
             <div ng-if="field.inputType==='bool'&&field.edit">
                 <input type="checkbox" ng-model="quickEdit[field.schema]" ng-change="field.dirty=true">
                 <span style="padding-top:5px;">
-                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
-                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
+                     <a class="btn btn-primary btn-sm" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-secondary btn-sm" ng-click="field.edit=false">Cancel</a>
                 </span>
             </div>
 
@@ -153,8 +153,8 @@
                 </div>
 
                 <span style="padding-top:5px;">
-                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
-                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
+                     <a class="btn btn-primary btn-sm" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-secondary btn-sm" ng-click="field.edit=false">Cancel</a>
                 </span>
             </div>
 
@@ -165,8 +165,8 @@
                        ng-change="field.dirty=true">
 
                 <span style="padding-top:5px;">
-                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
-                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
+                     <a class="btn btn-primary btn-sm" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-secondary btn-sm" ng-click="field.edit=false">Cancel</a>
                 </span>
             </div>
 
@@ -180,8 +180,8 @@
                 <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
 
                 <span style="padding-top:5px;">
-                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
-                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
+                     <a class="btn btn-primary btn-sm" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-secondary btn-sm" ng-click="field.edit=false">Cancel</a>
                 </span>
             </div>
 
@@ -229,8 +229,8 @@
                 </span>
                 <br>
                 <span>
-                    <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
-                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
+                    <a class="btn btn-primary btn-sm" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-secondary btn-sm" ng-click="field.edit=false">Cancel</a>
                 </span>
             </div>
 
@@ -241,8 +241,8 @@
                       ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"></textarea>
                 <br>
                 <span style="padding-top:5px;">
-                    <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
-                    <a class="btn btn-link btn-xs" ng-click="field.edit=false">Cancel</a>
+                    <a class="btn btn-primary btn-sm" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-link btn-sm" ng-click="field.edit=false">Cancel</a>
                 </span>
             </div>
         </form>
@@ -278,8 +278,8 @@
                    ng-class="{'input_box':!newParameter.valueInvalid, 'input_box_error':newParameter.valueInvalid}"
                    maxlength="125" style="width: 400px;" placeHolder="Custom field value">
             <span style="padding-top:5px;">
-                    <a class="btn btn-primary btn-xs" ng-click="addNewCustomField()">Save</a>
-                    <a class="btn btn-link btn-xs" ng-click="newParameter.edit=false; newParameter={}">Cancel</a>
+                    <a class="btn btn-primary btn-sm" ng-click="addNewCustomField()">Save</a>
+                    <a class="btn btn-link btn-sm" ng-click="newParameter.edit=false; newParameter={}">Cancel</a>
                 </span>
         </div>
     </div>
