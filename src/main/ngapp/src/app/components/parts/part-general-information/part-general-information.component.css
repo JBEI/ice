@@ -5,7 +5,7 @@
 
 .short-input {
     display: inline-block !important;
-    min-width: 300px;
+    min-width: 320px;
 }
 
 .medium-input, .withEmail-input {

@@ -1,12 +1,14 @@
 <div>
 
-    <div class="d-flex justify-content-between" style="background-color: #233559">
-        <div class="align-middle text-white font-14em p-3">BPS</div>
-        <div class="p-1 align-middle" style="width: 600px">
+    <div class="d-flex justify-content-between align-items-center p-2" style="background-color: #00175b">
+        <div>
+            <button class="btn btn-outline-light font-11em" (click)="goHome()">BPS</button>
+        </div>
+
+        <div style="width: 600px">
             <app-search-bar></app-search-bar>
         </div>
     </div>
-
 
     <div>
 
@@ -116,17 +118,22 @@
 
                         <a [href]="'profile/' + part.ownerId">{{part.ownerEmail || part.owner}}</a>
 
-                        <span style="color: #ccc; width: 1px"><span class="mr-1 ml-1">|</span></span>
+                        <span *ngIf="part.canEdit">
+                            <span style="color: #ccc; width: 1px"><span class="mr-1 ml-1">|</span></span>
 
-                        <span ngbDropdown>
-                            <span class="text-muted" ngbDropdownToggle role="button">
-                                Link to
+                            <span ngbDropdown>
+                                <span class="text-muted" ngbDropdownToggle role="button">
+                                    Link to
+                                </span>
+                                <div ngbDropdownMenu class="font-95em">
+                                    <div ngbDropdownItem (click)="addLink(undefined, 'PARENT')" class="cursor-pointer">
+                                        <i class="fa fa-fw fa-level-up"></i> Add Parent
+                                    </div>
+                                    <div ngbDropdownItem (click)="addLink(undefined, 'CHILD')" class="cursor-pointer">
+                                        <i class="fa fa-fw fa-level-down"></i> Add Child
+                                    </div>
+                                </div>
                             </span>
-                            <div ngbDropdownMenu class="dropdown-menu">
-                                <a ngbDropdownItem href="#"
-                                   (click)="$event.preventDefault(); addLink(undefined, 'PARENT')">Add Parent</a>
-                                <a ngbDropdownItem href="#" (click)="$event.preventDefault()">Add Child</a>
-                            </div>
                         </span>
                     </small>
                 </div>
@@ -176,7 +183,7 @@
                     <li class="list-group-item right-nav list-group-item-action cursor-pointer pr-1 pl-2"
                         (click)="showDetails()">
                         <i class="fa fa-fw fa-comments-o font-14em"></i>
-                        <div class="font-60em">Comments</div>
+                        <div class="font-60em">Comments <i class="fa fa-fw fa-circle"></i></div>
                     </li>
                     <li class="list-group-item list-group-item-action right-nav pr-1 pl-2">
                         <i class="fa fa-fw fa-history font-14em"></i>

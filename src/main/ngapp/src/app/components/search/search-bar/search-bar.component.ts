@@ -1,4 +1,6 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {SearchService} from "../search.service";
+import {Router} from "@angular/router";
 
 @Component({
     selector: 'app-search-bar',
@@ -7,10 +9,18 @@ import {Component, Input, OnInit} from '@angular/core';
 })
 export class SearchBarComponent implements OnInit {
 
-    constructor() {
+    terms: string;
+
+    constructor(private search: SearchService, private router: Router) {
     }
 
     ngOnInit(): void {
+        this.terms = this.search.getQuery();
+    }
 
+    submitSearch(): void {
+        console.log(this.terms);
+        this.search.setQuery(this.terms);
+        this.router.navigate(['/search']);
     }
 }

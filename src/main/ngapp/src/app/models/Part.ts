@@ -17,6 +17,7 @@ export class Part {
     ownerEmail: string;
     ownerId: number;
     canEdit: boolean;
+    longDescription: string;
 
     linkedParts: Part[];
     parents: Part[];

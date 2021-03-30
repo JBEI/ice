@@ -64,7 +64,7 @@ export class PartGeneralInformationComponent implements OnInit {
                     field.value = this.part[field.schema];
                 }
 
-                if (field.value === undefined || (Array.isArray(field.value) && !field.value.length)) {
+                if (!field.value || (Array.isArray(field.value) && !field.value.length)) {
                     console.log('skipping', field);
                     continue;
                 }

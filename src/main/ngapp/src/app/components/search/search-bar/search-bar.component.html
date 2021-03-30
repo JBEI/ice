@@ -1,27 +1,28 @@
-<div class="input-group p-2" ngbDropdown  placement="bottom-right">
+<form (submit)="submitSearch()">
 
-<!--    <div class="input-group-prepend">-->
-<!--        <span class="input-group-text bg-light">-->
-<!--            <i class="fa fa-fw fa-times"></i>-->
-<!--        </span>-->
-<!--    </div>-->
+    <div class="input-group p-2" ngbDropdown placement="bottom-right">
 
-    <div ngbDropdownMenu style="width: 600px" class="p-3">
-        <textarea></textarea>
-        <br>
+        <!--    <div class="input-group-prepend">-->
+        <!--        <span class="input-group-text bg-light">-->
+        <!--            <i class="fa fa-fw fa-times"></i>-->
+        <!--        </span>-->
+        <!--    </div>-->
 
-        Book a plane ride<br>
-        To a place far beyond<br>
-        And then you go to a little<br>
-        Till then we are
-    </div>
+        <div ngbDropdownMenu style="width: 585px" class="p-3">
+            <b>BLAST</b><br>
+            <textarea class="form-control" placeholder="Enter Sequence"></textarea>
+            <br>
+            <button class="btn btn-sm btn-primary pull-right">Search</button>
+        </div>
 
-    <input type="text" class="form-control border-right-0" placeholder="Enter search terms"/>
+        <input type="text" [(ngModel)]="terms" class="form-control border-right-0" name="searchTerms"
+               placeholder="Enter search terms"/>
 
-    <div class="input-group-append">
+        <div class="input-group-append">
         <span class="input-group-text bg-light cursor-pointer" ngbDropdownToggle>
             <small class="text-muted">Blast</small>
         </span>
+        </div>
     </div>
+</form>
 
-</div>

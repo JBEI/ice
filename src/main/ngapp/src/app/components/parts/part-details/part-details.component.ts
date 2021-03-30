@@ -32,6 +32,10 @@ export class PartDetailsComponent implements OnInit {
         this.details = true;
     }
 
+    goHome(): void {
+
+    }
+
     backTo(): void {
 
     }

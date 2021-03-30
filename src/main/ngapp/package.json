@@ -23,7 +23,7 @@
         "@ng-bootstrap/ng-bootstrap": "^9.0.2",
         "bootstrap": "^4.6.0",
         "handsontable": "^8.3.1",
-        "open-vector-editor": "^16.1.13",
+        "open-vector-editor": "^16.1.18",
         "rxjs": "~6.6.6",
         "tslib": "^2.1.0",
         "zone.js": "~0.11.4"

@@ -22,6 +22,12 @@
             <app-auto-complete-field *ngSwitchCase="'autoComplete'" class="pr-5 pb-3 align-text-top short-input"
                                      [part]="part" [field]="partField"></app-auto-complete-field>
 
+            <div *ngSwitchCase="'bool'" class="pr-5 pb-3 align-text-top  short-input">
+                <small class="text-muted">{{partField.label}}</small><br>
+                <span><i class="fa fa-fw fa-toggle-on font-14em text-success" *ngIf="partField.value === true"></i> </span>
+                <span><i class="fa fa-fw fa-toggle-off font-14em" *ngIf="!partField.value"></i> </span>
+            </div>
+
             <div [ngClass]="{'d-none': !partField.value, 'short-input': partField.value }"
                  class="pr-5 pb-3 align-text-top" *ngSwitchDefault>
                 <small class="text-muted">{{partField.label}}</small><br>
@@ -35,6 +41,11 @@
          class="pr-5 pb-2 align-text-top">
         <small class="text-muted">{{partField.label}}</small><br>
         <span>{{partField.value}}</span>
+    </div>
+
+    <div class="long-input pr-5 pb-2 align-text-top">
+        <small class="text-muted">Notes</small><br>
+        <span>{{part.longDescription}}</span>
     </div>
 </div>
 
