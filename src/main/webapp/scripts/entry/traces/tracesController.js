@@ -139,6 +139,10 @@ angular.module('ice.entry.traces.controller', [])
 
             var alignment = {
                 id: "iceAlignment",
+                alignmentName: 'Untitled', // todo
+                alignmentAnnotationVisibility: {
+                    "features": true,
+                },
                 pairwiseAlignments: []
             };
 
