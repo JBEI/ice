@@ -28,6 +28,7 @@ import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FeatureDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
+import org.jbei.ice.storage.hibernate.dao.SequenceFeatureAttributeDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceFeatureDAO;
 import org.jbei.ice.storage.model.*;
 
@@ -194,7 +195,15 @@ public class PartSequence {
             if (sequence == null)
                 throw new IOException("Could not create sequence object");
 
-            sequence.setSequenceUser(sequenceFile.getFileName());
+            // copy original sequence file to file system
+            try {
+                Files.copy(sequencePath, sequenceFile.getFilePath(), StandardCopyOption.REPLACE_EXISTING);
+                sequence.setSequenceUser(sequenceFile.getFileName());
+            } catch (Exception e) {
+                // ok to ignore. Can get back sequence as long as sequence object is saved. cannot download original
+                Logger.warn("Exception writing sequence to file: " + e.getMessage());
+            }
+
             sequence.setFileName(fileName);
             sequence.setFormat(format);
             sequence = saveSequenceObject(sequence);
@@ -358,24 +367,81 @@ public class PartSequence {
         if (existing == null || existing.getSequenceFeatures() == null || updated.getSequenceFeatures() == null)
             return;
 
-        for (SequenceFeature existingFeature : existing.getSequenceFeatures()) {
-            // for each existing feature, check with updated for difference in name and type
-            for (SequenceFeature updatedSequenceFeature : updated.getSequenceFeatures()) {
-                Feature sequenceFeature = updatedSequenceFeature.getFeature();
-                Feature existingFeatureFeature = existingFeature.getFeature();
+        final SequenceFeatureAttributeDAO attributeDAO = DAOFactory.getSequenceFeatureAttributeDAO();
 
-                if (!sequenceFeature.getHash().equals(existingFeatureFeature.getHash()))
-                    continue;
+        // for each existing feature, check with updated for difference in name and type and notes
+        for (SequenceFeature existingSequenceFeature : existing.getSequenceFeatures()) {
 
-                if (!sequenceFeature.getName().equals(existingFeatureFeature.getName()) ||
-                        !sequenceFeature.getGenbankType().equals(existingFeatureFeature.getGenbankType())) {
-                    // update
-                    existingFeatureFeature.setName(sequenceFeature.getName());
-                    existingFeatureFeature.setGenbankType(sequenceFeature.getGenbankType());
-                    featureDAO.update(existingFeatureFeature);
+            SequenceFeature updatedSequenceFeature = getUpdatedEquivalent(existingSequenceFeature, updated);
+            if (updatedSequenceFeature == null)
+                continue;
+
+            Feature updatedFeature = updatedSequenceFeature.getFeature();
+            Feature existingFeature = existingSequenceFeature.getFeature();
+
+            // check if existing feature name/type needs to be updated
+            if (!updatedFeature.getName().equals(existingFeature.getName()) ||
+                    !updatedFeature.getGenbankType().equals(existingFeature.getGenbankType())) {
+                existingFeature.setName(updatedFeature.getName());
+                existingFeature.setGenbankType(updatedFeature.getGenbankType());
+                featureDAO.update(existingFeature);
+            }
+
+            // check notes for existing feature TODO : if key same but value is different, update instead
+            // first build cache of updated
+            Map<String, List<String>> updatedCache = new HashMap<>();
+            for (SequenceFeatureAttribute updatedAttribute : updatedSequenceFeature.getSequenceFeatureAttributes()) {
+                String key = updatedAttribute.getKey();
+                String value = updatedAttribute.getValue();
+
+                List<String> values = updatedCache.computeIfAbsent(key, k -> new ArrayList<>());
+                values.add(value);
+            }
+
+            Iterator<SequenceFeatureAttribute> iterator = existingSequenceFeature.getSequenceFeatureAttributes().iterator();
+
+            // remove notes that are not in updated list
+            while (iterator.hasNext()) {
+                SequenceFeatureAttribute attribute = iterator.next();
+                List<String> values = updatedCache.get(attribute.getKey());
+                if (values == null || !values.contains(attribute.getValue())) {
+                    attributeDAO.delete(attribute);
+                    iterator.remove();
+                }
+            }
+
+            // add notes from updated list not present in existing
+            for (SequenceFeatureAttribute updatedAttribute : updatedSequenceFeature.getSequenceFeatureAttributes()) {
+                // check if attribute is available on existing
+                boolean isAvailable = false;
+                for (SequenceFeatureAttribute existingAttribute : existingSequenceFeature.getSequenceFeatureAttributes()) {
+                    isAvailable = updatedAttribute.getKey().equals(existingAttribute.getKey()) &&
+                            updatedAttribute.getValue().equals(existingAttribute.getValue());
+                    if (isAvailable)
+                        break;
+                }
+
+                // if not available add to list
+                if (!isAvailable) {
+                    updatedAttribute.setSequenceFeature(existingSequenceFeature);
+                    updatedAttribute = attributeDAO.create(updatedAttribute);
+                    existingSequenceFeature.getSequenceFeatureAttributes().add(updatedAttribute);
                 }
             }
         }
+    }
+
+    // todo : can cache using hash as key (hash -> sequence) for performance improvements
+    private SequenceFeature getUpdatedEquivalent(SequenceFeature existing, Sequence updatedSequence) {
+        if (updatedSequence.getSequenceFeatures() == null)
+            return null;
+
+        for (SequenceFeature updated : updatedSequence.getSequenceFeatures()) {
+            if (existing.getFeature().getHash().equals(updated.getFeature().getHash()))
+                return updated;
+        }
+        // no match found
+        return null;
     }
 
     private void deleteSequenceFeature(SequenceFeature sequenceFeature) {
@@ -510,21 +576,20 @@ public class PartSequence {
     /**
      * Convert sequence to a byte array of the specified format with the intention of being written to a file
      *
-     * @param format                 specified format for sequence conversion
-     * @param useFileName            whether to use the original filename of the sequence if the original uploaded sequence is
-     *                               available
-     * @param useOriginalIfAvailable whether to use specified format if is it the same as the uploaded format
+     * @param format      specified format for sequence conversion
+     * @param useFileName whether to use the original filename of the sequence if the original uploaded sequence is
+     *                    available
      * @return wrapper around the outputstream for the converted format and name
      */
-    public InputStreamWrapper toFile(SequenceFormat format, boolean useFileName, boolean useOriginalIfAvailable) {
+    public InputStreamWrapper toFile(SequenceFormat format, boolean useFileName) {
         entryAuthorization.expectRead(userId, entry);
         Sequence sequence = sequenceDAO.getByEntry(entry);
         if (sequence == null)
             return null;
 
-        // if requested format is the same as the original format (if original exist) then get the original instead
-        if (useOriginalIfAvailable && sequence.getFormat() == format && DAOFactory.getSequenceDAO().hasOriginalSequence(entry.getId()))
-            format = SequenceFormat.ORIGINAL;
+        // default format of genbank
+        if (format == null)
+            format = SequenceFormat.GENBANK;
 
         return new SequenceAsString(format, entry.getId(), useFileName).get();
     }

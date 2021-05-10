@@ -60,10 +60,10 @@ import java.util.List;
 @Path("/parts")
 public class PartResource extends RestResource {
 
-    private EntryController controller = new EntryController();
-    private Attachments attachments = new Attachments();
-    private SampleService sampleService = new SampleService();
-    private RemoteEntries remoteEntries = new RemoteEntries();
+    private final EntryController controller = new EntryController();
+    private final Attachments attachments = new Attachments();
+    private final SampleService sampleService = new SampleService();
+    private final RemoteEntries remoteEntries = new RemoteEntries();
 
     /**
      * Retrieves a part using any of the unique identifiers. e.g. Part number, synthetic id, or

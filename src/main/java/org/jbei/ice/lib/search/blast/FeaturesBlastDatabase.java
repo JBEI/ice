@@ -26,8 +26,8 @@ import java.util.List;
 
 public class FeaturesBlastDatabase extends BlastDatabase {
 
-    private BlastPlus blastPlus;
-    private BlastFastaFile blastFastaFile;
+    private final BlastPlus blastPlus;
+    private final BlastFastaFile blastFastaFile;
 
     public FeaturesBlastDatabase() {
         super("auto-annotation");
@@ -43,6 +43,11 @@ public class FeaturesBlastDatabase extends BlastDatabase {
      * @throws BlastException on null result or exception processing the result
      */
     public List<DNAFeature> runBlast(BlastQuery query) throws BlastException {   // todo add e-value
+        if (!blastPlus.canRunBlast()) {
+            Logger.error("Cannot run blast due to invalid blast installation");
+            return new ArrayList<>();
+        }
+
         BlastSearch blastSearch = new BlastSearch(this.indexPath, this.dbName);
         String result = blastSearch.run(query, "-perc_identity", "100",
                 "-outfmt", "10 stitle qstart qend sstart send sstrand");
@@ -122,6 +127,10 @@ public class FeaturesBlastDatabase extends BlastDatabase {
      * @throws BlastException on {@link IOException}
      */
     public void rebuild() throws BlastException {
+        if (!blastPlus.canRunBlast()) {
+            Logger.error("Cannot rebuild due to invalid blast installation");
+            return;
+        }
         Iterable<String> iterable = AllFeaturesStream::new;
         blastFastaFile.write(iterable);
         blastPlus.formatBlastDb(blastFastaFile, this.dbName); // todo
@@ -129,11 +138,11 @@ public class FeaturesBlastDatabase extends BlastDatabase {
 
     private static class AllFeaturesStream implements Iterator<String> {
 
-        private long available;
+        private final long available;
         private int currentOffset;
         private String nextValue;
-        private FeatureDAO featureDAO;
-        private SequenceFeatureDAO sequenceFeatureDAO;
+        private final FeatureDAO featureDAO;
+        private final SequenceFeatureDAO sequenceFeatureDAO;
 
         public AllFeaturesStream() {
             featureDAO = DAOFactory.getFeatureDAO();

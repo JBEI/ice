@@ -91,7 +91,6 @@ angular.module('ice.entry.directives', [])
                     if (!data)
                         return;
 
-                    console.log("refreshing vector editor");
                     $scope.loadVectorEditor(convertToVEModel(data));
                 });
 
@@ -104,7 +103,7 @@ angular.module('ice.entry.directives', [])
                     $scope.editor = $window.createVectorEditor(document.getElementById("ve-Root"), {
                         onCopy: function (event, sequenceData, editorState) {
                             const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
-                            clipboardData.setData('text/plain', sequenceData.sequence);
+                            // clipboardData.setData('text/plain', sequenceData.sequence);
                             data.selection = editorState.selectionLayer;
                             data.openVECopied = sequenceData;
                             clipboardData.setData('application/json', JSON.stringify(data));
@@ -178,6 +177,18 @@ angular.module('ice.entry.directives', [])
                     return l1.genbankStart - l2.genbankStart;
                 }
 
+                let convertNotes = function (feature, featureObject) {
+                    if (feature.notes.length) {
+                        for (let k = 0; k < feature.notes.length; k += 1) {
+                            const note = feature.notes[k];
+                            if (!featureObject.notes[note.name])
+                                featureObject.notes[note.name] = [];
+                            featureObject.notes[note.name].push(note.value);
+                        }
+                    }
+                    return featureObject;
+                }
+
                 // converts the features array (which is what is returned by ICE) to a class (which is what
                 // openVE uses)
                 const convertFeaturesToVEModel = function (features, openVE = null) {
@@ -202,8 +213,6 @@ angular.module('ice.entry.directives', [])
                             feature.locations.sort(compareLocations);   // todo: there is a bug here if spanning origin
 
                         // deal with locations
-                        let notes = feature.notes.length ? feature.notes[0].value : "";
-
                         for (let j = 0; j < feature.locations.length; j += 1) {
                             let location = feature.locations[j];
                             let featureObject = openVE[feature.id];
@@ -217,6 +226,9 @@ angular.module('ice.entry.directives', [])
                                 locations.push({start: location.genbankStart - 1, end: location.end - 1});
                                 featureObject.end = location.end - 1;
                                 featureObject.locations = locations;
+
+                                // deal with feature notes
+                                featureObject = convertNotes(feature, featureObject);
                             } else {
                                 featureObject = {
                                     start: location.genbankStart - 1,
@@ -225,9 +237,12 @@ angular.module('ice.entry.directives', [])
                                     forward: feature.strand === 1,
                                     type: feature.type,
                                     name: feature.name,
-                                    notes: notes,
+                                    notes: {},
                                     annotationType: feature.type
                                 };
+
+                                // deal with feature notes
+                                featureObject = convertNotes(feature, featureObject);
                             }
 
                             openVE[featureObject.fid] = featureObject;
@@ -285,7 +300,6 @@ angular.module('ice.entry.directives', [])
                         } else {
                             $scope.fetchingAnnotations = false;
                             $scope.loaded(seqData);
-                            console.log("annotations loaded", seqData);
                             $rootScope.$emit("VectorEditorSequenceModel", {sequenceData: seqData});
                         }
                     }, {start: start, limit: 10}, function (error) {

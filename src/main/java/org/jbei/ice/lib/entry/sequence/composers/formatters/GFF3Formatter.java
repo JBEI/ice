@@ -41,7 +41,8 @@ public class GFF3Formatter extends AbstractFormatter {
         Set<SequenceFeature> featureSet = sequence.getSequenceFeatures();
         if (featureSet != null) {
             for (SequenceFeature sequenceFeature : featureSet) {
-                String featureLine = sequenceFeature.getName() + " ICE " + sequenceFeature.getGenbankType();
+                String featureType = sequenceFeature.getFeature() != null && !StringUtils.isEmpty(sequenceFeature.getFeature().getGenbankType()) ? sequenceFeature.getFeature().getGenbankType() : sequenceFeature.getGenbankType();
+                String featureLine = sequenceFeature.getName() + " ICE " + featureType;
 
                 // location
                 for (AnnotationLocation location : sequenceFeature.getAnnotationLocations()) {

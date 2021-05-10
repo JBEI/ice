@@ -19,8 +19,6 @@ import java.io.IOException;
  */
 public class SequenceAsString {
 
-    private String sequenceString;
-    private String name;
     private InputStreamWrapper wrapper;
 
     public SequenceAsString(SequenceFormat format, long partId, boolean useFileName) {
@@ -31,10 +29,13 @@ public class SequenceAsString {
             return;
         }
 
+        final String sequenceString;
+        final String name;
+
         switch (format) {
             case ORIGINAL:
                 sequenceString = sequence.getSequenceUser();
-                if (!useFileName && !StringUtils.isEmpty(sequence.getFileName())) {
+                if (StringUtils.isEmpty(sequence.getFileName()) || !useFileName) {
                     name = entry.getPartNumber() + ".gb";
                 } else {
                     name = sequence.getFileName();
@@ -78,8 +79,10 @@ public class SequenceAsString {
                 break;
         }
 
-        ByteArrayInputStream stream = new ByteArrayInputStream(sequenceString.getBytes());
-        wrapper = new InputStreamWrapper(stream, name);
+        if (wrapper == null) {
+            ByteArrayInputStream stream = new ByteArrayInputStream(sequenceString.getBytes());
+            wrapper = new InputStreamWrapper(stream, name);
+        }
     }
 
     /**
