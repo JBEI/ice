@@ -103,7 +103,7 @@ angular.module('ice.entry.directives', [])
                     $scope.editor = $window.createVectorEditor(document.getElementById("ve-Root"), {
                         onCopy: function (event, sequenceData, editorState) {
                             const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
-                            clipboardData.setData('text/plain', sequenceData.sequence);
+                            // clipboardData.setData('text/plain', sequenceData.sequence);
                             data.selection = editorState.selectionLayer;
                             data.openVECopied = sequenceData;
                             clipboardData.setData('application/json', JSON.stringify(data));
