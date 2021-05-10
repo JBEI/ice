@@ -20,7 +20,7 @@ To install in a production environment, please [consult our manual](http://ice.j
 ### Development
 To set up a development environment or local machine installation make sure you have the following dependencies installed
 
-* [Java JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+* [Open JDK 15](https://openjdk.java.net/projects/jdk/15/)
 * [Maven 3](https://maven.apache.org/download.cgi)
 * [Git](https://git-scm.com/downloads)
 
@@ -48,9 +48,6 @@ Command line installation steps (linux environment):
 
 ## Links
 * [Documentation](http://ice.jbei.org/) including user manual and API documentation
-
-## Build Status:
-[![Build Status](https://travis-ci.org/JBEI/ice.svg?branch=master)](https://travis-ci.org/JBEI/ice)
 
 ## Related Projects
 [Open Vector Editor](https://github.com/TeselaGen/openVectorEditor) is used in ICE to display and edit sequences
