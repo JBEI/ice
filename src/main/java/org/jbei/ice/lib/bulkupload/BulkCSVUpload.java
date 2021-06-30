@@ -1,9 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.LineIterator;
+import com.opencsv.CSVReader;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.StorageLocation;
@@ -20,7 +17,7 @@ import org.jbei.ice.storage.model.Entry;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStreamReader;
 import java.util.*;
 
 /**
@@ -131,7 +128,7 @@ public class BulkCSVUpload {
         HashMap<Integer, HeaderValue> headers = new HashMap<>();
 
         for (int i = 0; i < headerArray.length; i += 1) {
-            String fieldStr = headerArray[i].trim();
+            String fieldStr = headerArray[i].replaceAll("[^\\x20-\\x7e]", " ").trim();
 
             // account for asterisk that indicates a header is required
             fieldStr = fieldStr.replace(FileBulkUpload.ASTERISK_SYMBOL, "");
@@ -176,89 +173,63 @@ public class BulkCSVUpload {
     List<PartWithSample> getBulkUploadDataFromFile(InputStream inputStream) throws IOException {
         List<PartWithSample> partDataList = new LinkedList<>();
 
-        // parse CSV file
-        try (LineIterator it = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8)) {
-            HashMap<Integer, HeaderValue> headers;
-            CSVParser parser;
+        HashMap<Integer, HeaderValue> headers = null;
+        CSVReader reader = new CSVReader(new InputStreamReader(inputStream));
+        int row = -1;
+        for (String[] nextLine : reader) {
+            row += 1;
 
-            //
-            // process headers
-            //
-            if (it.hasNext()) {
-                String headerString = it.nextLine();
-                // check the separator char (header will use the same separator)
-                // to indicate the type of parser to use (tab or comma separated)
-                if (headerString.contains("\t") && !headerString.contains(",")) {
-                    parser = new CSVParserBuilder().withSeparator('\t').build();
+            if (row == 0) {
+                // parse headers
+                headers = processColumnHeaders(nextLine);
+                continue;
+            }
+
+            // parse data
+            PartData partData = new PartData(addType);
+            PartSample partSample = null;
+
+            if (subType != null) {
+                partData.getLinkedParts().add(new PartData(subType));
+            }
+
+            // for each column
+            for (int i = 0; i < nextLine.length; i += 1) {
+                HeaderValue headerForColumn = headers.get(i);
+                String value = nextLine[i].replaceAll("[^\\x20-\\x7e]", " ");
+
+                // process sample information
+                if (headerForColumn.isSampleField()) {
+                    if (partSample == null)
+                        partSample = new PartSample();
+
+                    setPartSampleData(((SampleHeaderValue) headerForColumn).getSampleField(), partSample, value);
+                } else if (headerForColumn.isCustomField()) {
+                    // process custom field
+                    setCustomField(value, partData, (EntryHeaderValue) headerForColumn);
                 } else {
-                    parser = new CSVParser();
+                    // process existing field
+                    setExistingField(value, partData, (EntryHeaderValue) headerForColumn);
                 }
-
-                // get column headers
-                String[] fieldStrArray = parser.parseLine(headerString);
-                headers = processColumnHeaders(fieldStrArray);
-            } else {
-                throw new IllegalStateException("No headers found in csv file");
             }
 
-            //
-            // process data
-            //
-            int index = 0;
-            while (it.hasNext()) {
-                String line = it.nextLine().trim();
-
-                // skip any empty lines (holes) in the csv file
-                if (StringUtils.isBlank(line) || line.replaceAll(",", "").trim().isEmpty())
-                    continue;
-
-                // parser != null; process line contents with available headers
-                String[] valuesArray = parser.parseLine(line);
-                PartData partData = new PartData(addType);
-                PartSample partSample = null;
-
-                if (subType != null) {
-                    partData.getLinkedParts().add(new PartData(subType));
-                }
-
-                // for each column
-                for (int i = 0; i < valuesArray.length; i += 1) {
-                    HeaderValue headerForColumn = headers.get(i);
-                    String value = valuesArray[i];
-
-                    // process sample information
-                    if (headerForColumn.isSampleField()) {
-                        if (partSample == null)
-                            partSample = new PartSample();
-
-                        setPartSampleData(((SampleHeaderValue) headerForColumn).getSampleField(), partSample, value);
-                    } else if (headerForColumn.isCustomField()) {
-                        // process custom field
-                        setCustomField(value, partData, (EntryHeaderValue) headerForColumn);
-                    } else {
-                        // process existing field
-                        setExistingField(value, partData, (EntryHeaderValue) headerForColumn);
-                    }
-                }
-
-                // validate
-                List<EntryFieldLabel> fields = EntryUtil.validates(partData);
-                if (!fields.isEmpty()) {
-                    invalidFields.clear();
-                    invalidFields.addAll(fields);
-                    return null;
-                }
-
-                partData.setIndex(index);
-                PartWithSample partWithSample = new PartWithSample(partSample, partData);
-                partDataList.add(partWithSample);
-                index += 1;
+            // validate
+            List<EntryFieldLabel> fields = EntryUtil.validates(partData);
+            if (!fields.isEmpty()) {
+                invalidFields.clear();
+                invalidFields.addAll(fields);
+                return null;
             }
+
+            partData.setIndex(row);
+            PartWithSample partWithSample = new PartWithSample(partSample, partData);
+            partDataList.add(partWithSample);
         }
+
         return partDataList;
     }
 
-    private boolean setCustomField(String value, PartData partData, EntryHeaderValue headerValue) throws IOException {
+    private void setCustomField(String value, PartData partData, EntryHeaderValue headerValue) throws IOException {
         // todo : e.g. {entryField: host} can be existing field or custom field
         CustomEntryFieldDAO fieldDAO = DAOFactory.getCustomEntryFieldDAO();
         EntryType type;
@@ -270,9 +241,9 @@ public class BulkCSVUpload {
         }
 
         Optional<CustomEntryFieldModel> optional = fieldDAO.getLabelForType(type, headerValue.getLabel());
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             Logger.error("Could not retrieve custom field for \"" + headerValue.getLabel() + "\"");
-            return false;
+            return;
         }
 
         CustomEntryFieldModel customEntryFieldModel = optional.get();
@@ -280,10 +251,10 @@ public class BulkCSVUpload {
             // validate
             if (customEntryFieldModel.getRequired() && StringUtils.isEmpty(value)) {
                 // todo : return error
-                return false;
+                return;
             }
             setExistingField(value, partData, headerValue);
-            return true;
+            return;
         }
 
         CustomEntryField customEntryField = new CustomEntryField();
@@ -291,7 +262,6 @@ public class BulkCSVUpload {
         customEntryField.setValue(value); // todo : check if the value is from a pre-selected list of options
         partData.getCustomEntryFields().add(customEntryField);
 
-        return true;
     }
 
     private void setExistingField(String value, PartData partData, EntryHeaderValue headerValue) throws IOException {
@@ -340,33 +310,26 @@ public class BulkCSVUpload {
 
     private void setPartSampleData(SampleField sampleField, PartSample partSample, String data) {
         switch (sampleField) {
-            case LABEL:
-                partSample.setLabel(data);
-                break;
-
-            case SHELF:
+            case LABEL -> partSample.setLabel(data);
+            case SHELF -> {
                 StorageLocation storageLocation = new StorageLocation();
                 storageLocation.setType(SampleType.SHELF);
                 storageLocation.setDisplay(data);
                 partSample.setLocation(storageLocation);
-                break;
-
-            case BOX:
+            }
+            case BOX -> {
                 StorageLocation childLocation = new StorageLocation();
                 childLocation.setDisplay(data);
                 childLocation.setType(SampleType.BOX_INDEXED);
                 partSample.getLocation().setChild(childLocation);
-                break;
-
-            case WELL:
+            }
+            case WELL -> {
                 StorageLocation grandChildLocation = new StorageLocation();
                 grandChildLocation.setType(SampleType.WELL);
                 grandChildLocation.setDisplay(data);
                 partSample.getLocation().getChild().setChild(grandChildLocation);
-                break;
-
-            default:
-                throw new IllegalArgumentException("No handler for sample field " + sampleField);
+            }
+            default -> throw new IllegalArgumentException("No handler for sample field " + sampleField);
         }
     }
 }
