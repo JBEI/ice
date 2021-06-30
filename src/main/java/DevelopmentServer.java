@@ -46,6 +46,7 @@ public class DevelopmentServer {
         PredicatesHandler handler = Handlers.predicates(PredicatedHandlersParser.parse(
                 "path-prefix('search') or " +
                         "path-prefix('folders') or " +
+                        "path-prefix('upload') or " +
                         "path-prefix('download') or " +
                         "path-prefix('entry') or path-prefix('admin') and regex('/.+') -> rewrite('/')",
                 ClassLoader.getSystemClassLoader()), servletHandler);
