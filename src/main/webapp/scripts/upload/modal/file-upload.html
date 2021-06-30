@@ -27,7 +27,7 @@
         <span ng-if="uploadError.headers.length" class="font-85em" style="margin-left: 25px">
             The following fields are required and left blank or have invalid values:
             <ul style="margin-left: 62px">
-                <li ng-repeat="header in uploadError.headers">{{header.entryField}}</li>
+                <li ng-repeat="header in uploadError.headers">{{header.entryFieldLabel}}</li>
             </ul>
         </span>
         <span ng-if="uploadError.details" class="font-85em" style="margin-left: 25px">
