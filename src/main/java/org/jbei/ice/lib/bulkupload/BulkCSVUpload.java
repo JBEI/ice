@@ -229,7 +229,7 @@ public class BulkCSVUpload {
         return partDataList;
     }
 
-    private boolean setCustomField(String value, PartData partData, EntryHeaderValue headerValue) throws IOException {
+    private void setCustomField(String value, PartData partData, EntryHeaderValue headerValue) throws IOException {
         // todo : e.g. {entryField: host} can be existing field or custom field
         CustomEntryFieldDAO fieldDAO = DAOFactory.getCustomEntryFieldDAO();
         EntryType type;
@@ -243,7 +243,7 @@ public class BulkCSVUpload {
         Optional<CustomEntryFieldModel> optional = fieldDAO.getLabelForType(type, headerValue.getLabel());
         if (optional.isEmpty()) {
             Logger.error("Could not retrieve custom field for \"" + headerValue.getLabel() + "\"");
-            return false;
+            return;
         }
 
         CustomEntryFieldModel customEntryFieldModel = optional.get();
@@ -251,10 +251,10 @@ public class BulkCSVUpload {
             // validate
             if (customEntryFieldModel.getRequired() && StringUtils.isEmpty(value)) {
                 // todo : return error
-                return false;
+                return;
             }
             setExistingField(value, partData, headerValue);
-            return true;
+            return;
         }
 
         CustomEntryField customEntryField = new CustomEntryField();
@@ -262,7 +262,6 @@ public class BulkCSVUpload {
         customEntryField.setValue(value); // todo : check if the value is from a pre-selected list of options
         partData.getCustomEntryFields().add(customEntryField);
 
-        return true;
     }
 
     private void setExistingField(String value, PartData partData, EntryHeaderValue headerValue) throws IOException {
@@ -311,33 +310,26 @@ public class BulkCSVUpload {
 
     private void setPartSampleData(SampleField sampleField, PartSample partSample, String data) {
         switch (sampleField) {
-            case LABEL:
-                partSample.setLabel(data);
-                break;
-
-            case SHELF:
+            case LABEL -> partSample.setLabel(data);
+            case SHELF -> {
                 StorageLocation storageLocation = new StorageLocation();
                 storageLocation.setType(SampleType.SHELF);
                 storageLocation.setDisplay(data);
                 partSample.setLocation(storageLocation);
-                break;
-
-            case BOX:
+            }
+            case BOX -> {
                 StorageLocation childLocation = new StorageLocation();
                 childLocation.setDisplay(data);
                 childLocation.setType(SampleType.BOX_INDEXED);
                 partSample.getLocation().setChild(childLocation);
-                break;
-
-            case WELL:
+            }
+            case WELL -> {
                 StorageLocation grandChildLocation = new StorageLocation();
                 grandChildLocation.setType(SampleType.WELL);
                 grandChildLocation.setDisplay(data);
                 partSample.getLocation().getChild().setChild(grandChildLocation);
-                break;
-
-            default:
-                throw new IllegalArgumentException("No handler for sample field " + sampleField);
+            }
+            default -> throw new IllegalArgumentException("No handler for sample field " + sampleField);
         }
     }
 }
