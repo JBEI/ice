@@ -128,7 +128,7 @@ public class BulkCSVUpload {
         HashMap<Integer, HeaderValue> headers = new HashMap<>();
 
         for (int i = 0; i < headerArray.length; i += 1) {
-            String fieldStr = headerArray[i].trim();
+            String fieldStr = headerArray[i].replaceAll("[^\\x20-\\x7e]", " ").trim();
 
             // account for asterisk that indicates a header is required
             fieldStr = fieldStr.replace(FileBulkUpload.ASTERISK_SYMBOL, "");
@@ -196,7 +196,7 @@ public class BulkCSVUpload {
             // for each column
             for (int i = 0; i < nextLine.length; i += 1) {
                 HeaderValue headerForColumn = headers.get(i);
-                String value = nextLine[i];
+                String value = nextLine[i].replaceAll("[^\\x20-\\x7e]", " ");
 
                 // process sample information
                 if (headerForColumn.isSampleField()) {
