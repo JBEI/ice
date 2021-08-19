@@ -28,6 +28,10 @@ RUN apt-get clean \
         ncbi-blast+ \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /usr/local/tomcat/webapps/*
+    && rm -rf /usr/local/tomcat/webapps/* \
+    && sed -i.bak -E \
+        -e '\|^</Context>$|i <Resources cachingAllowed="true" cacheMaxSize="100000" />' \
+        /usr/local/tomcat/conf/context.xml \
+    && rm /usr/local/tomcat/conf/context.xml.bak
 
 COPY --from=maven /tmp/target/ice-*.war /usr/local/tomcat/webapps/ROOT.war
