@@ -1,4 +1,4 @@
-FROM maven:3-jdk-13 as maven
+FROM maven:3-openjdk-16 as maven
 
 COPY ./pom.xml /tmp
 WORKDIR /tmp
@@ -20,12 +20,12 @@ RUN sed -i.bak -E \
 
 # -----
 
-FROM tomcat:9
+FROM tomcat:9-jdk16
 
 RUN apt-get clean \
     && apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-install-recommends \
-        ncbi-blast+=2.6.0-1 \
+        ncbi-blast+ \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /usr/local/tomcat/webapps/*
