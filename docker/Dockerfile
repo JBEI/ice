@@ -34,4 +34,7 @@ RUN apt-get clean \
         /usr/local/tomcat/conf/context.xml \
     && rm /usr/local/tomcat/conf/context.xml.bak
 
+# Override CATALINA_OPTS environment to change from default db connection
+ENV CATALINA_OPTS="-Dice.db.url=jdbc:postgresql://postgres/ice -Dice.db.user=iceuser -Dice.db.pass=icepass"
+
 COPY --from=maven /tmp/target/ice-*.war /usr/local/tomcat/webapps/ROOT.war
