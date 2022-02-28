@@ -1360,8 +1360,8 @@ angular.module('ice.entry.controller', [])
 
 // customer parameter add for entry view
             $scope.addNewCustomField = function () {
-                $scope.newParameter.nameInvalid = $scope.newParameter.name == undefined || $scope.newParameter.name == '';
-                $scope.newParameter.valueInvalid = $scope.newParameter.value == undefined || $scope.newParameter.value == '';
+                $scope.newParameter.nameInvalid = $scope.newParameter.name === undefined || $scope.newParameter.name === '';
+                $scope.newParameter.valueInvalid = $scope.newParameter.value === undefined || $scope.newParameter.value === '';
                 if ($scope.newParameter.nameInvalid || $scope.newParameter.valueInvalid)
                     return;
 
