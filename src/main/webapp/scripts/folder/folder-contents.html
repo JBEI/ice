@@ -211,7 +211,9 @@
                     {{entry.type | uppercase}}
                     <i class="fa fa-fw fa-cloud" ng-if="entry.visible=='REMOTE'" style="color: #c9e6f2"></i>
                 </td>
-                <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
+                <td><a ng-click="showEntryDetails(entry, $index)" 
+                       ng-href="/entry/{{entry.id}}"
+                       class="cell_mouseover form-group"
                        popover-trigger="'mouseenter'" ng-mouseover="tooltipDetails(entry)"
                        uib-popover-template="folderPopupTemplateUrl" popover-placement="right">{{entry.partId}}</a>
                 </td>
