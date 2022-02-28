@@ -169,6 +169,14 @@ public class BulkCSVUpload {
         return headers;
     }
 
+    private boolean isEmptyRow(String[] row) {
+        StringBuilder sb = new StringBuilder();
+        for (String s : row) {
+            sb.append(s.trim());
+        }
+        return sb.toString().isEmpty();
+    }
+
     // NOTE: this also validates the part data (with the exception of the actual files)
     List<PartWithSample> getBulkUploadDataFromFile(InputStream inputStream) throws IOException {
         List<PartWithSample> partDataList = new LinkedList<>();
@@ -177,6 +185,11 @@ public class BulkCSVUpload {
         CSVReader reader = new CSVReader(new InputStreamReader(inputStream));
         int row = -1;
         for (String[] nextLine : reader) {
+
+            // skip all empty rows
+            if (isEmptyRow(nextLine))
+                continue;
+
             row += 1;
 
             if (row == 0) {

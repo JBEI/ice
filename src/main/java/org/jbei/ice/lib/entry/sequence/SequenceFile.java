@@ -22,9 +22,10 @@ public class SequenceFile {
     private final Path path;
     private String fileName;
     private boolean deleted;
+    private static final String SEQUENCE_FOLDER_NAME = "sequences";
 
     public SequenceFile() throws IOException {
-        Path directoryPath = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), "sequences");
+        Path directoryPath = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), SEQUENCE_FOLDER_NAME);
         if (!Files.exists(directoryPath))
             Files.createDirectory(directoryPath);
 
@@ -34,7 +35,7 @@ public class SequenceFile {
     }
 
     public SequenceFile(String fileName) throws IOException {
-        Path directoryPath = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), "sequences");
+        Path directoryPath = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), SEQUENCE_FOLDER_NAME);
         if (!Files.exists(directoryPath))
             Files.createDirectory(directoryPath);
         this.fileName = fileName;
