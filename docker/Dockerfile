@@ -21,7 +21,7 @@ RUN sed -i.bak -E \
 
 # -----
 
-FROM tomcat:9-jdk16
+FROM tomcat:9-jdk17
 
 RUN apt-get clean \
     && apt-get update \
