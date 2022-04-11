@@ -4,10 +4,10 @@ import io.undertow.predicate.PredicatesHandler;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.builder.PredicatedHandlersParser;
-import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.util.HttpString;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.jbei.ice.servlet.IceServletContextListener;
 
@@ -27,7 +27,7 @@ public class DevelopmentServer {
                 .addListener(Servlets.listener(IceServletContextListener.class))
                 .setContextPath("/")
                 .setDeploymentName("Inventory for Composable Elements")
-                .setResourceManager(new FileResourceManager(new File("src/main/webapp"), 10)).addWelcomePage("index.htm")
+//                .setResourceManager(new FileResourceManager(new File("src/main/webapp"), 10)).addWelcomePage("index.htm")
                 .addServlets(
                         Servlets.servlet("Jersey REST Servlet", ServletContainer.class)
                                 .addInitParam("jersey.config.server.provider.packages", "org.jbei.ice.services.rest")
@@ -48,6 +48,7 @@ public class DevelopmentServer {
                         "path-prefix('folders') or " +
                         "path-prefix('upload') or " +
                         "path-prefix('download') or " +
+                        "path-prefix('config') or " +
                         "path-prefix('entry') or path-prefix('admin') and regex('/.+') -> rewrite('/')",
                 ClassLoader.getSystemClassLoader()), servletHandler);
 
@@ -56,7 +57,13 @@ public class DevelopmentServer {
 
         Undertow server = Undertow.builder()
                 .addHttpListener(8080, "localhost")
-                .setHandler(path)
+                .setHandler(exchange -> {
+                    exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Origin"), "*");
+                    exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Methods"), "GET,PUT,POST,DELETE,OPTIONS");
+                    exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Headers"), "Content-Type, X-ICE-Authentication-SessionId");
+
+                    path.handleRequest(exchange);
+                })
                 .build();
         server.start();
     }

@@ -24,7 +24,7 @@ public class AccountDAO extends HibernateRepository<Account> {
      *
      * @param id unique local identifier for object
      * @return Account
-     * @throws DAOException
+     * @throws DAOException on HibernateException
      */
     public Account get(long id) throws DAOException {
         return super.get(Account.class, id);
@@ -54,7 +54,7 @@ public class AccountDAO extends HibernateRepository<Account> {
                                 getBuilder().like(getBuilder().lower(from.get("email")), "%" + tok + "%"))
                 );
             }
-            query.where(predicates.toArray(new Predicate[predicates.size()])).distinct(true);
+            query.where(predicates.toArray(new Predicate[0])).distinct(true);
             return currentSession().createQuery(query).setMaxResults(limit).list();
         } catch (HibernateException e) {
             Logger.error(e);

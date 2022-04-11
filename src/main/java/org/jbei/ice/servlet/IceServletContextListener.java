@@ -1,13 +1,13 @@
 package org.jbei.ice.servlet;
 
-import org.hibernate.SessionFactory;
 import org.jbei.ice.ApplicationInitialize;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.executor.IceExecutorService;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.nio.file.Path;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -22,7 +22,21 @@ import java.util.Enumeration;
 public class IceServletContextListener implements ServletContextListener {
 
     public void contextInitialized(ServletContextEvent event) {
-        init();
+        Path path = ApplicationInitialize.configure();
+        if (path == null) {
+            System.err.println("Problem configuring application initialization");
+            return;
+        }
+
+        try {
+            HibernateConfiguration.beginTransaction();
+            ApplicationInitialize.loadAuthentication();
+            ApplicationInitialize.start(path);
+            HibernateConfiguration.commitTransaction();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     public void contextDestroyed(ServletContextEvent event) {
@@ -30,9 +44,7 @@ public class IceServletContextListener implements ServletContextListener {
 
         // shutdown executor service
         IceExecutorService.getInstance().stopService();
-
-        closeSessionFactory(HibernateUtil.getSessionFactory());
-
+        HibernateConfiguration.close();
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
             Driver driver = drivers.nextElement();
@@ -42,23 +54,6 @@ public class IceServletContextListener implements ServletContextListener {
             } catch (SQLException e) {
                 Logger.error("Error de-registering driver: " + driver, e);
             }
-        }
-    }
-
-    // work
-    private void closeSessionFactory(SessionFactory factory) {
-        factory.close();
-    }
-
-    protected void init() {
-        try {
-            HibernateUtil.beginTransaction();
-            ApplicationInitialize.startUp();
-            HibernateUtil.commitTransaction();
-        } catch (Throwable e) {
-            HibernateUtil.rollbackTransaction();
-            e.printStackTrace();
-            throw new RuntimeException(e);
         }
     }
 }

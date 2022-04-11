@@ -20,7 +20,4 @@ public class PermissionException extends RuntimeException {
         super("Administrative privileges required");
     }
 
-    public PermissionException(String message, Throwable throwable) {
-        super(message, throwable);
-    }
 }

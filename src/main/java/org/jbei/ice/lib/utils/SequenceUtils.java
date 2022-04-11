@@ -69,12 +69,12 @@ public class SequenceUtils {
         int index = 0;
         int end = input.length();
         while (index < end) {
-            result = result.append(input, index, index + 1);
+            result.append(input, index, index + 1);
             counter = counter + 1;
             index = index + 1;
 
             if (counter == 59) {
-                result = result.append("\n");
+                result.append("\n");
                 counter = 0;
             }
         }

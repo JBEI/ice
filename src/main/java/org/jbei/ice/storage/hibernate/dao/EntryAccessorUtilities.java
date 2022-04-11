@@ -6,7 +6,7 @@ public class EntryAccessorUtilities {
 
     public static String columnFieldToString(ColumnField field) {
         if (field == null)
-            return "creationTime";
+            return "id";
 
         switch (field) {
             case TYPE:
@@ -29,7 +29,7 @@ public class EntryAccessorUtilities {
 
             case CREATED:
             default:
-                return "creationTime";
+                return "id";
         }
     }
 }

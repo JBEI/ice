@@ -1,0 +1,305 @@
+<div class="container-fluid">
+    <!--if subfolder-->
+    <div class="row entry_general_header_td" style="height: 60px" *ngIf="folder.type">
+        <div class="col-md-12">
+            <table>
+                <tr>
+                    <td>
+                        <h4>
+                            <span style="white-space: nowrap">
+                                <img alt="Loading..." *ngIf="loadingPage" src="assets/img/loader-mini.gif"/>
+                                <strong>
+                                    <span style="text-transform: uppercase; color: #888">{{selectedCollection || folder.type}}</span>
+                                    <span [ngClass]="{folder_name:folder.canEdit}" ngbTooltip={{folderNameTooltip}}
+                                          (click)="showFolderRenameModal()">
+                                        {{folder.folderName}}
+                                    </span>
+                                </strong>
+                                <span *ngIf="folder.publicReadAccess">&nbsp;
+                                    <small style="font-size: 12px; position: relative; top: -4px"
+                                           ngbTooltip="Available on web of registries"
+                                           class="badge badge-info cursor_pointer"><i class="fa fa-globe"></i>
+                                        Public
+                                    </small>
+                                </span>
+                            </span>
+
+                            <div class="no_wrap">
+                                <small class="font-65em" *ngIf="folder.type=='REMOTE'">
+                                    Shared by <i>{{folder.owner.email}}</i> on <a
+                                        [href]="'https://' + folder.remotePartner.url">{{folder.remotePartner.name}}</a>
+                                </small>
+                                <small class="font-65em"
+                                       *ngIf="folder.type==='SHARED'  && user.email != folder.owner.email">
+                                    Shared by <a [href]="'profile/' + folder.owner.id">{{folder.owner.firstName}}
+                                    {{folder.owner.lastName}}</a>
+                                    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+                                </small>
+                                <small class="font-65em"
+                                       *ngIf="folder.type==='PRIVATE' && user.email != folder.owner.email">
+                                    <a [href]="'profile/' + folder.owner.id">{{folder.owner.firstName}}
+                                        {{folder.owner.lastName}}</a>
+                                    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+                                </small>
+                                <small class="font-65em" *ngIf="folder.type != 'REMOTE'">
+                                    {{folder.creationTime | date:'short'}}
+                                </small>
+
+                                <small *ngIf="folder.accessPermissions.length" style="color: #333">
+                                    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+                                    <i class="fa fa-fw fa-users font-85em text-info"
+                                       ngbTooltip="Shared with others"></i>
+                                </small>
+                            </div>
+                        </h4>
+                    </td>
+                    <td style="padding-left: 40px; white-space: nowrap">
+                        <span *ngIf="folder.id" folder-actions class="font-95em"></span>
+                    </td>
+                    <td style="width: 99%">
+                        <div class="input-group input-group-sm pull-right" *ngIf="params.showFilter">
+                            <i class="fa fa-fw fa-filter input-group-addon"></i>
+                            <input [(ngModel)]="params.filter" class="form-control" focus (change)="folderPageChange()">
+                            <i class="fa fa-fw fa-times opacity_hover input-group-addon"
+                               (click)="params.showFilter = false; params.filter=''; folderPageChange()"></i>
+                        </div>
+
+                        <div class="pull-right" *ngIf="!params.showFilter">
+                            <i class="fa fa-fw fa-filter opacity_hover" ngbTooltip="Filter"
+                               (click)="params.showFilter=true"></i>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!--collections like 'personal', 'available' do not have a folderName-->
+    <div class="row" *ngIf="!folder.type">
+        <div class="col-md-9 entry_general_header_td">
+            <h4><img alt="Loading&hellip;" *ngIf="loadingPage" src="assets/img/loader-mini.gif"/>
+                <strong style="color: #888;text-transform: uppercase;">{{selectedFolder}}</strong>
+                <!--<br><small class="font-65em">Folder Description</small>-->
+            </h4>
+        </div>
+
+        <!-- filter for collections -->
+        <div class="col-md-3 entry_general_header_td" style="padding-top: 8px">
+            <div class="input-group input-group-sm pull-right" *ngIf="params.showFilter">
+                <i class="fa fa-fw fa-filter input-group-addon"></i>
+                <input [(ngModel)]="params.filter" class="input_box form-control" focus (change)="folderPageChange()">
+                <i class="fa fa-fw fa-times opacity_hover input-group-addon"
+                   (click)="params.showFilter = false; params.filter=''; folderPageChange()"></i>
+            </div>
+
+            <div class="pull-right" *ngIf="!params.showFilter">
+                <i class="fa fa-fw fa-filter opacity_hover" ngbTooltip="Filter" (click)="params.showFilter=true"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="pad_top" data-*ngIf='!folder'>
+            <img alt="Loading..." src="assets/img/loader-mini.gif"/> Loading&hellip;
+        </div>
+
+        <div class="pad_top" *ngIf="folder && folder.entries.length == 0">
+            No entries available for selection
+        </div>
+
+        <div class="tableFixHead">
+            <table *ngIf="folder && folder.entries && folder.entries.length"
+                   class="table border-bottom table-hover table-responsive-sm table-sm font-95em"
+                   [ngClass]="{'opacity_4':loadingPage}">
+                <thead>
+                <tr style="height: 32px">
+                    <!--selection toggle-->
+                    <th ngbDropdown style="font-size: 15px; vertical-align: middle;">
+                    <span class="uib-dropdown-toggle" ngbDropdownToggle>
+                        <i class="fa fa-fw cursor_default" [ngClass]="selectAllClass()" (click)="selectAll()"
+                        ></i><small class="caret cursor_pointer" style="margin-left: 0"></small>
+                    </span>
+                        <ul class="dropdown-menu" ngbDropdownMenu style="min-width: 100px">
+                            <li class="font-75em cursor_pointer" (click)="setType('all')"><a>All</a></li>
+                            <!--                        <li *ngFor="let choice of items" (click)="setType('choice.type')"-->
+                            <!--                            class="font-75em cursor_pointer">-->
+                            <!--                            &lt;!&ndash;                            <a>{{choice.type | capitalize}}</a>&ndash;&gt;-->
+                            <!--                        </li>-->
+                            <li class="font-75em cursor_pointer" (click)="setType('none')"><a>None</a></li>
+                        </ul>
+                    </th>
+                    <th class="entry-table-header">
+                        <span (click)="sort('type')">TYPE</span>
+                        <i *ngIf="paging.sort!=='type'" class="sortable fa fa-angle-down"></i>
+                        <i *ngIf="paging.sort=='type'" style="font-size: 14px;" class="fa opacity_4"
+                           [ngClass]="{'fa-angle-down':paging.asc==false, 'fa-angle-up':paging.asc==true}"></i>
+                    </th>
+                    <th class="entry-table-header">
+                        <span (click)="sort('part_id')">Part ID</span>
+                        <i *ngIf="paging.sort!=='part_id'" class="sortable fa fa-angle-down"></i>
+                        <i *ngIf="paging.sort=='part_id'" style="font-size: 14px" class="fa opacity_4"
+                           [ngClass]="{'fa-angle-down':paging.asc==false, 'fa-angle-up':paging.asc==true}"></i>
+                    </th>
+                    <th class="entry-table-header" *ngIf="entryHeaders.alias.selected">
+                        <span (click)="sort('alias')">Alias</span>
+                        <i *ngIf="paging.sort!=='alias'" class="sortable fa fa-angle-down"></i>
+                        <i *ngIf="paging.sort=='alias'" style="font-size: 14px" class="fa opacity_4"
+                           [ngClass]="{'fa-angle-down':paging.asc==false, 'fa-angle-up':paging.asc==true}"></i>
+                    </th>
+                    <th class="entry-table-header">
+                        <span (click)="sort('name')">Name</span>
+                        <i *ngIf="paging.sort!=='name'" class="sortable fa fa-angle-down"></i>
+                        <i *ngIf="paging.sort=='name'" style="font-size: 14px" class="fa opacity_4"
+                           [ngClass]="{'fa-angle-down':paging.asc==false, 'fa-angle-up':paging.asc==true}"></i>
+                    </th>
+                    <th></th>
+                    <th class="entry-table-header" *ngIf="entryHeaders.status.selected">
+                        <span (click)="sort('status')">Status</span>
+                        <i *ngIf="paging.sort!=='status'" class="sortable fa fa-angle-down"></i>
+                        <i *ngIf="paging.sort=='status'" style="font-size: 14px" class="fa opacity_4"
+                           [ngClass]="{'fa-angle-down':paging.asc==false, 'fa-angle-up':paging.asc==true}"></i>
+                    </th>
+                    <th style="width:70px;" class="no_wrap">
+                        <i class="fa fa-flask fa-fw" ngbTooltip="Has Sample" style="font-size: 15px"
+                           *ngIf="entryHeaders.hasSample.selected"></i>
+                        <img src="assets/img/dna.svg" ngbTooltip="Has Sequence" width="16px"
+                             style="margin-left: 3px; margin-right: 3px;"
+                             *ngIf="entryHeaders.hasSequence.selected"/>
+
+                        <span ngbTooltip="Has Link" *ngIf="entryHeaders.links.selected"
+                              style="font-size: 14px; margin-left: 8px"
+                              class="glyphicon glyphicon-link"></span>
+                    </th>
+                    <th class="entry-table-header" *ngIf="entryHeaders.created.selected">
+                        <span (click)="sort('created')">Created</span>
+                        <i *ngIf="paging.sort=='created'" style="font-size: 14px" class="fa opacity_4"
+                           [ngClass]="{'fa-angle-down':paging.asc==false, 'fa-angle-up':paging.asc==true}"></i>
+                        <i *ngIf="paging.sort!=='created'" class="sortable fa fa-angle-down"></i>
+                    </th>
+                    <th ngbDropdownToggle class="text-muted opacity_hover" ngbDropdown
+                        style="width: 12px; padding: 0; vertical-align: middle; opacity: 1">
+                        <i class="fa fa-fw fa-ellipsis-v"></i>
+
+                        <div class="dropdown-menu pull-right" style="background-color: #f1f1f1" ngbDropdownMenu>
+                            <strong class="pad-8 small">Show/Hide fields</strong>
+                            <table class=" no_wrap table table-condensed font-75em" style="font-weight: normal">
+                                <!--                            <tr (click)="selectedHeaderField(header, $event)" ng-repeat="header in entryHeaders">-->
+                                <!--                                <td class="check-box-table-cell">-->
+                                <!--                                    <input type="checkbox" [(ngModel)]="header.selected"> {{header.display}}-->
+                                <!--                                </td>-->
+                                <!--                            </tr>-->
+                            </table>
+                        </div>
+                    </th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr *ngFor="let entry of folder.entries">
+                    <td style="width: 43px">
+                        <!--<i class="fa cursor_pointer fa-check-square-o" *ngIf="allSelected"-->
+                        <!--style="color: #000; font-size: 14px;" (click)="select(entry)"></i>-->
+
+                        <i class="fa fa-fw cursor_default" style="font-size: 15px"
+                           [ngClass]="{'fa-square-o':!isSelected(entry), 'fa-check-square-o':isSelected(entry)}"
+                           (click)="select(entry)"></i>
+                    </td>
+                    <td class="entry-type">
+                        <i class="fa fa-fw fa-trash-o red" *ngIf="entry.visible=='DELETED'"></i>
+                        {{entry.type | uppercase}}
+                        <i class="fa fa-fw fa-cloud" *ngIf="entry.visible=='REMOTE'" style="color: #c9e6f2"></i>
+                    </td>
+                    <td><a class="cell_mouseover form-group" (mouseover)="tooltipDetails(entry)">{{entry.partId}}</a>
+                    </td>
+                    <!--                       uib-popover-template="folderPopupTemplateUrl">{{entry.partId}}</a>-->
+                    <td *ngIf="entryHeaders.alias.selected">
+                        <div class="ellipsis">{{entry.alias}}</div>
+                    </td>
+                    <td>
+                        <div title="{{entry.name}}" class="ellipsis" style="width: 350px">{{entry.name}}</div>
+                        <div *ngIf="entry.shortDescription" title="{{entry.shortDescription}}" class="small text-muted"
+                             style="width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
+                            {{entry.shortDescription}}
+                        </div>
+                        <i *ngIf="!entry.shortDescription" class="small text-muted">No description provided</i>
+                    </td>
+                    <td style="vertical-align: middle">
+                        <a class="cursor_pointer"
+                           ngbTooltip="{{entry.viewCount}} views">
+                        <span *ngIf="entry.viewCount > 1" class="glyphicon glyphicon-fire small" [ngClass]="{
+                        'light-blue': entry.viewCount < 50,
+                        'gold': entry.viewCount >= 50 && entry.viewCount <= 100,
+                         'orange': entry.viewCount > 100 && entry.viewCount <= 500,
+                          'dark-orange': entry.viewCount > 500 && entry.viewCount <= 1000,
+                          'red': entry.viewCount > 1000}"></span>
+                        </a>
+                    </td>
+                    <td style="vertical-align: middle; width:100px; white-space:nowrap"
+                        *ngIf="entryHeaders.status.selected">
+                    <span class="badge text-uppercase p-2 font-70em" [ngClass]="{
+                    'badge-success':entry.status.toUpperCase()=='COMPLETE',
+                    'badge-secondary': entry.status.toUpperCase()=='In Progress'.toUpperCase(),
+                    'badge-danger': entry.status.toUpperCase()=='Abandoned'.toUpperCase(),
+                    'badge-info': entry.status.toUpperCase()=='Planned'.toUpperCase()}">{{entry.status}}
+                    </span>
+                    </td>
+
+                    <td style="vertical-align: middle; white-space: nowrap">
+                    <span *ngIf="entryHeaders.hasSample.selected">
+                        <i *ngIf="entry.hasSample" class="fa fa-flask fa-fw dark-gray"
+                           style="color: #555; font-size: 14px;"></i>
+                        <i *ngIf="!entry.hasSample" class="fa fa-square fa-fw"
+                           style="opacity: 0; font-size: 14px;"></i>
+                    </span>
+
+                        <span *ngIf="entryHeaders.hasSequence.selected">
+                        <img *ngIf="entry.hasSequence" src="assets/img/dna.svg" width="16px"
+                             style="margin-left: 2px; margin-right: 3px"/>
+                         <i *ngIf="!entry.hasSequence" class="fa fa-square fa-fw"
+                            style="opacity: 0; font-size: 14px"></i>
+                    </span>
+
+                        <span *ngIf="entryHeaders.links.selected">
+                        <span *ngIf="entry.linkedParts.length || entry.parents.length">
+                            <span class="opacity_hover link-sup">{{entry.parents.length}}</span>
+                            <span class="glyphicon glyphicon-link"></span>
+                            <span class="opacity_hover link-sub">{{entry.linkedParts.length}}</span>
+                        </span>
+
+                        <i *ngIf="!entry.linkedParts.length && !entry.parents.length" class="fa fa-square fa-fw"
+                           style="opacity: 0; font-size: 14px;"></i>
+                    </span>
+                    </td>
+                    <td style="width: 130px; white-space: nowrap; vertical-align: middle;"
+                        *ngIf="entryHeaders.created.selected">
+                        {{entry.creationTime | date:'MMM d, yyyy'}}
+                    </td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row" *ngIf="folder && folder.entries.length > 0" style="margin-top: -15px">
+        <div class="col-md-6" style="padding-left: 0">
+            <ngb-pagination [collectionSize]="this.paging.available" (pageChange)="folderPageChange()"
+                            [boundaryLinks]="true" [rotate]="true" [(page)]="paging.currentPage"
+                            [maxSize]="5" class="pagination-sm"
+                            [pageSize]="paging.limit"></ngb-pagination>
+        </div>
+        <div class="col-md-4" style="margin-top: 25px;">
+            <strong class="small">
+                <i *ngIf="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(paging.currentPage,
+                folder.count, paging.limit)}}
+            </strong>
+        </div>
+        <div class="col-md-2" style="margin-top: 25px;">
+            <small class="text-muted pull-right">Show:
+                <select (change)="folderPageChange()" [(ngModel)]="paging.limit"
+                        ng-options="opt for opt in paging.hstep"></select></small>
+        </div>
+    </div>
+</div>
+
+

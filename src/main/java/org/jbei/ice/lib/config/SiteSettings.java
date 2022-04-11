@@ -14,6 +14,7 @@ public class SiteSettings implements IDataTransferModel {
     private boolean hasLogo;
     private boolean hasLoginMessage;
     private boolean hasFooter;
+    private String dataDirectory;
 
     public String getVersion() {
         return version;
@@ -53,5 +54,9 @@ public class SiteSettings implements IDataTransferModel {
 
     public void setHasFooter(boolean hasFooter) {
         this.hasFooter = hasFooter;
+    }
+
+    public void setDataDirectory(String dataDirectory) {
+        this.dataDirectory = dataDirectory;
     }
 }

@@ -1,0 +1,134 @@
+<form (submit)="search(false)">
+    <table style="white-space: nowrap;">
+        <tr>
+            <td class="quick_search uib-dropdown" ngbDropdown>
+                <i class="fa fa-fw fa-search search-indicator"></i>
+
+                <i class="fa fa-times-circle opacity_hover search-indicator" (click)="reset()" title="Reset Search"
+                   *ngIf="canReset()"></i>
+
+                <input type="search" class="quick_search_input" [(ngModel)]="queryText" placeholder="Search">
+
+                <span style="padding: 8px 5px 9px 7px;color: #999;" class="opacity_hover"
+                      (click)="toggleAdvancedMenuDropdown($event)">
+                    <span style="font-size: 11px">Blast &amp; Filters</span> <i class="fa fa-caret-down"></i>
+                </span>
+                <!--                <i class="fa fa-caret-down opacity_hover" (click)="toggleAdvancedMenuDropdown($event)"-->
+                <!--                   style="padding: 9px 5px 4px 5px; color: #999; height: 33px; background-color: #ededed;"></i>-->
+
+                <!--<i class="fa fa-search cursor_pointer blue"-->
+                <!--style="padding: 4px 9px 4px 5px; background-color: #fff; font-size: 19px"></i>-->
+
+                <div class="dropdown-menu" ngbDropdownMenu style="padding: 12px;width: 509px">
+                    <span style="letter-spacing:-1px; color:#555;">&nbsp;<b>TYPE</b>&nbsp;&nbsp;</span>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" [(ngModel)]="searchTypes.all" (change)="check('all')">All
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" [(ngModel)]="searchTypes.strain" (change)="check('strain')">Strain
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" [(ngModel)]="searchTypes.plasmid" (change)="check('plasmid')">Plasmid
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" [(ngModel)]="searchTypes.part" (change)="check('part')">Part
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" [(ngModel)]="searchTypes.seed" (change)="check('seed')">Seed
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" [(ngModel)]="searchTypes.protein" (change)="check('protein')">Protein
+                    </label>
+
+                    <div class="divider"></div>
+
+                    <span style="letter-spacing:-1px; color:#555;"><b>BLAST</b></span>
+
+                    <select class="pull_down" [(ngModel)]="blastSearchType">
+                        <option value="">Choose one</option>
+                        <option value="BLAST_N">Nucleotide Search (blastn)</option>
+                        <option value="TBLAST_X">Nucleotide Translated Search (tblastx)</option>
+                    </select>
+
+                    <br>
+                    <textarea class="mt-5 form-control-sm" rows="6" placeholder="Enter Sequence" style="width: 100%"
+                              [(ngModel)]="sequenceText"></textarea>
+
+                    <div class="divider"></div>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" [(ngModel)]="hasAttachment">Has Attachment
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" [(ngModel)]="hasSample">Has Sample
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" [(ngModel)]="hasSequence">Has Sequence
+                    </label>
+
+                    <div class="divider"></div>
+
+                    <span style="letter-spacing:-1px; color:#555;"><b>BIO SAFETY LEVEL</b></span>
+
+                    <select class="pull_down" [(ngModel)]="bioSafetyLevelOption">
+                        <option value="">Choose one</option>
+                        <option value="1">Level 1</option>
+                        <option value="2">Level 2</option>
+                        <option value="-1">Restricted</option>
+                    </select>
+
+                    <div class="divider"></div>
+                    <strong style="letter-spacing:-1px; color:#555;">FIELD FILTERS</strong>
+
+                    <div *ngIf="!fieldFilters.length">
+                        <small class="text-muted opacity_hover" (click)="addFieldFilter()">
+                            Add filter <i class="fa fa-plus-circle"></i>
+                        </small>
+                    </div>
+
+<!--                    <div *ngFor="let filterFilter of fieldFilters">-->
+<!--                        <select class="pull_down" [(ngModel)]="fieldFilters[$index].field">-->
+<!--                            <option value="">Select Filter</option>-->
+<!--                            <option value="NAME">Name</option>-->
+<!--                            <option value="ALIAS">Alias</option>-->
+<!--                            <option value="PART_NUMBER">Part Number</option>-->
+<!--                        </select>-->
+
+<!--                        <input class="input_box" style="width: 200px" [(ngModel)]="fieldFilters[$index].filter"/>-->
+<!--                        <i class="fa fa-fw fa-plus opacity_hover" (click)="addFieldFilter()"></i>-->
+<!--                        <i class="fa fa-fw fa-minus opacity_hover" (click)="removeFieldFilter($index)"></i>-->
+<!--                    </div>-->
+
+                    <div class="divider"></div>
+
+                    <div>
+                        <button class="btn btn-link" type="button" (click)="search(true)">
+                            <i style="color: #555" class="fa fa-globe"></i> <span
+                                class="font-90em">Search other registries</span>
+                        </button>
+
+                        <span class="pull-right">
+                            <button type="submit" class="btn btn-sm btn-primary">Search</button>
+                            <button type="button" class="btn btn-sm btn-default" (click)="reset()">
+                                Reset
+                            </button>
+                        </span>
+                    </div>
+
+                </div>
+            </td>
+            <td> &nbsp;
+                <button style="width: 80px; padding: 7px" type="submit" class="btn btn-primary btn-sm">
+                    <b>SEARCH</b>
+                </button>
+            </td>
+        </tr>
+    </table>
+</form>

@@ -1,18 +1,31 @@
-<configuration>
+<configuration scan="true" scanPeriod="30 seconds">
 
-    <property name="LOG_PATH" value="/tmp"/>
+    <contextListener class="org.jbei.ice.lib.common.logging.LoggerStartupListener"/>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/ice.log</file>
-
         <encoder>
             <pattern>%date %level %msg%n</pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>ice-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>100MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>[%-5level] %d{dd MMM yyyy; HH:mm:ss.SSS} [%.6thread] - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{dd MMM yyyy; HH:mm:ss.SSS} %-5level [%.6thread] - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -23,6 +36,6 @@
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="ROLLING_FILE"/>
     </root>
 </configuration>

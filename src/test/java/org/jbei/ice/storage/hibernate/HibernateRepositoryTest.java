@@ -8,16 +8,16 @@ public class HibernateRepositoryTest {
 
     @BeforeClass
     public static void runOnce() {
-        HibernateUtil.initializeMock();
+        HibernateConfiguration.initializeMock();
     }
 
     @Before
     public void setUp() throws Exception {
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.beginTransaction();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.rollbackTransaction();
+        HibernateConfiguration.rollbackTransaction();
     }
 }

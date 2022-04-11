@@ -6,6 +6,7 @@ import org.jbei.ice.lib.account.authentication.AuthenticationException;
 import org.jbei.ice.lib.account.authentication.IAuthentication;
 import org.jbei.ice.lib.account.authentication.LocalAuthentication;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.email.EmailFactory;
@@ -32,8 +33,7 @@ import java.util.List;
 
 public class AccountController {
 
-    private static final String ADMIN_ACCOUNT_EMAIL = "Administrator";
-    private static final String ADMIN_ACCOUNT_PASSWORD = "Administrator";
+
     private final AccountDAO dao;
     private final GroupDAO groupDAO;
 
@@ -175,6 +175,18 @@ public class AccountController {
         return dao.update(account).toDataTransferObject();
     }
 
+    private static Account fromDTO(AccountTransfer info) {
+        Account account = new Account();
+        account.setFirstName(info.getFirstName());
+        account.setLastName(info.getLastName());
+        account.setInitials(info.getInitials());
+        account.setEmail(info.getEmail().trim().toLowerCase());
+        account.setDescription(info.getDescription());
+        account.setInstitution(info.getInstitution());
+        account.setIp("");
+        return account;
+    }
+
     /**
      * Creates a new account using the parameters passed. A random password is initially generated ,
      * encrypted and assigned to the account
@@ -194,11 +206,12 @@ public class AccountController {
         }
 
         // generate salt and encrypt password before storing
-        final String salt = Utils.generateSaltForUserAccount();
-        final String newPassword = Utils.generateUUID().substring(24);
+        TokenHash hash = new TokenHash();
+        final String salt = hash.generateSalt();
+        final String newPassword = hash.generateRandomToken(24);
         final String encryptedPassword = AccountUtils.encryptNewUserPassword(newPassword, salt);
 
-        Account account = AccountUtils.fromDTO(info);
+        Account account = fromDTO(info);
         account.setPassword(encryptedPassword);
         account.setSalt(salt);
         account.setCreationTime(Calendar.getInstance().getTime());
@@ -252,34 +265,6 @@ public class AccountController {
     }
 
     /**
-     * @return new admin account
-     */
-    public Account createAdminAccount() {
-        Account adminAccount = getByEmail(ADMIN_ACCOUNT_EMAIL);
-        if (adminAccount != null) {
-            return adminAccount;
-        }
-
-        adminAccount = new Account();
-        adminAccount.setEmail(ADMIN_ACCOUNT_EMAIL);
-        adminAccount.setLastName("Administrator");
-        adminAccount.setFirstName("");
-        adminAccount.setInitials("");
-        adminAccount.setInstitution("");
-        adminAccount.setSalt(Utils.generateSaltForUserAccount());
-        adminAccount.setPassword(AccountUtils.encryptNewUserPassword(ADMIN_ACCOUNT_PASSWORD, adminAccount.getSalt()));
-        adminAccount.setDescription("Administrator Account");
-
-        adminAccount.setIp("");
-        final Date currentTime = Calendar.getInstance().getTime();
-        adminAccount.setCreationTime(currentTime);
-        adminAccount.setModificationTime(currentTime);
-        adminAccount.setLastLoginTime(currentTime);
-        adminAccount.setType(AccountType.ADMIN);
-        return save(adminAccount);
-    }
-
-    /**
      * Retrieve {@link Account} by user id.
      *
      * @param email unique identifier for account, typically email
@@ -287,19 +272,6 @@ public class AccountController {
      */
     public Account getByEmail(final String email) {
         return dao.getByEmail(email);
-    }
-
-    /**
-     * @param email an account identifier (usually email)
-     * @return database identifier of account matching account identifier (email)
-     * @throws IllegalArgumentException for an invalid account identifier
-     */
-    public long getAccountId(final String email) {
-        final Account account = dao.getByEmail(email);
-        if (account == null) {
-            throw new IllegalArgumentException("No account found with email " + email);
-        }
-        return account.getId();
     }
 
     /**
@@ -351,24 +323,36 @@ public class AccountController {
         return account != null && account.getType() == AccountType.ADMIN;
     }
 
+    private IAuthentication getAuthentication() {
+        try {
+            String clazz = new ConfigurationSettings().getPropertyValue(ConfigurationKey.AUTHENTICATION_CLASS);
+            Class<?> authentication = Class.forName(clazz);
+            return (IAuthentication) authentication.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            Logger.error("Exception loading authentication class: ", e);
+            Logger.error("Using default authentication");
+            return new LocalAuthentication();
+        }
+    }
+
     /**
      * Authenticate a user in the database.
      * <p>
      * Using the {@link org.jbei.ice.lib.account.authentication.IAuthentication} specified in the
      * settings file, authenticate the user, and return the sessionData
      *
-     * @param login
-     * @param password
+     * @param login    user login (typically email address)
+     * @param password user password
      * @param ip       IP Address of the user.
      * @return the account identifier (email) on a successful login, otherwise {@code null}
      */
-    protected Account authenticate(final String login, final String password, final String ip) {
-        final IAuthentication authentication = new LocalAuthentication();
-        String email;
+    private Account authenticate(final String login, final String password, final String ip) {
+        final IAuthentication authentication = getAuthentication();
+        AccountTransfer accountTransfer;
 
         try {
-            email = authentication.authenticates(login.trim(), password);
-            if (email == null) {
+            accountTransfer = authentication.authenticates(login.trim(), password, ip);
+            if (accountTransfer == null) {
                 loginFailureCooldown();
                 return null;
             }
@@ -377,7 +361,8 @@ public class AccountController {
             return null;
         }
 
-        Account account = dao.getByEmail(email);
+        // check if there is an account for the user trying to login
+        Account account = dao.getByEmail(accountTransfer.getEmail());
         if (account == null)
             return null;
 
@@ -436,15 +421,6 @@ public class AccountController {
         info.setAdmin(isAdmin);
         info.setSessionId(UserSessions.createSessionForUser(email, transfer.getSessionId()));
         return info;
-    }
-
-    /**
-     * De-authenticate the given sessionKey. The user is logged out from the system.
-     *
-     * @param sessionKey unique session identifier
-     */
-    public void invalidate(final String sessionKey) {
-        UserSessions.invalidateSession(sessionKey);
     }
 
     /**

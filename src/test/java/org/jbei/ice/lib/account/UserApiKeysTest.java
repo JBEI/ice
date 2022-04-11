@@ -3,7 +3,7 @@ package org.jbei.ice.lib.account;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.dto.access.AccessKey;
 import org.jbei.ice.lib.dto.common.Results;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.Account;
 import org.junit.After;
 import org.junit.Assert;
@@ -17,13 +17,13 @@ public class UserApiKeysTest {
 
     @Before
     public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.initializeMock();
+        HibernateConfiguration.beginTransaction();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
+        HibernateConfiguration.commitTransaction();
     }
 
     @Test

@@ -34,9 +34,19 @@ public class ConfigResource extends RestResource {
     }
 
     @GET
+    @Path("/init")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getInitialValues() {
+        return super.respond(controller.getInitialValues());
+    }
+
+    @GET
     @Path("/site")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSiteSettings() {
+        if (!controller.hasDataDirectory()) {
+            return super.respond(Response.Status.SERVICE_UNAVAILABLE);
+        }
         return super.respond(controller.getSiteSettings());
     }
 

@@ -9,7 +9,7 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.folder.collection.CollectionType;
 import org.jbei.ice.lib.folder.collection.Collections;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Folder;
 import org.jbei.ice.storage.model.RemoteAccessModel;
@@ -28,13 +28,13 @@ public class RemoteAccessTest {
 
     @Before
     public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.initializeMock();
+        HibernateConfiguration.beginTransaction();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
+        HibernateConfiguration.commitTransaction();
     }
 
     @Test

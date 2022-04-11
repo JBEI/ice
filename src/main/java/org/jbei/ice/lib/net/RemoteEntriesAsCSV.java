@@ -189,8 +189,8 @@ public class RemoteEntriesAsCSV {
             return;
 
         SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
-        Configuration configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
-        String thisUrl = configuration == null ? "" : configuration.getValue();
+        ConfigurationModel configurationModel = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
+        String thisUrl = configurationModel == null ? "" : configurationModel.getValue();
 
         for (Long id : entries) {
             Entry entry = DAOFactory.getEntryDAO().get(id);

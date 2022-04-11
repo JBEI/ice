@@ -1,0 +1,78 @@
+.action-badge {
+    font-size: 9px;
+    position: relative;
+    top: -4px;
+    /*background-color: #d9534f;*/
+    color: #ffffff;
+    padding-right: 3px;
+    cursor: pointer;
+    border-left: 1px solid whitesmoke;
+    border-radius: 0 0.25em 0.25em 0;
+
+    /*background-color: #f0ad4e;*/
+}
+
+.nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff;
+    border-bottom: 3px solid darkblue;
+    /*border-color: #dee2e6 #dee2e6 #fff;*/
+}
+
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    font-size: 0.78rem;
+    font-weight: 500;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #0082c0;
+    text-transform: uppercase;
+}
+
+.nav-link {
+    display: block;
+    padding: 0.8rem 1.2rem;
+    color: #253B56;
+}
+
+.nav {
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom: 3px solid slategray;
+    color: #3c3c3c;
+}
+
+/* COLLECTIONS */
+.context_nav_pager {
+    cursor: pointer;
+    font-size: 1.6em;
+    color: #666666;
+}
+
+.context_nav_pager:hover {
+    color: #0082c0;
+}
+
+.right-nav {
+    background-color: #0082c0;
+    color: whitesmoke;
+    cursor: pointer;
+}
+
+.right-nav:hover {
+    background-color: white;
+    color: black;
+}
+
+.list-group-item:first-child {
+    border-top-right-radius: 0;
+}
+
+.list-group-item:last-child {
+    border-bottom-right-radius: 0;
+}

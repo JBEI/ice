@@ -99,7 +99,7 @@ public class Utils {
      * @param string Plain text to hash.
      * @return Hex digest of give string.
      */
-    public static String encryptSHA(String string) {
+    static String encryptSHA(String string) {
         String result = "";
 
         try {

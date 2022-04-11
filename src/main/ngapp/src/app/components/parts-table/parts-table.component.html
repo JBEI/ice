@@ -1,0 +1,120 @@
+<div *ngIf="!parts" class="text-black-50 font-italic p-4">
+    No available parts
+</div>
+
+<div *ngIf="parts">
+    <table class="table border-bottom table-hover font-95em" [ngClass]="{'opacity_4':loadingPage}">
+        <thead>
+        <tr>
+            <!--selection toggle-->
+            <th ngbDropdown style="font-size: 15px; vertical-align: middle">
+            <span class="uib-dropdown-toggle" ngbDropdownToggle>
+                <i class="fa fa-fw cursor_default"></i>
+                <small class="caret cursor-pointer ml-0"></small>
+            </span>
+            </th>
+            <th class="text-uppercase font-85em">
+                <span>Type</span>
+            </th>
+            <th class="text-uppercase font-85em">
+                <span>Part ID</span>
+            </th>
+            <th class="text-uppercase font-85em">
+                <span>Name</span>
+            </th>
+            <th class="text-uppercase font-85em">
+                <span>Status</span>
+            </th>
+            <th style="width: 100px" class="no_wrap">
+                <i class="fa fa-flask fa-fw" ngbTooltip="Has Sample" style="font-size: 15px"></i>
+                <img src="assets/img/dna.svg" ngbTooltip="Has Sequence" width="16px"
+                     style="margin-left: 3px; margin-right: 3px"/>
+
+                <span ngbTooltip="Has Link" style="font-size: 14px" class="fa fa-fw fa-link"></span>
+            </th>
+            <th class="text-uppercase font-85em">
+                <span>Created</span>
+            </th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let part of parts">
+            <td style="width: 43px">
+                <i class="fa fa-fw cursor_default" (click)="select(part)"
+                   [ngClass]="{'fa-square-o':!isSelected(part), 'fa-check-square-o':isSelected(part)}"></i>
+            </td>
+            <td class="font-90em text-uppercase text-black-50 font-weight-bold">
+                <i class="fa fa-fw fa-trash-o red" *ngIf="part.visible=='DELETED'"></i>
+                {{part.type}}
+                <i class="fa fa-fw fa-cloud" *ngIf="part.visible=='REMOTE'" style="color: #c9e6f2"></i>
+            </td>
+            <td>
+                <a class="cell_mouseover form-group" [href]="'entry/' + part.id">{{part.partId}}</a>
+            </td>
+            <td>
+                <div title="{{part.name}}" class="ellipsis" style="width: 350px">{{part.name}}</div>
+                <div *ngIf="part.shortDescription" title="{{part.shortDescription}}" class="small text-muted"
+                     style="width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
+                    {{part.shortDescription}}
+                </div>
+                <i *ngIf="!part.shortDescription" class="small text-muted">No description provided</i>
+            </td>
+            <!--            <td style="vertical-align: middle">-->
+            <!--                <a class="cursor_pointer" ngbTooltip="{{part.viewCount}} views">-->
+            <!--                <span *ngIf="part.viewCount > 1" class="glyphicon glyphicon-fire small" [ngClass]="{-->
+            <!--                'light-blue': part.viewCount < 50,-->
+            <!--                'gold': part.viewCount >= 50 && part.viewCount <= 100,-->
+            <!--                 'orange': part.viewCount > 100 && part.viewCount <= 500,-->
+            <!--                  'dark-orange': part.viewCount > 500 && part.viewCount <= 1000,-->
+            <!--                  'red': part.viewCount > 1000}"></span>-->
+            <!--                </a>-->
+            <!--            </td>-->
+            <td style="vertical-align: middle; width:100px; white-space:nowrap">
+                <span class="badge text-uppercase p-2 font-70em" [ngClass]="{
+                'badge-success':part.status.toUpperCase()=='COMPLETE',
+                'badge-secondary': part.status.toUpperCase()=='In Progress'.toUpperCase(),
+                'badge-danger': part.status.toUpperCase()=='Abandoned'.toUpperCase(),
+                'badge-info': part.status.toUpperCase()=='Planned'.toUpperCase()}">{{part.status}}
+                </span>
+            </td>
+
+            <td style="vertical-align: middle; white-space: nowrap">
+                <i *ngIf="part.hasSample" class="fa fa-flask fa-fw dark-gray"
+                   style="color: #555; font-size: 14px;"></i>
+                <i *ngIf="!part.hasSample" class="fa fa-square fa-fw"
+                   style="opacity: 0; font-size: 14px;"></i>
+
+                <img *ngIf="part.hasSequence" src="assets/img/dna.svg" width="16px"
+                     style="margin-left: 2px; margin-right: 3px"/>
+                <i *ngIf="!part.hasSequence" class="fa fa-square fa-fw"
+                   style="opacity: 0; font-size: 14px"></i>
+
+                <span *ngIf="part.linkedParts.length || part.parents.length">
+                    <span class="opacity_hover link-sup">{{part.parents.length}}</span>
+                    <span class="glyphicon glyphicon-link"></span>
+                    <span class="opacity_hover link-sub">{{part.linkedParts.length}}</span>
+                </span>
+
+                <i *ngIf="!part.linkedParts.length && !part.parents.length" class="fa fa-square fa-fw"
+                   style="opacity: 0; font-size: 14px;"></i>
+            </td>
+            <td style="width: 130px; white-space: nowrap; vertical-align: middle;">
+                {{part.creationTime | date:'MMM d, yyyy'}}
+            </td>
+            <td></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <ngb-pagination [boundaryLinks]="true" [maxSize]="5" (pageChange)="getParts()" [collectionSize]="paging.available"
+                    [pageSize]="paging.limit" class="pagination" [(ngModel)]="paging.currentPage">
+        <ng-template ngbPaginationPrevious>Prev</ng-template>
+        <ng-template ngbPaginationNext>Next</ng-template>
+        <!--        <ng-template ngbPaginationNumber let-p>{{ getPageSymbol(p) }}</ng-template>-->
+    </ngb-pagination>
+
+    <strong class="small">{{pageCounts(paging.currentPage, paging.available, paging.limit)}}</strong>
+
+    {{paging.offset | json}}
+</div>

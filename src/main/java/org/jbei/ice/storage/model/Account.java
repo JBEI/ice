@@ -19,7 +19,7 @@ import java.util.Set;
 @Entity
 @Table(name = "accounts")
 @SequenceGenerator(name = "accounts_id", sequenceName = "accounts_id_seq", allocationSize = 1)
-public class Account implements DataModel {
+public class Account implements DataModel<AccountTransfer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "accounts_id")

@@ -6,12 +6,10 @@ import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Folder;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -19,16 +17,9 @@ import java.util.ArrayList;
 /**
  * @author Hector Plahar
  */
-public class FolderControllerTest {
+public class FolderControllerTest extends HibernateRepositoryTest {
 
-    private FolderController controller;
-
-    @Before
-    public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
-        controller = new FolderController();
-    }
+    private FolderController controller = new FolderController();
 
     @Test
     public void testGetPublicFolders() throws Exception {
@@ -66,10 +57,5 @@ public class FolderControllerTest {
         Folder f = DAOFactory.getFolderDAO().get(folder.getId());
         Assert.assertNotNull(f);
         Assert.assertEquals("test", f.getName());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
     }
 }
