@@ -1,4 +1,0 @@
-language: java
-jdk:
-  - openjdk13
-sudo: false
