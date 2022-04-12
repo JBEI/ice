@@ -1,6 +1,6 @@
 <configuration scan="true" scanPeriod="30 seconds">
 
-    <contextListener class="org.jbei.ice.lib.common.logging.LoggerStartupListener"/>
+    <contextListener class="org.jbei.ice.logging.LoggerStartupListener"/>
 
     <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/ice.log</file>
