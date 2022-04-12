@@ -1,9 +1,9 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.TestEntryCreator;
+import org.jbei.ice.AccountCreator;
+import org.jbei.ice.TestEntryCreator;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Audit;
 import org.jbei.ice.storage.model.Plasmid;
 import org.jbei.ice.storage.model.Strain;
@@ -29,7 +29,7 @@ public class AuditDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetAuditsForEntry() throws Exception {
-        Account account = AccountCreator.createTestAccount("AuditDAOTest.testGetAuditsForEntry", false);
+        AccountModel account = AccountCreator.createTestAccount("AuditDAOTest.testGetAuditsForEntry", false);
         Assert.assertNotNull(account);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         Random random = new Random();
@@ -51,7 +51,7 @@ public class AuditDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetAuditsForEntryCount() throws Exception {
-        Account account = AccountCreator.createTestAccount("AuditDAOTest.testGetAuditsForEntryCount", false);
+        AccountModel account = AccountCreator.createTestAccount("AuditDAOTest.testGetAuditsForEntryCount", false);
         Assert.assertNotNull(account);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         Random random = new Random();
@@ -72,7 +72,7 @@ public class AuditDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testDeleteAll() throws Exception {
-        Account account = AccountCreator.createTestAccount("AuditDAOTest.testDeleteAll", false);
+        AccountModel account = AccountCreator.createTestAccount("AuditDAOTest.testDeleteAll", false);
         Assert.assertNotNull(account);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         Random random = new Random();

@@ -1,25 +1,27 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.account.Accounts;
-import org.jbei.ice.lib.account.PreferencesController;
-import org.jbei.ice.lib.dto.AccountResults;
-import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.folder.FolderDetails;
-import org.jbei.ice.lib.dto.group.UserGroup;
-import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
-import org.jbei.ice.lib.dto.user.UserPreferences;
-import org.jbei.ice.lib.entry.OwnerEntries;
-import org.jbei.ice.lib.entry.sample.RequestRetriever;
-import org.jbei.ice.lib.folder.UserFolders;
-import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.group.Groups;
-import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.account.Account;
+import org.jbei.ice.account.AccountController;
+import org.jbei.ice.account.Accounts;
+import org.jbei.ice.account.PreferencesController;
+import org.jbei.ice.dto.AccountResults;
+import org.jbei.ice.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.dto.entry.PartData;
+import org.jbei.ice.dto.folder.FolderDetails;
+import org.jbei.ice.dto.group.UserGroup;
+import org.jbei.ice.dto.sample.SampleRequestStatus;
+import org.jbei.ice.dto.user.UserPreferences;
+import org.jbei.ice.entry.OwnerEntries;
+import org.jbei.ice.entry.sample.RequestRetriever;
+import org.jbei.ice.folder.UserFolders;
+import org.jbei.ice.group.GroupController;
+import org.jbei.ice.group.Groups;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
+import org.jbei.ice.utils.UtilityException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -34,9 +36,9 @@ import java.util.List;
 @Path("/users")
 public class UserResource extends RestResource {
 
-    private AccountController controller = new AccountController();
-    private GroupController groupController = new GroupController();
-    private RequestRetriever requestRetriever = new RequestRetriever();
+    private final AccountController controller = new AccountController();
+    private final GroupController groupController = new GroupController();
+    private final RequestRetriever requestRetriever = new RequestRetriever();
 
     /**
      * Retrieves list of users that are available to user making request. Availability is defined by
@@ -71,7 +73,7 @@ public class UserResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/autocomplete")
-    public List<AccountTransfer> getAutoCompleteForAvailableAccounts(
+    public List<Account> getAutoCompleteForAvailableAccounts(
             @QueryParam("val") String val,
             @DefaultValue("8") @QueryParam("limit") int limit) {
         String userId = getUserId();
@@ -169,8 +171,8 @@ public class UserResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public AccountTransfer update(@PathParam("id") long userId,
-                                  AccountTransfer transfer) {
+    public Account update(@PathParam("id") long userId,
+                          Account transfer) {
         String user = requireUserId();
         return controller.updateAccount(user, userId, transfer);
     }
@@ -179,7 +181,7 @@ public class UserResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/password")
-    public Response resetPassword(AccountTransfer transfer) {
+    public Response resetPassword(Account transfer) {
         boolean success = controller.resetPassword(transfer.getEmail());
         if (!success) {
             return super.respond(Response.Status.NOT_FOUND);
@@ -194,8 +196,7 @@ public class UserResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/password")
-    public AccountTransfer updatePassword(@PathParam("id") long userId,
-                                          AccountTransfer transfer) {
+    public Account updatePassword(@PathParam("id") long userId, Account transfer) {
         String user = getUserId();
         log(user, "changing password for user " + userId);
         return controller.updatePassword(user, userId, transfer);
@@ -207,11 +208,14 @@ public class UserResource extends RestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createNewUser(
-            @DefaultValue("true") @QueryParam("sendEmail") boolean sendEmail,
-            AccountTransfer accountTransfer) {
-        AccountTransfer created = controller.createNewAccount(accountTransfer, sendEmail);
-        return super.respond(created);
+    public Response createNewUser(@DefaultValue("true") @QueryParam("sendEmail") boolean sendEmail, Account account) {
+        try {
+            Account created = controller.createNewAccount(account, sendEmail);
+            return super.respond(created);
+        } catch (UtilityException e) {
+            Logger.error(e);
+            return super.respond(Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -225,10 +229,11 @@ public class UserResource extends RestResource {
                                         @DefaultValue("15") @QueryParam("limit") int limit,
                                         @DefaultValue("requested") @QueryParam("sort") String sort,
                                         @DefaultValue("false") @QueryParam("asc") boolean asc,
+                                        @DefaultValue("") @QueryParam("filter") String filter,
                                         @DefaultValue("") @QueryParam("status") SampleRequestStatus status) {
         String user = requireUserId();
         return super.respond(Response.Status.OK,
-                requestRetriever.getUserSamples(user, status, offset, limit, sort, asc));
+                requestRetriever.getUserSamples(user, status, offset, limit, sort, asc, filter));
     }
 
     @GET
@@ -236,7 +241,7 @@ public class UserResource extends RestResource {
     @Path("/{id}/folders")
     public Response getUserFolders(@PathParam("id") long userId) {
         String user = requireUserId();
-        Account account = DAOFactory.getAccountDAO().get(userId);
+        AccountModel account = DAOFactory.getAccountDAO().get(userId);
         UserFolders userFolders = new UserFolders(account.getEmail());
         return super.respond(userFolders.getList(user));
     }

@@ -1,17 +1,17 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.access.PermissionsController;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.common.PageParameters;
-import org.jbei.ice.lib.dto.folder.FolderDetails;
-import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.entry.EntrySelection;
-import org.jbei.ice.lib.folder.*;
-import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.access.PermissionsController;
+import org.jbei.ice.dto.access.AccessPermission;
+import org.jbei.ice.dto.common.PageParameters;
+import org.jbei.ice.dto.folder.FolderDetails;
+import org.jbei.ice.dto.folder.FolderType;
+import org.jbei.ice.dto.web.RegistryPartner;
+import org.jbei.ice.entry.EntrySelection;
+import org.jbei.ice.folder.*;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.shared.ColumnField;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

@@ -4,9 +4,9 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.search.annotations.ClassBridge;
 import org.hibernate.search.annotations.ContainedIn;
-import org.jbei.ice.lib.access.EntryFolderPermissionBridge;
-import org.jbei.ice.lib.dto.folder.FolderDetails;
-import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.access.EntryFolderPermissionBridge;
+import org.jbei.ice.dto.folder.FolderDetails;
+import org.jbei.ice.dto.folder.FolderType;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -16,7 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Encapsulates the notion of a collection of {@link Entry}s
+ * Encapsulates the notion of a collection of {@link org.jbei.ice.storage.model.Entry}s
  * Each folder has an owner.
  *
  * @author Hector Plahar
@@ -64,7 +64,7 @@ public class Folder implements DataModel {
             inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
     @LazyCollection(LazyCollectionOption.EXTRA)
     @ContainedIn
-    private Set<Entry> contents = new LinkedHashSet<>();
+    private final Set<org.jbei.ice.storage.model.Entry> contents = new LinkedHashSet<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, mappedBy = "folder",
             orphanRemoval = true, fetch = FetchType.LAZY)

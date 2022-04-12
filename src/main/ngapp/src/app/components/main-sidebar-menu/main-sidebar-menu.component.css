@@ -1,0 +1,11 @@
+.folder-menu {
+    -ms-flex: 0 0 230px;
+    /*flex: 0 0 280px;*/
+    width: 280px;
+}
+
+@media (max-width: 1279px) {
+    .folder-menu {
+        display: none;
+    }
+}

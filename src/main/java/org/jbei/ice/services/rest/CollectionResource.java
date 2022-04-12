@@ -1,13 +1,13 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.common.Results;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.folder.collection.Collection;
-import org.jbei.ice.lib.folder.collection.CollectionEntries;
-import org.jbei.ice.lib.folder.collection.CollectionType;
-import org.jbei.ice.lib.folder.collection.Collections;
-import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.dto.common.Results;
+import org.jbei.ice.dto.entry.PartData;
+import org.jbei.ice.folder.collection.Collection;
+import org.jbei.ice.folder.collection.CollectionEntries;
+import org.jbei.ice.folder.collection.CollectionType;
+import org.jbei.ice.folder.collection.Collections;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.shared.ColumnField;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

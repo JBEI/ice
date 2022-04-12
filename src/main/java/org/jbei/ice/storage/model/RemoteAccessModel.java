@@ -1,6 +1,6 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.access.AccessPermission;
+import org.jbei.ice.dto.access.AccessPermission;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -28,7 +28,7 @@ public class RemoteAccessModel implements DataModel {
 
     @OneToOne(orphanRemoval = true)
     @JoinColumn(name = "permission_id", nullable = false)
-    private Permission permission;
+    private org.jbei.ice.storage.model.Permission permission;
 
     /**
      * unique identifier for what is being shared. currently the folder id
@@ -57,7 +57,7 @@ public class RemoteAccessModel implements DataModel {
         this.remoteClientModel = remoteClientModel;
     }
 
-    public Permission getPermission() {
+    public org.jbei.ice.storage.model.Permission getPermission() {
         return permission;
     }
 

@@ -1,10 +1,10 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.dto.group.GroupType;
-import org.jbei.ice.lib.dto.group.UserGroup;
-import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.group.Groups;
+import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.dto.group.GroupType;
+import org.jbei.ice.dto.group.UserGroup;
+import org.jbei.ice.group.GroupController;
+import org.jbei.ice.group.Groups;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
 @Path("/groups")
 public class GroupResource extends RestResource {
 
-    private GroupController groupController = new GroupController();
+    private final GroupController groupController = new GroupController();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

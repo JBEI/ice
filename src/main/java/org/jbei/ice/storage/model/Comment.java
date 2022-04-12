@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.model;
 
 import org.hibernate.annotations.Type;
-import org.jbei.ice.lib.dto.comment.UserComment;
+import org.jbei.ice.dto.comment.UserComment;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Store comments about an {@link Entry} object, with the associated {@link org.jbei.ice
+ * Store comments about an {@link org.jbei.ice.storage.model.Entry} object, with the associated {@link org.jbei.ice
  * .lib.account.model.Account}.
  *
  * @author Timothy Ham, Zinovii Dmytriv
@@ -27,11 +27,11 @@ public class Comment implements DataModel {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "accounts_id", nullable = false)
-    private Account account;
+    private AccountModel account;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
-    private Entry entry;
+    private org.jbei.ice.storage.model.Entry entry;
 
     @Column(name = "body", nullable = false)
     @Lob
@@ -50,12 +50,12 @@ public class Comment implements DataModel {
     @JoinTable(name = "comment_sample", joinColumns = @JoinColumn(name = "comment_id"),
             inverseJoinColumns = @JoinColumn(name = "sample_id"))
 
-    private Set<Sample> samples = new HashSet<>();
+    private final Set<org.jbei.ice.storage.model.Sample> samples = new HashSet<>();
 
     public Comment() {
     }
 
-    public Comment(Entry entry, Account account, String body) {
+    public Comment(org.jbei.ice.storage.model.Entry entry, AccountModel account, String body) {
         setEntry(entry);
         setAccount(account);
         setBody(body);
@@ -66,15 +66,15 @@ public class Comment implements DataModel {
         return id;
     }
 
-    public Account getAccount() {
+    public AccountModel getAccount() {
         return account;
     }
 
-    public void setAccount(Account account) {
+    public void setAccount(AccountModel account) {
         this.account = account;
     }
 
-    public Entry getEntry() {
+    public org.jbei.ice.storage.model.Entry getEntry() {
         return entry;
     }
 
@@ -106,7 +106,7 @@ public class Comment implements DataModel {
         this.modificationTime = modificationTime;
     }
 
-    public Set<Sample> getSamples() {
+    public Set<org.jbei.ice.storage.model.Sample> getSamples() {
         return samples;
     }
 

@@ -1,7 +1,7 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.logging.Logger;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;

@@ -2,7 +2,7 @@ package org.jbei.ice.services.rest;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
+import org.jbei.ice.entry.sequence.analysis.TraceSequences;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;

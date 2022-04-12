@@ -1,9 +1,9 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.entry.CustomEntryField;
-import org.jbei.ice.lib.dto.entry.EntryField;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.FieldType;
+import org.jbei.ice.dto.entry.CustomEntryField;
+import org.jbei.ice.dto.entry.EntryFieldLabel;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.FieldType;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -20,7 +20,7 @@ public class CustomEntryFieldModel implements DataModel {
     private long id;
 
     // unique across same entry types for non-disabled fields
-    @Column(name = "label")
+    @Column(name = "\"label\"")
     private String label;
 
     // type of field (e.g. multi choice etc)
@@ -29,19 +29,19 @@ public class CustomEntryFieldModel implements DataModel {
 
     @Column(name = "existing_entry_field")
     @Enumerated(EnumType.STRING)
-    private EntryField existingField;
+    private EntryFieldLabel existingField;
 
     @Enumerated(EnumType.STRING)
     private EntryType entryType;    // type of entry this custom field is for
 
-    @Column(name = "required")
+    @Column(name = "\"required\"")
     private Boolean required = Boolean.FALSE;
 
-    @Column(name = "disabled")
+    @Column(name = "\"disabled\"")
     private Boolean disabled = Boolean.FALSE;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CustomEntryFieldOptionModel> customFieldLabels = new ArrayList<>();
+    private final List<CustomEntryFieldOptionModel> customFieldLabels = new ArrayList<>();
 
     @Override
     public long getId() {
@@ -88,11 +88,11 @@ public class CustomEntryFieldModel implements DataModel {
         this.disabled = disabled;
     }
 
-    public EntryField getExistingField() {
+    public EntryFieldLabel getExistingField() {
         return existingField;
     }
 
-    public void setExistingField(EntryField existingField) {
+    public void setExistingField(EntryFieldLabel existingField) {
         this.existingField = existingField;
     }
 

@@ -1,6 +1,6 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
+import org.jbei.ice.dto.sample.SampleRequestStatus;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IDataTransferModel;
 
@@ -18,11 +18,11 @@ public class SampleCreateModel implements DataModel {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "accounts_id", nullable = false)
-    private Account account;
+    private AccountModel account;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id", nullable = false)
-    private Folder folder;
+    private org.jbei.ice.storage.model.Folder folder;
 
     @Column(name = "requested")
     @Temporal(TemporalType.TIMESTAMP)
@@ -41,15 +41,15 @@ public class SampleCreateModel implements DataModel {
         return id;
     }
 
-    public Account getAccount() {
+    public AccountModel getAccount() {
         return account;
     }
 
-    public void setAccount(Account account) {
+    public void setAccount(AccountModel account) {
         this.account = account;
     }
 
-    public Folder getFolder() {
+    public org.jbei.ice.storage.model.Folder getFolder() {
         return folder;
     }
 

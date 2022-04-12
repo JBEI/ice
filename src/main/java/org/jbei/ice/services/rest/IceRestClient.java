@@ -5,10 +5,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.dto.ConfigurationKey;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.utils.Utils;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -103,7 +103,7 @@ public class IceRestClient extends RestClient {
         if (StringUtils.isEmpty(this.token))
             return;
 
-        invocationBuilder.header(Headers.WOR_API_KEY_TOKEN, token);
+        invocationBuilder.header(org.jbei.ice.services.rest.Headers.WOR_API_KEY_TOKEN, token);
         String clientId = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
         if (!StringUtils.isEmpty(clientId)) {
             invocationBuilder.header(Headers.API_KEY_CLIENT_ID, clientId);

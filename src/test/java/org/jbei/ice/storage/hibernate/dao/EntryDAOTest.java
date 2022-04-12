@@ -1,12 +1,12 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.TestEntryCreator;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.entry.Entries;
+import org.jbei.ice.AccountCreator;
+import org.jbei.ice.TestEntryCreator;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.PartData;
+import org.jbei.ice.entry.Entries;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Entry;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,7 +24,7 @@ public class EntryDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetEntrySummary() throws Exception {
-        Account account = AccountCreator.createTestAccount("testGetEntrySummary", false);
+        AccountModel account = AccountCreator.createTestAccount("testGetEntrySummary", false);
         long id = TestEntryCreator.createTestPart(account.getEmail());
         String summary = entryDAO.getEntrySummary(id);
         Assert.assertEquals("summary for test", summary);
@@ -38,7 +38,7 @@ public class EntryDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGet() throws Exception {
-        Account account = AccountCreator.createTestAccount("testGet", false);
+        AccountModel account = AccountCreator.createTestAccount("testGet", false);
         long id = TestEntryCreator.createTestPart(account.getEmail());
         Entry entry = entryDAO.get(id);
         Assert.assertNotNull(entry);
@@ -47,7 +47,7 @@ public class EntryDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetByRecordId() throws Exception {
-        Account account = AccountCreator.createTestAccount("testGetByRecordId", false);
+        AccountModel account = AccountCreator.createTestAccount("testGetByRecordId", false);
         long id = TestEntryCreator.createTestPart(account.getEmail());
         Entry entry = entryDAO.get(id);
         Assert.assertNotNull(entry);
@@ -58,7 +58,7 @@ public class EntryDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetByPartNumber() throws Exception {
-        Account account = AccountCreator.createTestAccount("testGetByPartNumber", false);
+        AccountModel account = AccountCreator.createTestAccount("testGetByPartNumber", false);
         long id = TestEntryCreator.createTestPart(account.getEmail());
         Entry entry = entryDAO.get(id);
         Assert.assertNotNull(entry);
@@ -69,7 +69,7 @@ public class EntryDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetByUniqueName() throws Exception {
-        Account account = AccountCreator.createTestAccount("testGetByUniqueName", false);
+        AccountModel account = AccountCreator.createTestAccount("testGetByUniqueName", false);
         PartData data = new PartData(EntryType.PART);
         data.setShortDescription("summary for test");
         String uniqueName = "pTest" + account.getEmail();
@@ -85,7 +85,7 @@ public class EntryDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetOwnerEntryIds() throws Exception {
-        Account account = AccountCreator.createTestAccount("EntryDAOTest.testGetOwnerEntryIds", false);
+        AccountModel account = AccountCreator.createTestAccount("EntryDAOTest.testGetOwnerEntryIds", false);
         Random random = new Random();
         int entryCount = random.nextInt(30);
         while (entryCount == 0)

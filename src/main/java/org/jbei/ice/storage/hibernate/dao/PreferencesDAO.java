@@ -1,11 +1,11 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.user.PreferenceKey;
+import org.jbei.ice.dto.user.PreferenceKey;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Preference;
 
 import javax.persistence.criteria.CriteriaQuery;
@@ -19,7 +19,7 @@ import java.util.*;
  */
 public class PreferencesDAO extends HibernateRepository<Preference> {
 
-    public List<Preference> getAccountPreferences(Account account, List<PreferenceKey> keys) {
+    public List<Preference> getAccountPreferences(AccountModel account, List<PreferenceKey> keys) {
         ArrayList<String> keyString = new ArrayList<>();
         for (PreferenceKey key : keys)
             keyString.add(key.name());
@@ -35,7 +35,7 @@ public class PreferencesDAO extends HibernateRepository<Preference> {
         }
     }
 
-    public Preference getPreference(Account account, String key) {
+    public Preference getPreference(AccountModel account, String key) {
         try {
             CriteriaQuery<Preference> query = getBuilder().createQuery(Preference.class);
             Root<Preference> from = query.from(Preference.class);
@@ -50,7 +50,7 @@ public class PreferencesDAO extends HibernateRepository<Preference> {
         }
     }
 
-    public HashMap<String, String> retrievePreferenceValues(Account account, HashSet<String> keys) {
+    public HashMap<String, String> retrievePreferenceValues(AccountModel account, HashSet<String> keys) {
         try {
             CriteriaQuery<Preference> query = getBuilder().createQuery(Preference.class);
             Root<Preference> from = query.from(Preference.class);
@@ -72,7 +72,7 @@ public class PreferencesDAO extends HibernateRepository<Preference> {
         }
     }
 
-    public Preference createOrUpdatePreference(Account account, String key, String value) {
+    public Preference createOrUpdatePreference(AccountModel account, String key, String value) {
         try {
             CriteriaQuery<Preference> query = getBuilder().createQuery(Preference.class);
             Root<Preference> from = query.from(Preference.class);

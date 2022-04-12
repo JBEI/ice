@@ -1,11 +1,11 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.sample.SampleRequest;
-import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
-import org.jbei.ice.lib.dto.sample.SampleRequestType;
-import org.jbei.ice.lib.entry.EntryUtil;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.PartData;
+import org.jbei.ice.dto.sample.SampleRequest;
+import org.jbei.ice.dto.sample.SampleRequestStatus;
+import org.jbei.ice.dto.sample.SampleRequestType;
+import org.jbei.ice.entry.EntryUtil;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -27,7 +27,7 @@ public class Request implements DataModel {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "accounts_id", nullable = false)
-    private Account account;
+    private AccountModel account;
 
     @Column(name = "requested")
     @Temporal(TemporalType.TIMESTAMP)
@@ -39,7 +39,7 @@ public class Request implements DataModel {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entry_id", nullable = false)
-    private Entry entry;
+    private org.jbei.ice.storage.model.Entry entry;
 
     @Column(name = "request_type")
     @Enumerated(value = EnumType.STRING)
@@ -59,11 +59,11 @@ public class Request implements DataModel {
         return this.id;
     }
 
-    public Account getAccount() {
+    public AccountModel getAccount() {
         return account;
     }
 
-    public void setAccount(Account account) {
+    public void setAccount(AccountModel account) {
         this.account = account;
     }
 
@@ -115,7 +115,7 @@ public class Request implements DataModel {
         this.plateDescription = plateDescription;
     }
 
-    public Entry getEntry() {
+    public org.jbei.ice.storage.model.Entry getEntry() {
         return entry;
     }
 

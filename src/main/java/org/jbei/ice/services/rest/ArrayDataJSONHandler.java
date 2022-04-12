@@ -27,15 +27,15 @@ public class ArrayDataJSONHandler implements MessageBodyWriter<ArrayList<IDataTr
         MessageBodyReader<ArrayList<IDataTransferModel>> {
     @Override
     public boolean isReadable(final Class<?> type, final Type genericType,
-            final Annotation[] annotations, final MediaType mediaType) {
+                              final Annotation[] annotations, final MediaType mediaType) {
         return true;
     }
 
     @Override
     public ArrayList<IDataTransferModel> readFrom(final Class<ArrayList<IDataTransferModel>> type,
-            final Type genericType, final Annotation[] annotations, final MediaType mediaType,
-            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream)
-                    throws IOException, WebApplicationException {
+                                                  final Type genericType, final Annotation[] annotations, final MediaType mediaType,
+                                                  final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream)
+            throws IOException, WebApplicationException {
         final Gson gson = new GsonBuilder().create();
         try (Reader in = new InputStreamReader(entityStream)) {
             return gson.fromJson(in, type);
@@ -44,22 +44,22 @@ public class ArrayDataJSONHandler implements MessageBodyWriter<ArrayList<IDataTr
 
     @Override
     public boolean isWriteable(final Class<?> type, final Type genericType,
-            final Annotation[] annotations, final MediaType mediaType) {
+                               final Annotation[] annotations, final MediaType mediaType) {
         return true;
     }
 
     @Override
     public long getSize(final ArrayList<IDataTransferModel> iDataTransferModels,
-            final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType) {
+                        final Class<?> type, final Type genericType, final Annotation[] annotations,
+                        final MediaType mediaType) {
         return 0;
     }
 
     @Override
     public void writeTo(final ArrayList<IDataTransferModel> data, final Class<?> type,
-            final Type genericType, final Annotation[] annotations, final MediaType mediaType,
-            final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
-                    throws IOException, WebApplicationException {
+                        final Type genericType, final Annotation[] annotations, final MediaType mediaType,
+                        final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
+            throws IOException, WebApplicationException {
         final Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (Writer out = new OutputStreamWriter(entityStream)) {
             gson.toJson(data, out);

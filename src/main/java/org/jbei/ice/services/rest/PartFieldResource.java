@@ -1,8 +1,8 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.dto.entry.CustomEntryField;
-import org.jbei.ice.lib.dto.entry.CustomFields;
-import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.CustomEntryField;
+import org.jbei.ice.dto.entry.CustomFields;
+import org.jbei.ice.dto.entry.EntryType;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

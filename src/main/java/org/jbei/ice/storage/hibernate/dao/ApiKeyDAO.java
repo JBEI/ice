@@ -1,6 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.ApiKey;

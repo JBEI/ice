@@ -1,6 +1,6 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.entry.CustomEntryField;
+import org.jbei.ice.dto.entry.CustomEntryField;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -16,13 +16,13 @@ public class CustomEntryFieldValueModel implements DataModel {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
-    private Entry entry;
+    private org.jbei.ice.storage.model.Entry entry;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "custom_entry_field_id", nullable = false)
-    private CustomEntryFieldModel field;
+    private org.jbei.ice.storage.model.CustomEntryFieldModel field;
 
-    @Column(name = "value")
+    @Column(name = "\"value\"")
     private String value;
 
     @Override
@@ -30,7 +30,7 @@ public class CustomEntryFieldValueModel implements DataModel {
         return id;
     }
 
-    public void setEntry(Entry entry) {
+    public void setEntry(org.jbei.ice.storage.model.Entry entry) {
         this.entry = entry;
     }
 
@@ -46,7 +46,7 @@ public class CustomEntryFieldValueModel implements DataModel {
         return this.value;
     }
 
-    public CustomEntryFieldModel getField() {
+    public org.jbei.ice.storage.model.CustomEntryFieldModel getField() {
         return field;
     }
 

@@ -1,59 +1,62 @@
-<div class="container-fluid">
+<section class="min-vh-100 d-flex align-items-center" style="background-color: #f5f9fc">
+    <div class="container">
+        <div class="row">
 
-    <div style="margin: 180px auto; width: 350px">
-        <div class="bg-light shadow-sm p-4">
+            <div class="col-lg-5 mx-auto p-5 border shadow-sm bg-white rounded">
 
-            <!--    <img src="assets/logo.png" alt="ICE logo" style="width: 250px" class="mb-3">-->
-
-
-            <form name="loginForm" (submit)="getAccessToken()">
-
-                <div class="mb-3">
-                    <label for="userId" class="form-label">User ID</label>
-                    <a routerLink="/register" class="pr-0 font-80em pull-right" *ngIf="canCreateAccount">Register</a>
-
-                    <input type="text" class="form-control" [(ngModel)]="login.email"
-                           [disabled]="validation.processing&&!errMsg" id="userId"
-                           name="userId" [ngClass]="{'is-invalid': !validation.validId}" required>
+                <div class="text-center">
+                    <img src="assets/img/img.png" alt="logo" style="height: 60px">
                 </div>
 
+                <hr class="border-top">
 
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <a routerLink="/forgotPassword" class="font-80em pr-0 pull-right">Forgot?</a>
+                <div class="pt-3">
 
-                    <input type="password" class="form-control" [(ngModel)]="login.password"
-                           [disabled]="validation.processing && !errMsg" id="password"
-                           name="password" [ngClass]="{'is-invalid': !validation.validPassword}" required>
-                </div>
+                    <div class="alert alert-danger p-2" *ngIf="this.validation.invalidPassword"><i
+                            class="fa fa-fw fa-exclamation-triangle"></i> Invalid login or
+                        password. Please try again.
+                    </div>
 
-                <div class="mt-1">
-                    <label class="font-90em cursor-pointer text-secondary" (click)="setRemember()">
-                        <i class="fa fa-fw font-11em"
-                           [ngClass]="{'fa-square-o': !remember, 'fa-check-square-o': remember}"></i>
-                        Remember Me
-                    </label>
+                    <form id="login-form">
+                        <div class="mb-4">
+                            <label for="floatingInput" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com"
+                                   [(ngModel)]="loggedInUser.email"
+                                   name="userId" [ngClass]="{'is-invalid': !validation.validId}" [disabled]="processing"
+                                   required>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div><label class="form-label" for="password">Password</label></div>
+                            <div class="mb-2"><a routerLink="/forgotPassword" class="small">Forgot password?</a>
+                            </div>
+                        </div>
+
+                        <input type="password" class="form-control" id="password" placeholder="Password"
+                               [(ngModel)]="loggedInUser.password" [disabled]="processing"
+                               name="password" [ngClass]="{'is-invalid': !validation.validPassword}" required>
+
+                        <div class="mt-5">
+                            <button [disabled]="processing"
+                                    class="w-100 btn btn-primary pull-right py-2 fw-bold" id="submit"
+                                    (click)="loginUser()">
+                                <div *ngIf="processing" class="spinner-border spinner-border-sm text-light"
+                                     role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                Sign In
+                            </button>
+                        </div>
+                    </form>
+
                 </div>
 
                 <br>
 
-                <div class="alert alert-danger p-2" style="width: 300px" *ngIf="errMsg">
-                    <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
-                    &nbsp;<span class="font-90em">Login failed. Please try again.</span>
-                </div>
+                <div class="small text-center">Don't have an account? <a routerLink="/register">Create one now</a></div>
+            </div>
 
-                <button type="submit" class="btn btn-primary" [disabled]="validation.processing && !errMsg"
-                        style="width: 300px">
-                    <i *ngIf="validation.processing" class="fa fa-spinner fa-pulse fa-fw"></i> Sign In
-                </button>
-            </form>
         </div>
 
-        <br><br>
-
-        <div ng-if="canCreateAccount">
-            <a href="register" class="btn btn-link btn-sm">Create account</a>
-        </div>
     </div>
-</div>
-
+</section>

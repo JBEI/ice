@@ -3,26 +3,28 @@ package org.jbei.ice.storage.hibernate.search;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.search.*;
+import org.hibernate.Session;
 import org.hibernate.search.FullTextQuery;
 import org.hibernate.search.FullTextSession;
+import org.hibernate.search.Search;
 import org.hibernate.search.engine.ProjectionConstants;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hibernate.search.query.dsl.TermContext;
-import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.dto.search.FieldFilter;
-import org.jbei.ice.lib.dto.search.SearchQuery;
-import org.jbei.ice.lib.dto.search.SearchResult;
-import org.jbei.ice.lib.dto.search.SearchResults;
-import org.jbei.ice.lib.folder.Folders;
-import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.search.QueryType;
-import org.jbei.ice.lib.search.filter.SearchFieldFactory;
-import org.jbei.ice.lib.shared.BioSafetyOption;
-import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.account.AccountController;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.PartData;
+import org.jbei.ice.dto.entry.Visibility;
+import org.jbei.ice.dto.search.FieldFilter;
+import org.jbei.ice.dto.search.SearchQuery;
+import org.jbei.ice.dto.search.SearchResult;
+import org.jbei.ice.dto.search.SearchResults;
+import org.jbei.ice.folder.Folders;
+import org.jbei.ice.group.GroupController;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.search.QueryType;
+import org.jbei.ice.search.filter.SearchFieldFactory;
+import org.jbei.ice.shared.BioSafetyOption;
+import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.Entry;
@@ -83,8 +85,9 @@ public class HibernateSearch {
             entryTypes = new ArrayList<>(Arrays.asList(EntryType.values()));
         }
 
+        Session session = HibernateConfiguration.getCurrentSession();
         int resultCount;
-        FullTextSession fullTextSession = HibernateConfiguration.getFullTextSession();
+        FullTextSession fullTextSession = Search.getFullTextSession(session);
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
 
@@ -195,7 +198,8 @@ public class HibernateSearch {
      */
     public SearchResults filterBlastResults(String userId, int start, int count, SearchQuery searchQuery,
                                             final HashMap<String, SearchResult> blastResults) {
-        FullTextSession fullTextSession = HibernateConfiguration.getFullTextSession();
+        Session session = HibernateConfiguration.getCurrentSession();
+        FullTextSession fullTextSession = Search.getFullTextSession(session);
 
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
         Query query = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
@@ -252,8 +256,9 @@ public class HibernateSearch {
     public SearchResults executeSearch(String userId, HashMap<String, QueryType> terms,
                                        SearchQuery searchQuery,
                                        HashMap<String, SearchResult> blastResults) {
+        Session session = HibernateConfiguration.getCurrentSession();
         int resultCount;
-        FullTextSession fullTextSession = HibernateConfiguration.getFullTextSession();
+        FullTextSession fullTextSession = Search.getFullTextSession(session);
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
         // get classes for search

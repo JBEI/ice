@@ -3,12 +3,12 @@ package org.jbei.ice.storage.model;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
-import org.jbei.ice.lib.dto.entry.SequenceInfo;
-import org.jbei.ice.lib.entry.sequence.SequenceFormat;
-import org.jbei.ice.lib.utils.SequenceUtils;
-import org.jbei.ice.lib.utils.UtilityException;
+import org.jbei.ice.dto.entry.SequenceInfo;
+import org.jbei.ice.entry.sequence.SequenceFormat;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.hibernate.bridge.EntryBooleanPropertiesBridge;
+import org.jbei.ice.utils.SequenceUtils;
+import org.jbei.ice.utils.UtilityException;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
@@ -18,10 +18,10 @@ import java.util.Set;
 import static javax.persistence.FetchType.LAZY;
 
 /**
- * Stores the unique sequence for an {@link Entry} object.
+ * Stores the unique sequence for an {@link org.jbei.ice.storage.model.Entry} object.
  * <p>
  * <ul>
- * <li><b>sequence: </b>Normalized (lower cased, trimmed) sequence for {@link Entry}.</li>
+ * <li><b>sequence: </b>Normalized (lower cased, trimmed) sequence for {@link org.jbei.ice.storage.model.Entry}.</li>
  * <li><b>sequenceUser: </b>Original sequence uploaded by the user. For example, the unparsed
  * genbank file, if that was the original upload. If the original upload does not exist, then this
  * field is the same as sequence.</li>
@@ -78,7 +78,7 @@ public class Sequence implements DataModel {
     @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
             @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasSequence")
     }))
-    private Entry entry;
+    private org.jbei.ice.storage.model.Entry entry;
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = LAZY, mappedBy = "sequence")
     private Set<SequenceFeature> sequenceFeatures = new HashSet<>();
@@ -86,7 +86,7 @@ public class Sequence implements DataModel {
     public Sequence() {
     }
 
-    public Sequence(String sequence, String sequenceUser, String fwdHash, String revHash, Entry entry) {
+    public Sequence(String sequence, String sequenceUser, String fwdHash, String revHash, org.jbei.ice.storage.model.Entry entry) {
         super();
 
         this.sequence = sequence;
@@ -147,7 +147,7 @@ public class Sequence implements DataModel {
     }
 
     @XmlTransient
-    public Entry getEntry() {
+    public org.jbei.ice.storage.model.Entry getEntry() {
         return entry;
     }
 

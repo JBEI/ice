@@ -1,6 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.CustomEntryFieldModel;
 

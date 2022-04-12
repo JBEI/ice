@@ -3,10 +3,10 @@ package org.jbei.ice.storage.hibernate.dao;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
-import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Group;
 import org.jbei.ice.storage.model.Message;
 
@@ -28,7 +28,7 @@ public class MessageDAO extends HibernateRepository<Message> {
         return super.get(Message.class, id);
     }
 
-    public int retrieveNewMessageCount(Account account) {
+    public int retrieveNewMessageCount(AccountModel account) {
         try {
             StringBuilder builder = new StringBuilder();
             builder.append("select count(id) from message m where m.is_read=false AND (m.id in ")
@@ -58,7 +58,7 @@ public class MessageDAO extends HibernateRepository<Message> {
         }
     }
 
-    public List<Message> retrieveMessages(Account account, List<Group> groups, int start, int count) {
+    public List<Message> retrieveMessages(AccountModel account, List<Group> groups, int start, int count) {
         try {
             StringBuilder builder = new StringBuilder();
             builder.append("select id from message m where m.id in ")
@@ -105,7 +105,7 @@ public class MessageDAO extends HibernateRepository<Message> {
         }
     }
 
-    public int retrieveMessageCount(Account account, List<Group> groups) {
+    public int retrieveMessageCount(AccountModel account, List<Group> groups) {
         try {
             Session session = currentSession();
             StringBuilder builder = new StringBuilder();

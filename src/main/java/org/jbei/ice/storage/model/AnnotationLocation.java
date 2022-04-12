@@ -6,7 +6,7 @@ import org.jbei.ice.storage.IDataTransferModel;
 import javax.persistence.*;
 
 /**
- * Store the basepair location annotation for a {@link SequenceFeature} object.
+ * Store the basepair location annotation for a {@link org.jbei.ice.storage.model.SequenceFeature} object.
  * <p/>
  * Is able to record single residue or inbetween annotations.
  *
@@ -26,7 +26,7 @@ public class AnnotationLocation implements DataModel {
 
     @Column(name = "genbank_end", nullable = false)
     // This column is named genbank_end because "end" is an sql keyword, and hibernate
-    // does not quote table names during creation.  
+    // does not quote table names during creation.
     // if annotating only one base, set end=genbankStart, instead of end=null
     private int end;
 
@@ -40,13 +40,13 @@ public class AnnotationLocation implements DataModel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sequence_feature_id")
-    private SequenceFeature sequenceFeature;
+    private org.jbei.ice.storage.model.SequenceFeature sequenceFeature;
 
     public AnnotationLocation() {
         super();
     }
 
-    public AnnotationLocation(int genbankStart, int end, SequenceFeature sequenceFeature) {
+    public AnnotationLocation(int genbankStart, int end, org.jbei.ice.storage.model.SequenceFeature sequenceFeature) {
         super();
 
         this.genbankStart = genbankStart;
@@ -94,7 +94,7 @@ public class AnnotationLocation implements DataModel {
         return inbetween;
     }
 
-    public void setSequenceFeature(SequenceFeature sequenceFeature) {
+    public void setSequenceFeature(org.jbei.ice.storage.model.SequenceFeature sequenceFeature) {
         this.sequenceFeature = sequenceFeature;
     }
 

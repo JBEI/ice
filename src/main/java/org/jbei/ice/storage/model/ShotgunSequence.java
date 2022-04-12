@@ -1,6 +1,6 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.ShotgunSequenceDTO;
+import org.jbei.ice.dto.ShotgunSequenceDTO;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -17,7 +17,7 @@ public class ShotgunSequence implements DataModel {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entries_id", nullable = false)
-    private Entry entry;
+    private org.jbei.ice.storage.model.Entry entry;
 
     @Column(name = "file_id", nullable = false, unique = true)
     private String fileId;
@@ -35,7 +35,7 @@ public class ShotgunSequence implements DataModel {
     public ShotgunSequence() {
     }
 
-    public ShotgunSequence(Entry entry, String fileId, String filename, String depositor, Date creationTime) {
+    public ShotgunSequence(org.jbei.ice.storage.model.Entry entry, String fileId, String filename, String depositor, Date creationTime) {
         super();
 
         this.entry = entry;
@@ -53,7 +53,7 @@ public class ShotgunSequence implements DataModel {
         this.id = id;
     }
 
-    public Entry getEntry() {
+    public org.jbei.ice.storage.model.Entry getEntry() {
         return entry;
     }
 

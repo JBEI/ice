@@ -3,8 +3,8 @@ package org.jbei.ice.storage.hibernate.dao;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.dto.entry.Visibility;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -35,7 +35,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         return root.get(path).in(objects);
     }
 
-    public boolean hasPermission(Entry entry, Folder folder, BulkUpload upload, Account account, Group group,
+    public boolean hasPermission(Entry entry, Folder folder, BulkUpload upload, AccountModel account, Group group,
                                  boolean canRead, boolean canWrite) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
@@ -61,7 +61,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
     }
 
     // to avoid ambiguous call name clashes when collections are null
-    public boolean hasPermissionMulti(Entry entry, Set<Folder> folders, Account account, List<Group> groups,
+    public boolean hasPermissionMulti(Entry entry, Set<Folder> folders, AccountModel account, List<Group> groups,
                                       boolean canRead, boolean canWrite) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
@@ -85,7 +85,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    public Permission retrievePermission(Entry entry, Folder folder, BulkUpload upload, Account account, Group group,
+    public Permission retrievePermission(Entry entry, Folder folder, BulkUpload upload, AccountModel account, Group group,
                                          boolean canRead, boolean canWrite) {
         try {
             Query<Permission> query = createPermissionQuery(entry, folder, upload, account, group, canRead, canWrite);
@@ -103,7 +103,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
     }
 
     protected Query<Permission> createPermissionQuery(Entry entry, Folder folder, BulkUpload upload,
-                                                      Account account, Group group, boolean canRead,
+                                                      AccountModel account, Group group, boolean canRead,
                                                       boolean canWrite) {
         CriteriaQuery<Permission> query = getBuilder().createQuery(Permission.class);
         Root<Permission> from = query.from(Permission.class);
@@ -121,7 +121,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         return currentSession().createQuery(query);
     }
 
-    public int removePermission(Entry entry, Folder folder, BulkUpload upload, Account account, Group group,
+    public int removePermission(Entry entry, Folder folder, BulkUpload upload, AccountModel account, Group group,
                                 boolean canRead, boolean canWrite) {
         try {
             CriteriaDelete<Permission> delete = getBuilder().createCriteriaDelete(Permission.class);
@@ -168,9 +168,9 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    public List<Account> retrieveAccountPermissions(Folder folder, boolean canWrite, boolean canRead) {
+    public List<AccountModel> retrieveAccountPermissions(Folder folder, boolean canWrite, boolean canRead) {
         try {
-            CriteriaQuery<Account> query = getBuilder().createQuery(Account.class);
+            CriteriaQuery<AccountModel> query = getBuilder().createQuery(AccountModel.class);
             Root<Permission> from = query.from(Permission.class);
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(getBuilder().equal(from.get("canWrite"), canWrite));
@@ -185,7 +185,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    public boolean hasSetWriteFolderPermission(Folder folder, Account account) {
+    public boolean hasSetWriteFolderPermission(Folder folder, AccountModel account) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Permission> from = query.from(Permission.class);
@@ -243,7 +243,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    public List<Folder> retrieveFolderPermissions(Account account, Set<Group> accountGroups) {
+    public List<Folder> retrieveFolderPermissions(AccountModel account, Set<Group> accountGroups) {
         // can read or can write
         try {
             CriteriaQuery<Folder> query = getBuilder().createQuery(Folder.class);
@@ -300,7 +300,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
      * @param entries list of entry ids to filter
      * @return filtered list such that specified account have read privileges on entries contained in it
      */
-    public List<Long> getCanReadEntries(Account account, List<Group> groups, List<Long> entries) {
+    public List<Long> getCanReadEntries(AccountModel account, List<Group> groups, List<Long> entries) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Permission> from = query.from(Permission.class);

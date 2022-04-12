@@ -1,9 +1,9 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.dto.entry.CustomField;
+import org.jbei.ice.dto.entry.CustomField;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Entry;
-import org.jbei.ice.storage.model.Parameter;
+import org.jbei.ice.storage.model.ParameterModel;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -11,15 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data accessor object for handling {@link Parameter}s
+ * Data accessor object for handling {@link ParameterModel}s
  *
  * @author Hector Plahar
  */
-public class ParameterDAO extends HibernateRepository<Parameter> {
+public class ParameterDAO extends HibernateRepository<ParameterModel> {
 
     @Override
-    public Parameter get(long id) {
-        return super.get(Parameter.class, id);
+    public ParameterModel get(long id) {
+        return super.get(ParameterModel.class, id);
     }
 
     // filter by key value pairs
@@ -33,7 +33,7 @@ public class ParameterDAO extends HibernateRepository<Parameter> {
                 return entries;
 
             CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
-            Root<Parameter> from = query.from(Parameter.class);
+            Root<ParameterModel> from = query.from(ParameterModel.class);
             query.select(from.get("entry")).where(
                     getBuilder().equal(getBuilder().lower(from.get("key")), field.getName().toLowerCase()),
                     getBuilder().equal(getBuilder().lower(from.get("value")), field.getValue().toLowerCase())

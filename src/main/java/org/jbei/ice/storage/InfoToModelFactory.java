@@ -1,9 +1,9 @@
 package org.jbei.ice.storage;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.entry.*;
-import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.dto.entry.*;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.storage.model.*;
 
 import java.text.DateFormat;
@@ -284,19 +284,19 @@ public class InfoToModelFactory {
             entry.setKeywords(info.getKeywords());
 
         // parameters
-        List<Parameter> parameters = getParameters(info.getParameters(), entry);
+        List<ParameterModel> parameters = getParameters(info.getParameters(), entry);
         entry.setParameters(parameters);
         return entry;
     }
 
-    private static List<Parameter> getParameters(ArrayList<CustomField> infos, Entry entry) {
-        List<Parameter> parameters = new ArrayList<>();
+    private static List<ParameterModel> getParameters(ArrayList<CustomField> infos, Entry entry) {
+        List<ParameterModel> parameters = new ArrayList<>();
 
         if (infos == null)
             return parameters;
 
         for (CustomField info : infos) {
-            Parameter param = new Parameter();
+            ParameterModel param = new ParameterModel();
             param.setEntry(entry);
             param.setKey(info.getName());
             param.setValue(info.getValue());
@@ -373,7 +373,7 @@ public class InfoToModelFactory {
      * @param values list of value to set. some fields like selections markers can handle multiple values.
      * @param field  to set
      */
-    public static void infoToEntryForField(Entry entry, String[] values, EntryField field) {
+    public static void infoToEntryForField(Entry entry, String[] values, EntryFieldLabel field) {
         if (entry == null || values.length == 0)
             return;
 
@@ -506,7 +506,7 @@ public class InfoToModelFactory {
         }
     }
 
-    private static void infoToStrainForField(Entry entry, String value, EntryField field) {
+    private static void infoToStrainForField(Entry entry, String value, EntryFieldLabel field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString()))
             return;
 
@@ -523,7 +523,7 @@ public class InfoToModelFactory {
         }
     }
 
-    private static void infoToPlasmidForField(Entry entry, String value, EntryField field) {
+    private static void infoToPlasmidForField(Entry entry, String value, EntryFieldLabel field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.toString()))
             return;
 
@@ -556,7 +556,7 @@ public class InfoToModelFactory {
         }
     }
 
-    private static void infoToSeedForField(Entry entry, String value, EntryField field) {
+    private static void infoToSeedForField(Entry entry, String value, EntryFieldLabel field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.SEED.toString()))
             return;
 
@@ -602,7 +602,7 @@ public class InfoToModelFactory {
         }
     }
 
-    private static void infoToProteinForField(Entry entry, String value, EntryField field) {
+    private static void infoToProteinForField(Entry entry, String value, EntryFieldLabel field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.PROTEIN.toString()))
             return;
 

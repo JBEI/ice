@@ -4,7 +4,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
-import org.jbei.ice.lib.dto.sample.PartSample;
+import org.jbei.ice.dto.sample.PartSample;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.hibernate.bridge.EntryBooleanPropertiesBridge;
 
@@ -50,7 +50,7 @@ public class Sample implements DataModel {
     @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
             @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasSample")
     }))
-    private Entry entry;
+    private org.jbei.ice.storage.model.Entry entry;
 
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
@@ -110,7 +110,7 @@ public class Sample implements DataModel {
         this.notes = notes;
     }
 
-    public Entry getEntry() {
+    public org.jbei.ice.storage.model.Entry getEntry() {
         return entry;
     }
 

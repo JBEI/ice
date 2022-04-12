@@ -11,8 +11,6 @@ import io.undertow.util.HttpString;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.jbei.ice.servlet.IceServletContextListener;
 
-import java.io.File;
-
 /**
  * Embedded (Undertow) server for development. Uses the settings from <code>web.xml</code>
  * todo : parse web.xml file
@@ -44,10 +42,12 @@ public class DevelopmentServer {
         HttpHandler servletHandler = manager.start();
 
         PredicatesHandler handler = Handlers.predicates(PredicatedHandlersParser.parse(
-                "path-prefix('search') or " +
+                "path-prefix('accesstokens') or " +
+                        "path-prefix('search') or " +
                         "path-prefix('folders') or " +
+                        "path-prefix('collections') or " +
+                        "path-prefix('upload') or " +
                         "path-prefix('download') or " +
-                        "path-prefix('config') or " +
                         "path-prefix('entry') or path-prefix('admin') and regex('/.+') -> rewrite('/')",
                 ClassLoader.getSystemClassLoader()), servletHandler);
 
@@ -55,7 +55,7 @@ public class DevelopmentServer {
                 .addPrefixPath("/", handler);
 
         Undertow server = Undertow.builder()
-                .addHttpListener(8080, "localhost")
+                .addHttpListener(8081, "localhost")
                 .setHandler(exchange -> {
                     exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Origin"), "*");
                     exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Methods"), "GET,PUT,POST,DELETE,OPTIONS");

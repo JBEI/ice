@@ -5,32 +5,32 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.jbei.ice.lib.bulkupload.FileBulkUpload;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationSettings;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.Setting;
-import org.jbei.ice.lib.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.dto.entry.EntryField;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.SequenceInfo;
-import org.jbei.ice.lib.entry.Entries;
-import org.jbei.ice.lib.entry.EntriesAsCSV;
-import org.jbei.ice.lib.entry.EntrySelection;
-import org.jbei.ice.lib.entry.attachment.Attachments;
-import org.jbei.ice.lib.entry.sequence.InputStreamWrapper;
-import org.jbei.ice.lib.entry.sequence.PartSequence;
-import org.jbei.ice.lib.entry.sequence.SequenceFormat;
-import org.jbei.ice.lib.entry.sequence.Sequences;
-import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
-import org.jbei.ice.lib.net.RemoteEntries;
-import org.jbei.ice.lib.net.RemoteSequence;
-import org.jbei.ice.lib.parsers.InvalidFormatParserException;
-import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.bulkupload.FileBulkUpload;
+import org.jbei.ice.config.ConfigurationSettings;
+import org.jbei.ice.dto.ConfigurationKey;
+import org.jbei.ice.dto.Setting;
+import org.jbei.ice.dto.entry.AttachmentInfo;
+import org.jbei.ice.dto.entry.EntryFieldLabel;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.SequenceInfo;
+import org.jbei.ice.entry.Entries;
+import org.jbei.ice.entry.EntriesAsCSV;
+import org.jbei.ice.entry.EntrySelection;
+import org.jbei.ice.entry.attachment.Attachments;
+import org.jbei.ice.entry.sequence.InputStreamWrapper;
+import org.jbei.ice.entry.sequence.PartSequence;
+import org.jbei.ice.entry.sequence.SequenceFormat;
+import org.jbei.ice.entry.sequence.Sequences;
+import org.jbei.ice.entry.sequence.analysis.TraceSequences;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.net.RemoteEntries;
+import org.jbei.ice.net.RemoteSequence;
+import org.jbei.ice.parsers.InvalidFormatParserException;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
 import org.jbei.ice.storage.model.ShotgunSequence;
 import org.jbei.ice.storage.model.TraceSequence;
+import org.jbei.ice.utils.Utils;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 @Path("/file")
 public class FileResource extends RestResource {
 
-    private Attachments attachments = new Attachments();
+    private final Attachments attachments = new Attachments();
 
     @GET
     @Path("asset/{assetName}")
@@ -210,7 +210,7 @@ public class FileResource extends RestResource {
 
             return addHeaders(Response.ok(stream), wrapper.getName());
         } else {
-            InputStreamWrapper wrapper = new PartSequence(userId, partId).toFile(SequenceFormat.fromString(downloadType));
+            InputStreamWrapper wrapper = new PartSequence(userId, partId).toFile(SequenceFormat.fromString(downloadType), true);
             StreamingOutput stream = output -> IOUtils.copy(wrapper.getInputStream(), output);
             return addHeaders(Response.ok(stream), wrapper.getName());
         }
@@ -274,7 +274,7 @@ public class FileResource extends RestResource {
             if (info == null)
                 throw new WebApplicationException(Response.serverError().build());
             return Response.status(Response.Status.OK).entity(info).build();
-        } catch (Exception e) {
+        } catch (IOException e) {
             Logger.error(e);
             ErrorResponse response = new ErrorResponse();
             response.setMessage(e.getMessage());
@@ -315,17 +315,17 @@ public class FileResource extends RestResource {
                                 EntrySelection selection) {
         String userId = super.requireUserId();
         EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId, sequenceFormats.toArray(new String[0]));
-        List<EntryField> entryFields = new ArrayList<>();
+        List<EntryFieldLabel> entryFieldLabels = new ArrayList<>();
         try {
-            if (fields != null) {
-                entryFields.addAll(fields.stream().map(EntryField::fromString).collect(Collectors.toList()));
+            if (fields != null && !fields.isEmpty()) {
+                entryFieldLabels.addAll(fields.stream().map(EntryFieldLabel::fromString).collect(Collectors.toList()));
             }
         } catch (Exception e) {
             Logger.error(e);
         }
 
         boolean success = entriesAsCSV.setSelectedEntries(selection,
-                entryFields.toArray(new EntryField[0]));
+                entryFieldLabels.toArray(new EntryFieldLabel[0]));
         if (!success)
             return super.respond(false);
 

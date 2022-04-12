@@ -1,9 +1,9 @@
 package org.jbei.ice.storage.model;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.jbei.ice.lib.access.AccessStatus;
-import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dto.access.AccessKey;
+import org.jbei.ice.access.AccessStatus;
+import org.jbei.ice.account.Account;
+import org.jbei.ice.dto.access.AccessKey;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -134,14 +134,14 @@ public class ApiKey implements DataModel {
         accessKey.setSecret(this.secret);
         accessKey.setClientId(this.clientId);
         accessKey.setCreationTime(this.creationTime.getTime());
-        AccountTransfer accountTransfer = new AccountTransfer();
-        accountTransfer.setEmail(this.ownerEmail);
+        Account account = new Account();
+        account.setEmail(this.ownerEmail);
         if (this.allowDelegate != null)
             accessKey.setAllowDelegate(this.allowDelegate);
 
         if (this.readOnly != null)
             accessKey.setReadOnly(this.readOnly);
-        accessKey.setAccount(accountTransfer);
+        accessKey.setAccount(account);
         return accessKey;
     }
 }

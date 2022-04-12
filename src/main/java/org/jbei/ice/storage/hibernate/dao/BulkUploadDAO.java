@@ -1,12 +1,12 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
-import org.jbei.ice.lib.bulkupload.BulkUploadStatus;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.bulkupload.BulkUploadStatus;
+import org.jbei.ice.dto.entry.Visibility;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.BulkUpload;
 import org.jbei.ice.storage.model.Entry;
 
@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
 
-    public List<BulkUpload> retrieveByAccount(Account account) {
+    public List<BulkUpload> retrieveByAccount(AccountModel account) {
         try {
             CriteriaQuery<BulkUpload> query = getBuilder().createQuery(BulkUpload.class);
             Root<BulkUpload> from = query.from(BulkUpload.class);

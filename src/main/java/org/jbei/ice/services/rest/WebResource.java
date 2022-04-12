@@ -1,20 +1,20 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.FeaturedDNASequence;
-import org.jbei.ice.lib.dto.Setting;
-import org.jbei.ice.lib.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.PartStatistics;
-import org.jbei.ice.lib.dto.search.SearchQuery;
-import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.dto.web.WebEntries;
-import org.jbei.ice.lib.net.RemoteContact;
-import org.jbei.ice.lib.net.RemoteEntries;
-import org.jbei.ice.lib.net.RemoteEntriesAsCSV;
-import org.jbei.ice.lib.net.WoRController;
-import org.jbei.ice.lib.search.WebSearch;
+import org.jbei.ice.dto.ConfigurationKey;
+import org.jbei.ice.dto.FeaturedDNASequence;
+import org.jbei.ice.dto.Setting;
+import org.jbei.ice.dto.entry.AttachmentInfo;
+import org.jbei.ice.dto.entry.PartData;
+import org.jbei.ice.dto.entry.PartStatistics;
+import org.jbei.ice.dto.search.SearchQuery;
+import org.jbei.ice.dto.web.RegistryPartner;
+import org.jbei.ice.dto.web.WebEntries;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.net.RemoteContact;
+import org.jbei.ice.net.RemoteEntries;
+import org.jbei.ice.net.RemoteEntriesAsCSV;
+import org.jbei.ice.net.WoRController;
+import org.jbei.ice.search.WebSearch;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.ConfigurationModel;
 
@@ -123,9 +123,9 @@ public class WebResource extends RestResource {
             @PathParam("id") final long partnerId, @PathParam("entryId") final String entryId) {
         requireUserId();
         final FeaturedDNASequence result = remoteEntries.getPublicEntrySequence(partnerId, entryId);
-        ConfigurationModel configurationModel = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
-        if (configurationModel != null && result != null) {
-            String uriPrefix = configurationModel.getValue();
+        ConfigurationModel configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
+        if (configuration != null && result != null) {
+            String uriPrefix = configuration.getValue();
             result.setUri(uriPrefix + "/web/" + partnerId + "/entry/" + entryId);
         }
         return super.respond(Response.Status.OK, result);

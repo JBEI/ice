@@ -1,11 +1,11 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.group.GroupType;
-import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.dto.group.GroupType;
+import org.jbei.ice.group.GroupController;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Group;
 
 import javax.persistence.criteria.*;
@@ -54,7 +54,7 @@ public class GroupDAO extends HibernateRepository<Group> {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Group> from = query.from(Group.class);
-            Join<Group, Account> member = from.join("members");
+            Join<Group, AccountModel> member = from.join("members");
             query.select(getBuilder().countDistinct(member.get("id")));
             query.where(getBuilder().equal(from.get("uuid"), uuid));
             return currentSession().createQuery(query).uniqueResult();
@@ -64,7 +64,7 @@ public class GroupDAO extends HibernateRepository<Group> {
         }
     }
 
-    public List<Group> getMatchingGroups(Account account, String token, int limit) {
+    public List<Group> getMatchingGroups(AccountModel account, String token, int limit) {
         Set<Group> userGroups = account.getGroups();
 
         try {
@@ -90,11 +90,11 @@ public class GroupDAO extends HibernateRepository<Group> {
         }
     }
 
-    public List<Group> retrieveMemberGroups(Account account) {
+    public List<Group> retrieveMemberGroups(AccountModel account) {
         try {
             CriteriaQuery<Group> query = getBuilder().createQuery(Group.class).distinct(true);
             Root<Group> from = query.from(Group.class);
-            Join<Group, Account> members = from.join("members", JoinType.LEFT);
+            Join<Group, AccountModel> members = from.join("members", JoinType.LEFT);
             query.where(getBuilder().or(
                     getBuilder().equal(from.get("owner"), account),
                     getBuilder().equal(members.get("email"), account.getEmail())
@@ -113,11 +113,11 @@ public class GroupDAO extends HibernateRepository<Group> {
      * @return list of UUIDs matching the query
      * @throws DAOException on hibernate exception
      */
-    public List<String> getMemberGroupUUIDs(Account account) {
+    public List<String> getMemberGroupUUIDs(AccountModel account) {
         try {
             CriteriaQuery<String> query = getBuilder().createQuery(String.class).distinct(true);
             Root<Group> from = query.from(Group.class);
-            Join<Group, Account> members = from.join("members", JoinType.LEFT);
+            Join<Group, AccountModel> members = from.join("members", JoinType.LEFT);
             query.select(from.get("uuid")).where(getBuilder().or(
                     getBuilder().equal(from.get("owner"), account),
                     getBuilder().equal(members.get("email"), account.getEmail())

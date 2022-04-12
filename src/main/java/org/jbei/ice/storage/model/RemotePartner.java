@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
+import org.jbei.ice.dto.web.RegistryPartner;
+import org.jbei.ice.dto.web.RemotePartnerStatus;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -163,7 +163,7 @@ public class RemotePartner implements DataModel {
         RegistryPartner registryPartner = new RegistryPartner();
         registryPartner.setId(this.id);
         registryPartner.setName(this.name);
-        if(this.added != null)
+        if (this.added != null)
             registryPartner.setAddTime(this.added.getTime());
         if (this.lastContact != null)
             registryPartner.setLastContactTime(this.lastContact.getTime());

@@ -1,9 +1,9 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationSettings;
-import org.jbei.ice.lib.dto.Setting;
+import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.config.ConfigurationSettings;
+import org.jbei.ice.dto.Setting;
+import org.jbei.ice.logging.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 @Path("/config")
 public class ConfigResource extends RestResource {
 
-    private ConfigurationSettings controller = new ConfigurationSettings();
+    private final ConfigurationSettings controller = new ConfigurationSettings();
 
     /**
      * Retrieves list of system settings available
@@ -34,19 +34,9 @@ public class ConfigResource extends RestResource {
     }
 
     @GET
-    @Path("/init")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getInitialValues() {
-        return super.respond(controller.getInitialValues());
-    }
-
-    @GET
     @Path("/site")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSiteSettings() {
-        if (!controller.hasDataDirectory()) {
-            return super.respond(Response.Status.SERVICE_UNAVAILABLE);
-        }
         return super.respond(controller.getSiteSettings());
     }
 
@@ -85,7 +75,7 @@ public class ConfigResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response update(final Setting setting) {
         final String userId = requireUserId();
-        log(userId, "updating system setting " + setting.getKey() + " to \'" + setting.getValue() + "\'");
+        log(userId, "updating system setting " + setting.getKey() + " to '" + setting.getValue() + "'");
         final String url = getThisServer(false);
         return super.respond(controller.updateSetting(userId, setting, url));
     }

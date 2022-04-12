@@ -1,6 +1,6 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.DNAFeature;
+import org.jbei.ice.dto.DNAFeature;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -9,8 +9,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Stores the sequence annotation information, and associates {@link Feature} objects to a
- * {@link Sequence} object.
+ * Stores the sequence annotation information, and associates {@link org.jbei.ice.storage.model.Feature} objects to a
+ * {@link org.jbei.ice.storage.model.Sequence} object.
  * <p/>
  * SequenceFeature represents is a many-to-many mapping. In addition, this class has fields to store
  * sequence specific annotation information.
@@ -28,11 +28,11 @@ public class SequenceFeature implements DataModel {
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
     @JoinColumn(name = "sequence_id")
-    private Sequence sequence;
+    private org.jbei.ice.storage.model.Sequence sequence;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "feature_id")
-    private Feature feature;
+    private org.jbei.ice.storage.model.Feature feature;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "sequenceFeature", orphanRemoval = true)
     private final Set<AnnotationLocation> annotationLocations = new LinkedHashSet<>();
@@ -63,8 +63,8 @@ public class SequenceFeature implements DataModel {
         super();
     }
 
-    public SequenceFeature(Sequence sequence, Feature feature, int strand, String name,
-            String genbankType, AnnotationType annotationType) {
+    public SequenceFeature(org.jbei.ice.storage.model.Sequence sequence, org.jbei.ice.storage.model.Feature feature, int strand, String name,
+                           String genbankType, AnnotationType annotationType) {
         super();
         this.sequence = sequence;
         this.feature = feature;
@@ -99,7 +99,7 @@ public class SequenceFeature implements DataModel {
      * @author Timothy Ham
      */
     public enum AnnotationType {
-        PREFIX, SUFFIX, SCAR, INNER, SUBINNER;
+        PREFIX, SUFFIX, SCAR, INNER, SUBINNER
     }
 
     public void setId(long id) {
@@ -112,7 +112,7 @@ public class SequenceFeature implements DataModel {
     }
 
     @XmlTransient
-    public Sequence getSequence() {
+    public org.jbei.ice.storage.model.Sequence getSequence() {
         return sequence;
     }
 
@@ -120,7 +120,7 @@ public class SequenceFeature implements DataModel {
         this.sequence = sequence;
     }
 
-    public Feature getFeature() {
+    public org.jbei.ice.storage.model.Feature getFeature() {
         return feature;
     }
 

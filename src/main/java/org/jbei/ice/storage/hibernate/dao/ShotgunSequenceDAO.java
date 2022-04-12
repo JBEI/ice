@@ -2,13 +2,13 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.dto.ConfigurationKey;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.ShotgunSequence;
+import org.jbei.ice.utils.Utils;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;

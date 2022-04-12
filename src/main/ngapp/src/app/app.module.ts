@@ -1,52 +1,51 @@
-import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
-import {LoginComponent} from "./components/login/login.component";
-import {HttpClientModule} from "@angular/common/http";
-import {FormsModule} from "@angular/forms";
-import {MainComponent} from './components/main/main.component';
-import {ContentsComponent} from './components/collection/contents/contents.component';
-import {NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbTooltipModule} from "@ng-bootstrap/ng-bootstrap";
-import {PartsTableComponent} from './components/parts-table/parts-table.component';
-import {PartDetailsComponent} from './components/parts/part-details/part-details.component';
-import {PartDetailsResolver} from "./components/parts/part-details/part.details.resolver";
-import {PartGeneralInformationComponent} from './components/parts/part-general-information/part-general-information.component';
-import {SequenceComponent} from "./components/visualization/sequence/sequence.component";
+import {LoginComponent} from './components/login/login.component';
+import {CollectionComponent} from './components/main/collection.component';
 import {HeaderComponent} from './components/header/header.component';
-import {OptionsFieldComponent} from './components/parts/widgets/options-field/options-field.component';
-import {WithEmailFieldComponent} from './components/parts/widgets/with-email-field/with-email-field.component';
-import { AutoCompleteFieldComponent } from './components/parts/widgets/auto-complete-field/auto-complete-field.component';
-import { SearchBarComponent } from './components/search/search-bar/search-bar.component';
+import {NgbDropdownModule, NgbModule, NgbNavModule} from "@ng-bootstrap/ng-bootstrap";
+import {FormsModule} from "@angular/forms";
+import {HttpClientModule} from "@angular/common/http";
+import {EntryDetailComponent} from './components/entry/entry-detail/entry-detail.component';
+import {EntryResolver} from "./components/entry/entry.resolver";
+import {PartVisualizationComponent} from "./components/part-visualization/part-visualization.component";
+import {UploadComponent} from './components/entry/upload/upload.component';
+import {registerAllModules} from "handsontable/registry";
+import {HotTableModule} from "@handsontable/angular";
+import {MainSidebarMenuComponent} from './components/main-sidebar-menu/main-sidebar-menu.component';
+import {FooterComponent} from './components/footer/footer.component';
+import {CollectionEntriesComponent} from './components/collection-entries/collection-entries.component';
+
+// register Handsontable's modules
+registerAllModules();
 
 @NgModule({
     declarations: [
         AppComponent,
         LoginComponent,
-        MainComponent,
-        ContentsComponent,
-        PartsTableComponent,
-        PartDetailsComponent,
-        PartGeneralInformationComponent,
-        SequenceComponent,
+        CollectionComponent,
         HeaderComponent,
-        OptionsFieldComponent,
-        WithEmailFieldComponent,
-        AutoCompleteFieldComponent,
-        SearchBarComponent
+        EntryDetailComponent,
+        PartVisualizationComponent,
+        UploadComponent,
+        MainSidebarMenuComponent,
+        FooterComponent,
+        CollectionEntriesComponent
     ],
     imports: [
         BrowserModule,
         AppRoutingModule,
-        HttpClientModule,
-        FormsModule,
-        NgbTooltipModule,
-        NgbPaginationModule,
         NgbDropdownModule,
-        NgbNavModule
+        FormsModule,
+        NgbModule,
+        NgbNavModule,
+        HttpClientModule,
+        HotTableModule
     ],
-    providers: [PartDetailsResolver],
+    providers: [EntryResolver],
     bootstrap: [AppComponent]
 })
 export class AppModule {

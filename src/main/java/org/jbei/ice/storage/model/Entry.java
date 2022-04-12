@@ -6,13 +6,14 @@ import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Index;
 import org.hibernate.search.annotations.*;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.PartData;
+import org.jbei.ice.dto.entry.Visibility;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.filter.EntryHasFilterFactory;
 import org.jbei.ice.storage.hibernate.filter.EntrySecurityFilterFactory;
+import org.jbei.ice.utils.Utils;
 
 import javax.persistence.*;
 import java.util.*;
@@ -35,7 +36,7 @@ import java.util.*;
  * ownerEmail for that functionality. This field is also distinct from the creator field.</li> <li><b>ownerEmail:</b>
  * Email address of the owner. Because an entry can be exchanged between different registries, without having the
  * corresponding account records be exchanged along with it, association of entry with a user is done through this
- * field, instead of the database id of {@link Account}. This means that other classes
+ * field, instead of the database id of {@link AccountModel}. This means that other classes
  * (such as {@link org.jbei.ice.lib .entry.sample.model.Sample}) also associate via the email address. Consequently,
  * email address must be unique to a gd-ice instance.</li> <li><b>creator:</b> Creator is the person that has created
  * this entry. If the entry came from somewhere else, or was entered into this instance of gd-ice by someone other than
@@ -62,7 +63,7 @@ import java.util.*;
  * entry. In the future, this field will propagate to other entries based on inheritance.</li> <li><b>links:</b> URL or
  * other links that point outside of this instance of gd-ice.</li> <li><b>name: </b> name for this
  * entry.</li> <li><b>partNumber: </b> human readable unique identifier for this entry.</li>
- * <li><b>parameters: {@link Parameter}s for this entry.</b></li> </ul>
+ * <li><b>parameters: {@link ParameterModel}s for this entry.</b></li> </ul>
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
@@ -208,11 +209,11 @@ public class Entry implements DataModel {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
     @IndexedEmbedded(depth = 1)
-    private final Set<Link> links = new LinkedHashSet<>();
+    private final Set<org.jbei.ice.storage.model.Link> links = new LinkedHashSet<>();
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
     @IndexedEmbedded(depth = 1)
-    private final List<Parameter> parameters = new ArrayList<>();
+    private final List<ParameterModel> parameters = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, mappedBy = "entry",
             orphanRemoval = true, fetch = FetchType.LAZY)
@@ -334,7 +335,7 @@ public class Entry implements DataModel {
         for (SelectionMarker marker : this.selectionMarkers) {
             markers.add(marker.getName());
         }
-        result = org.jbei.ice.lib.utils.Utils.join(", ", markers);
+        result = Utils.join(", ", markers);
 
         return result;
     }
@@ -351,7 +352,7 @@ public class Entry implements DataModel {
         }
     }
 
-    public Set<Link> getLinks() {
+    public Set<org.jbei.ice.storage.model.Link> getLinks() {
         return links;
     }
 
@@ -454,13 +455,13 @@ public class Entry implements DataModel {
         return intellectualProperty;
     }
 
-    public void setParameters(List<Parameter> inputParameters) {
+    public void setParameters(List<ParameterModel> inputParameters) {
         if (inputParameters == null) {
             parameters.clear();
             return;
         }
         if (inputParameters != parameters) {
-            for (Parameter parameter : inputParameters) {
+            for (ParameterModel parameter : inputParameters) {
                 parameter.setEntry(this);
             }
             parameters.clear();
@@ -468,7 +469,7 @@ public class Entry implements DataModel {
         }
     }
 
-    public List<Parameter> getParameters() {
+    public List<ParameterModel> getParameters() {
         return parameters;
     }
 

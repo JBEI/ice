@@ -1,23 +1,24 @@
 export class User {
     id?: number;
-    firstName: string;
-    lastName: string;
-    email: string;
+    userId?: string;
+    firstName: string | undefined;
+    lastName: string | undefined;
+    email: string | undefined;
     password?: string;
     newPassword?: string;
     sessionId?: string;
-    commercial: boolean;
-    roles: string[];
-    public creationTime: string;
-    public lastUpdateTime: string;
-    public lastLoginTime: string;
-    public j5Enabled: boolean;
-    public disabled: boolean;
-    public description: string;
+    public creationTime: string | undefined;
+    public lastUpdateTime: string | undefined;
+    public lastLoginTime: string | undefined;
+    public disabled: boolean | undefined;
+    public description: string | undefined;
     updatingActiveStatus?: boolean;
+    usingTemporaryPassword: boolean;
     updatingType?: boolean;
     updatingJ5Status?: boolean;
-    allowedToChangePassword: boolean;
-    usingTemporaryPassword: boolean;
     type?: string;
+
+    constructor() {
+        this.usingTemporaryPassword = false;
+    }
 }

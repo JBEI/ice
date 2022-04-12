@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.StorageLocation;
-import org.jbei.ice.lib.dto.sample.SampleType;
+import org.jbei.ice.dto.StorageLocation;
+import org.jbei.ice.dto.sample.SampleType;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;

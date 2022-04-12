@@ -1,10 +1,10 @@
 package org.jbei.ice.storage;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.entry.*;
-import org.jbei.ice.lib.entry.EntryUtil;
+import org.jbei.ice.account.AccountController;
+import org.jbei.ice.dto.entry.*;
+import org.jbei.ice.entry.EntryUtil;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
 
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Factory for converting {@link Entry}s to a {@link org.jbei.ice.lib.dto.entry.PartData}
+ * Factory for converting {@link Entry}s to a {@link PartData}
  * data transfer objects
  *
  * @author Hector Plahar
@@ -146,12 +146,12 @@ public class ModelToInfoFactory {
             owner = entry.getOwnerEmail();
         info.setOwner(owner);
         info.setOwnerEmail(entry.getOwnerEmail());
-        Account ownerAccount = DAOFactory.getAccountDAO().getByEmail(info.getOwnerEmail());
+        AccountModel ownerAccount = org.jbei.ice.storage.DAOFactory.getAccountDAO().getByEmail(info.getOwnerEmail());
         if (ownerAccount != null)
             info.setOwnerId(ownerAccount.getId());
         info.setCreator(entry.getCreator());
         info.setCreatorEmail(entry.getCreatorEmail());
-        Account creatorAccount = DAOFactory.getAccountDAO().getByEmail(info.getCreatorEmail());
+        AccountModel creatorAccount = org.jbei.ice.storage.DAOFactory.getAccountDAO().getByEmail(info.getCreatorEmail());
         if (creatorAccount != null)
             info.setCreatorId(creatorAccount.getId());
 
@@ -172,7 +172,7 @@ public class ModelToInfoFactory {
         info.setPrincipalInvestigator(entry.getPrincipalInvestigator());
         try {
             if (!StringUtils.isEmpty(entry.getPrincipalInvestigatorEmail())) {
-                Account piAccount = DAOFactory.getAccountDAO().getByEmail(entry.getPrincipalInvestigatorEmail());
+                AccountModel piAccount = org.jbei.ice.storage.DAOFactory.getAccountDAO().getByEmail(entry.getPrincipalInvestigatorEmail());
                 if (piAccount != null) {
                     info.setPrincipalInvestigator(piAccount.getFullName());
                     info.setPrincipalInvestigatorEmail(piAccount.getEmail());
@@ -194,7 +194,7 @@ public class ModelToInfoFactory {
         ArrayList<CustomField> params = new ArrayList<>();
 
         if (entry.getParameters() != null) {
-            for (Parameter parameter : entry.getParameters()) {
+            for (ParameterModel parameter : entry.getParameters()) {
                 CustomField paramInfo = new CustomField();
                 paramInfo.setId(parameter.getId());
                 paramInfo.setName(parameter.getKey());
@@ -238,7 +238,7 @@ public class ModelToInfoFactory {
         view.setSelectionMarkers(EntryUtil.getSelectionMarkersAsList(entry.getSelectionMarkers()));
 
         AccountController accountController = new AccountController();
-        Account account;
+        AccountModel account;
         String ownerEmail = entry.getOwnerEmail();
         if (ownerEmail != null && (account = accountController.getByEmail(ownerEmail)) != null)
             view.setOwnerId(account.getId());
@@ -257,7 +257,6 @@ public class ModelToInfoFactory {
     }
 
 
-
     public static PartData createTableView(long entryId, List<String> fields) {
         Set<String> fieldsToProcess;
         if (fields == null)
@@ -272,7 +271,7 @@ public class ModelToInfoFactory {
         fieldsToProcess.add("short_description");
 
         // minimum set of values
-        Entry entry = DAOFactory.getEntryDAO().get(entryId);
+        Entry entry = org.jbei.ice.storage.DAOFactory.getEntryDAO().get(entryId);
         EntryType type = EntryType.nameToType(entry.getRecordType());
         PartData view = new PartData(type);
         view.setId(entry.getId());
@@ -285,14 +284,14 @@ public class ModelToInfoFactory {
         view.setShortDescription(entry.getShortDescription());
 
         // has sample
-        view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
+        view.setHasSample(org.jbei.ice.storage.DAOFactory.getSampleDAO().hasSample(entry));
 
         // has sequence
         Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
         if (visibility == Visibility.REMOTE) {
             view.setHasSequence(entry.getLongDescriptionType().equalsIgnoreCase("sequence"));
         } else {
-            SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
+            SequenceDAO sequenceDAO = org.jbei.ice.storage.DAOFactory.getSequenceDAO();
             view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
             view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
         }

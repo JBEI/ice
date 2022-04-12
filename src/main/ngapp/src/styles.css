@@ -1,9 +1,11 @@
-@import "~open-vector-editor/umd/main.css";
 @import '~bootstrap/dist/css/bootstrap.css';
-@import "assets/css/font-awesome.min.css";
+@import "~bootstrap-icons/font/bootstrap-icons.css";
+@import '~open-vector-editor/umd/main.css';
+@import '~handsontable/dist/handsontable.full.css';
 
 html body {
-    font-family: Arial, sans-serif;
+    font-family: "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    background-color: #f5f9fc;
 }
 
 .entry_detail_submenu .selected {
@@ -123,4 +125,18 @@ html body {
 
 .text-dark-blue {
     color: #253B56;
+}
+
+.btn-white {
+    background-color: #fff;
+    border-color: #e7eaf0;
+    box-shadow: 0 1px 1px rgb(0 0 0 / 5%);
+    color: #16192c;
+}
+
+.btn-white:hover {
+    background-color: #f5f4f3;
+    border-color: #e7eaf0;
+    box-shadow: 0 1px 1px rgb(0 0 0 / 5%);
+    color: #16192c;
 }

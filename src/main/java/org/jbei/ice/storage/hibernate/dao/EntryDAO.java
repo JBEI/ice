@@ -1,12 +1,12 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.entry.AutoCompleteField;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.entry.EntryUtil;
-import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.dto.entry.AutoCompleteField;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.Visibility;
+import org.jbei.ice.entry.EntryUtil;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.*;
@@ -159,7 +159,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @return Number of visible entries.
      * @throws DAOException on hibernate exception
      */
-    public List<Long> retrieveVisibleEntries(Account account, Set<Group> groups, ColumnField sortField, boolean asc,
+    public List<Long> retrieveVisibleEntries(AccountModel account, Set<Group> groups, ColumnField sortField, boolean asc,
                                              int start, int count, String filter) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
@@ -193,7 +193,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     // todo : or entry is in a folder that is public
-    public long visibleEntryCount(Account account, Set<Group> groups, String filter) {
+    public long visibleEntryCount(AccountModel account, Set<Group> groups, String filter) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Permission> from = query.from(Permission.class);
@@ -231,9 +231,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
         filter = filter.toLowerCase();
         predicates.add(getBuilder().or(
-                getBuilder().like(getBuilder().lower(root.get("name")), "%" + filter + "%"),
-                getBuilder().like(getBuilder().lower(root.get("alias")), "%" + filter + "%"),
-                getBuilder().like(getBuilder().lower(root.get("partNumber")), "%" + filter + "%")
+                        getBuilder().like(getBuilder().lower(root.get("name")), "%" + filter + "%"),
+                        getBuilder().like(getBuilder().lower(root.get("alias")), "%" + filter + "%"),
+                        getBuilder().like(getBuilder().lower(root.get("partNumber")), "%" + filter + "%")
                 )
         );
     }
@@ -242,9 +242,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
         if (filter != null && !filter.trim().isEmpty()) {
             filter = filter.toLowerCase();
             predicates.add(getBuilder().or(
-                    getBuilder().like(getBuilder().lower(entry.get("name")), "%" + filter + "%"),
-                    getBuilder().like(getBuilder().lower(entry.get("alias")), "%" + filter + "%"),
-                    getBuilder().like(getBuilder().lower(entry.get("partNumber")), "%" + filter + "%")
+                            getBuilder().like(getBuilder().lower(entry.get("name")), "%" + filter + "%"),
+                            getBuilder().like(getBuilder().lower(entry.get("alias")), "%" + filter + "%"),
+                            getBuilder().like(getBuilder().lower(entry.get("partNumber")), "%" + filter + "%")
                     )
             );
         }
@@ -261,7 +261,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @param asc           entry id sort asc or desc
      * @return generated criteria query
      */
-    private CriteriaQuery<Long> createSharedEntryQuery(Account requester, Set<Group> accountGroups, String filter,
+    private CriteriaQuery<Long> createSharedEntryQuery(AccountModel requester, Set<Group> accountGroups, String filter,
                                                        boolean isCount, ColumnField sort, boolean asc) {
         CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
         Root<Permission> root = query.from(Permission.class);
@@ -301,7 +301,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @param accountGroups groups that account belongs to
      * @return number of entries that have been shared with user
      */
-    public long sharedEntryCount(Account requester, Set<Group> accountGroups, String filter) {
+    public long sharedEntryCount(AccountModel requester, Set<Group> accountGroups, String filter) {
         try {
             CriteriaQuery<Long> query = createSharedEntryQuery(requester, accountGroups, filter, true, null, false);
             return currentSession().createQuery(query).uniqueResult();
@@ -312,7 +312,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     // retrieves list of entries based on the paging parameters and the different ways entries can be shared
-    public List<Long> sharedWithUserEntries(Account requester, Set<Group> accountGroups, ColumnField sort,
+    public List<Long> sharedWithUserEntries(AccountModel requester, Set<Group> accountGroups, ColumnField sort,
                                             boolean asc, int start, int limit, String filter) {
         try {
             CriteriaQuery<Long> query = createSharedEntryQuery(requester, accountGroups, filter, false, sort, asc);
@@ -336,7 +336,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @return list of entries matching specified criteria
      * @throws DAOException on HibernateException
      */
-    public List<Long> retrieveUserEntries(Account requester, String owner, Set<Group> requesterGroups,
+    public List<Long> retrieveUserEntries(AccountModel requester, String owner, Set<Group> requesterGroups,
                                           ColumnField sortField, boolean asc, int start, int limit, String filter) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
@@ -365,7 +365,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    public List<Long> sharedWithUserEntryIds(Account account, Set<Group> groups) {
+    public List<Long> sharedWithUserEntryIds(AccountModel account, Set<Group> groups) {
         try {
             ArrayList<Predicate> predicates = new ArrayList<>();
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
@@ -500,8 +500,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     @SafeVarargs
-    private List<Long> getResultList(int start, int limit, ColumnField sort, boolean asc, String filter,
-                                     Map<String, String>... predicatesMap) {
+    private final List<Long> getResultList(int start, int limit, ColumnField sort, boolean asc, String filter,
+                                           Map<String, String>... predicatesMap) {
         if (sort == null)
             sort = ColumnField.CREATED;
 
@@ -658,7 +658,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     // checks permission, does not include pending entries
-    public long ownerEntryCount(Account requester, String ownerEmail, Set<Group> accountGroups) {
+    public long ownerEntryCount(AccountModel requester, String ownerEmail, Set<Group> accountGroups) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Permission> from = query.from(Permission.class);

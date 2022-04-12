@@ -1,8 +1,8 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.sample.SampleType;
+import org.jbei.ice.dto.sample.SampleType;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Storage;
@@ -28,11 +28,29 @@ public class StorageDAO extends HibernateRepository<Storage> {
      */
     public List<Storage> retrieveStorageTube(String barcode) {
         List<Storage> results = retrieveStorageByIndex(barcode, SampleType.TUBE);
-
         if (results == null || results.isEmpty()) {
             return null;
         }
         return results;
+    }
+
+    public Storage getPlateWell(String well, long parentId) {
+        Storage parent = this.get(parentId);
+        if (parent == null)
+            return null;
+
+        try {
+            CriteriaQuery<Storage> query = getBuilder().createQuery(Storage.class);
+            Root<Storage> from = query.from(Storage.class);
+            query.where(
+                    getBuilder().equal(from.get("index"), well),
+                    getBuilder().equal(from.get("storageType"), SampleType.PLATE96),
+                    getBuilder().equal(from.get("parent"), parent));
+            return currentSession().createQuery(query).uniqueResult();
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
     }
 
     /**
@@ -49,7 +67,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
             query.where(getBuilder().equal(from.get("index"), index), getBuilder().equal(from.get("storageType"), type));
             return currentSession().createQuery(query).list();
         } catch (Exception e) {
-            String msg = "Could not get Storage by index: " + index + " " + e.toString();
+            String msg = "Could not get Storage by index: " + index + " " + e;
             Logger.error(msg, e);
             throw new DAOException(msg);
         }

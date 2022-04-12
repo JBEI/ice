@@ -10,13 +10,15 @@ import {UserService} from "./services/user.service";
 export class AppComponent {
     title = 'ICE';
 
-    constructor(private router: Router, private user: UserService) {
+    constructor(private router: Router, private userService: UserService) {
+
+        // set the url to redirect to
         this.router.events.subscribe((e) => {
             if (e instanceof NavigationStart) {
                 if (e.id === 1) {
                     const url = e.url;
                     if (url !== '/login') {
-                        this.user.setLoginRedirect(url);
+                        this.userService.setLoginRedirect(url);
                     }
                 }
             }

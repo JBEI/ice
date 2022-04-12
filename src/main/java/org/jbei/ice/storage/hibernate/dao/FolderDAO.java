@@ -2,12 +2,12 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.common.PageParameters;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.dto.common.PageParameters;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.Visibility;
+import org.jbei.ice.dto.folder.FolderType;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.*;
@@ -221,13 +221,13 @@ public class FolderDAO extends HibernateRepository<Folder> {
     }
 
     /**
-     * Retrieve all {@link Folder}s owned by given the {@link Account}.
+     * Retrieve all {@link Folder}s owned by given the {@link AccountModel}.
      *
      * @param account owner account
      * @return List of Folder objects.
      * @throws DAOException
      */
-    public List<Folder> getFoldersByOwner(Account account) {
+    public List<Folder> getFoldersByOwner(AccountModel account) {
         try {
             CriteriaQuery<Folder> query = getBuilder().createQuery(Folder.class);
             Root<Folder> from = query.from(Folder.class);
@@ -263,7 +263,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * @return list of folders that the account or groups that the account belongs to has write privileges on
      * @throws DAOException
      */
-    public List<Folder> getCanEditFolders(Account account, Set<Group> accountGroups) {
+    public List<Folder> getCanEditFolders(AccountModel account, Set<Group> accountGroups) {
         try {
             CriteriaQuery<Folder> query = getBuilder().createQuery(Folder.class);
             Root<Folder> from = query.from(Folder.class);
@@ -294,7 +294,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
     }
 
-    public List<Long> getCanReadFolderIds(Account account, Set<Group> accountGroups) {
+    public List<Long> getCanReadFolderIds(AccountModel account, Set<Group> accountGroups) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Permission> from = query.from(Permission.class);
@@ -383,6 +383,27 @@ public class FolderDAO extends HibernateRepository<Folder> {
             query.select(getBuilder().countDistinct(entry.get("id")));
             query.where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).uniqueResult();
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
+    }
+
+    /**
+     * Retrieves distinct list of types for the entries contained in the folder
+     *
+     * @param folderId unique identifier for folder whose content types are being retrieved
+     * @return list of content types. e.g. if a folder contains 345 Strains, and 23 plasmids, this will return
+     * [STRAIN, PLASMID]. Any empty folder will result in a return of an empty list
+     */
+    public List<String> getContentTypes(long folderId) {
+        try {
+            CriteriaQuery<String> query = getBuilder().createQuery(String.class);
+            Root<Folder> from = query.from(Folder.class);
+            Join<Folder, Entry> entry = from.join("contents");
+            query.select(entry.get("recordType")).distinct(true);
+            query.where(getBuilder().equal(from.get("id"), folderId));
+            return currentSession().createQuery(query).list();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);

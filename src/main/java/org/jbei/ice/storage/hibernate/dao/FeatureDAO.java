@@ -1,11 +1,11 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Feature;
+import org.jbei.ice.utils.SequenceUtils;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;

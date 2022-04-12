@@ -2,9 +2,9 @@ package org.jbei.ice.storage.model;
 
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.PlasmidData;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.PartData;
+import org.jbei.ice.dto.entry.PlasmidData;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

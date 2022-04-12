@@ -34,7 +34,7 @@ public class PartDataJSONHandler
 
     @Override
     public long getSize(IDataTransferModel data, Class<?> type, Type genericType, Annotation[] annotations,
-            MediaType mediaType) {
+                        MediaType mediaType) {
         return 0;
     }
 
@@ -55,8 +55,8 @@ public class PartDataJSONHandler
 
     @Override
     public IDataTransferModel readFrom(Class<IDataTransferModel> type, Type genericType, Annotation[] annotations,
-            MediaType mediaType,
-            MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
+                                       MediaType mediaType,
+                                       MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
             throws IOException, WebApplicationException {
         Gson gson = new GsonBuilder().create();
         try (Reader in = new InputStreamReader(entityStream)) {

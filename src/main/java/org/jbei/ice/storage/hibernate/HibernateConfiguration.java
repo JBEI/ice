@@ -4,17 +4,15 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.search.FullTextSession;
-import org.hibernate.search.Search;
 import org.hibernate.service.ServiceRegistry;
-import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.model.*;
 
 import java.nio.file.Path;
 import java.util.Properties;
 
 /**
- * Configuration for Hibernate database connection and sessions
+ * Helper class to Initialize Hibernate, and obtain new sessions.
  *
  * @author Hector Plahar
  */
@@ -25,6 +23,44 @@ public class HibernateConfiguration {
 
     // singleton
     private HibernateConfiguration() {
+    }
+
+    public static void beginTransaction() {
+        if (sessionFactory == null)
+            return;
+
+        if (!sessionFactory.getCurrentSession().getTransaction().isActive())
+            sessionFactory.getCurrentSession().beginTransaction();
+    }
+
+    public static void commitTransaction() {
+        if (sessionFactory == null)
+            return;
+
+        if (sessionFactory.getCurrentSession().getTransaction().isActive())
+            sessionFactory.getCurrentSession().getTransaction().commit();
+    }
+
+    public static void rollbackTransaction() {
+        if (sessionFactory == null)
+            return;
+
+        if (sessionFactory.getCurrentSession().getTransaction().isActive())
+            sessionFactory.getCurrentSession().getTransaction().rollback();
+    }
+
+    /**
+     * Open a new {@link Session} from the sessionFactory.
+     * This needs to be closed when done with
+     *
+     * @return New Hibernate {@link Session}.
+     */
+    public static Session newSession() {
+        return sessionFactory.openSession();
+    }
+
+    public static Session getCurrentSession() {
+        return sessionFactory.getCurrentSession();
     }
 
     /**
@@ -60,6 +96,7 @@ public class HibernateConfiguration {
         }
 
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();
+        configuration.configure();
         addAnnotatedClasses(configuration);
         sessionFactory = configuration.buildSessionFactory(serviceRegistry);
     }
@@ -70,8 +107,9 @@ public class HibernateConfiguration {
         String url = properties.getProperty("connectionUrl");
         String username = properties.getProperty("username");
         String password = properties.getProperty("password");
+        String dbName = properties.getProperty("dbName");
 
-        configuration.setProperty("hibernate.connection.url", "jdbc:postgresql://" + url + "/" + username);
+        configuration.setProperty("hibernate.connection.url", "jdbc:postgresql://" + url + "/" + dbName);
         configuration.setProperty("hibernate.connection.driver_class", "org.postgresql.Driver");
         configuration.setProperty("hibernate.connection.username", username);
         configuration.setProperty("hibernate.connection.password", password);
@@ -99,62 +137,6 @@ public class HibernateConfiguration {
                 "org.hibernate.search.store.impl.RAMDirectoryProvider");
     }
 
-    public static FullTextSession getFullTextSession() {
-        return Search.getFullTextSession(currentSession());
-    }
-
-    /**
-     * Open a new {@link Session} from the sessionFactory.
-     * This needs to be closed when done with
-     *
-     * @return New Hibernate {@link Session}.
-     */
-    public static Session newSession() {
-        return sessionFactory.openSession();
-    }
-
-    public static boolean isInitialized() {
-        return sessionFactory != null && sessionFactory.isOpen();
-    }
-
-    /**
-     * @return session bound to context.
-     */
-    protected static Session currentSession() {
-        return sessionFactory.getCurrentSession();
-    }
-
-    public static void beginTransaction() {
-        if (sessionFactory == null)
-            return;
-
-        if (!sessionFactory.getCurrentSession().getTransaction().isActive())
-            sessionFactory.getCurrentSession().beginTransaction();
-    }
-
-    public static void commitTransaction() {
-        if (sessionFactory == null)
-            return;
-
-        if (sessionFactory.getCurrentSession().getTransaction().isActive())
-            sessionFactory.getCurrentSession().getTransaction().commit();
-    }
-
-    public static void rollbackTransaction() {
-        if (sessionFactory == null)
-            return;
-
-        if (sessionFactory.getCurrentSession().getTransaction().isActive())
-            sessionFactory.getCurrentSession().getTransaction().rollback();
-    }
-
-    /**
-     * Initialize a in-memory mock database for testing.
-     */
-    public static void initializeMock() {
-        initialize(DbType.MEMORY, null, null);
-    }
-
     private static void addAnnotatedClasses(Configuration configuration) {
         configuration.addAnnotatedClass(Entry.class);
         configuration.addAnnotatedClass(Plasmid.class);
@@ -169,15 +151,17 @@ public class HibernateConfiguration {
         configuration.addAnnotatedClass(SequenceFeature.class);
         configuration.addAnnotatedClass(SequenceFeatureAttribute.class);
         configuration.addAnnotatedClass(Comment.class);
-        configuration.addAnnotatedClass(Account.class);
+        configuration.addAnnotatedClass(AccountModel.class);
         configuration.addAnnotatedClass(Attachment.class);
         configuration.addAnnotatedClass(Sample.class);
+        configuration.addAnnotatedClass(org.jbei.ice.storage.model.AccountPreferences.class);
         configuration.addAnnotatedClass(Group.class);
         configuration.addAnnotatedClass(TraceSequence.class);
         configuration.addAnnotatedClass(TraceSequenceAlignment.class);
+        configuration.addAnnotatedClass(ConfigurationModel.class);
         configuration.addAnnotatedClass(Storage.class);
         configuration.addAnnotatedClass(Folder.class);
-        configuration.addAnnotatedClass(Parameter.class);
+        configuration.addAnnotatedClass(ParameterModel.class);
         configuration.addAnnotatedClass(AnnotationLocation.class);
         configuration.addAnnotatedClass(BulkUpload.class);
         configuration.addAnnotatedClass(Permission.class);
@@ -199,6 +183,13 @@ public class HibernateConfiguration {
         configuration.addAnnotatedClass(CustomEntryFieldValueModel.class);
         configuration.addAnnotatedClass(SequenceHistoryModel.class);
         configuration.addAnnotatedClass(SampleCreateModel.class);
+    }
+
+    /**
+     * Initialize a in-memory mock database for testing.
+     */
+    public static void initializeMock() {
+        initialize(DbType.MEMORY, null, null);
     }
 
     public static void close() {

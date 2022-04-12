@@ -2,11 +2,12 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
+
 
 public class AccountDAOTest extends HibernateRepositoryTest {
 
@@ -15,25 +16,25 @@ public class AccountDAOTest extends HibernateRepositoryTest {
     @Test
     public void testGet() throws DAOException {
         Assert.assertNull(dao.get(0));
-        Account account = createAccountObject("testGet");
-        Account saved = dao.create(account);
+        AccountModel account = createAccountObject("testGet");
+        AccountModel saved = dao.create(account);
         Assert.assertNotNull(saved);
-        Account ret = dao.get(saved.getId());
+        AccountModel ret = dao.get(saved.getId());
         Assert.assertTrue(saved.getEmail().equals(ret.getEmail()));
     }
 
     @Test
     public void testGetMatchingAccounts() throws DAOException {
         for (int i = 15; i < 24; i += 1) {
-            Account account = createAccountObject("testGetMatchingAccounts" + i);
+            AccountModel account = createAccountObject("testGetMatchingAccounts" + i);
             Assert.assertNotNull(dao.create(account));
         }
 
         // get by first name (return 4)
         int limit = 4;
-        List<Account> accounts = dao.getMatchingAccounts("Fir", limit);
+        List<AccountModel> accounts = dao.getMatchingAccounts("Fir", limit);
         Assert.assertEquals(limit, accounts.size());
-        for (Account account : accounts) {
+        for (AccountModel account : accounts) {
             Assert.assertTrue(account.getFirstName().contains("Fir"));
         }
 
@@ -41,7 +42,7 @@ public class AccountDAOTest extends HibernateRepositoryTest {
         limit = 7;
         accounts = dao.getMatchingAccounts("ast", limit);
         Assert.assertEquals(limit, accounts.size());
-        for (Account account : accounts) {
+        for (AccountModel account : accounts) {
             Assert.assertTrue(account.getLastName().contains("ast"));
         }
 
@@ -53,7 +54,7 @@ public class AccountDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetByEmail() throws DAOException {
-        Account account = createAccountObject("testGetByEmail");
+        AccountModel account = createAccountObject("testGetByEmail");
         account = dao.create(account);
         Assert.assertNotNull(account);
         account = dao.getByEmail(account.getEmail());
@@ -64,19 +65,19 @@ public class AccountDAOTest extends HibernateRepositoryTest {
     @Test
     public void testGetAccounts() throws DAOException {
         for (int i = 0; i < 16; i += 1) {
-            Account account = createAccountObject("testGetAccounts" + i);
+            AccountModel account = createAccountObject("testGetAccounts" + i);
             Assert.assertNotNull(dao.create(account));
         }
 
         // get all accounts (no filters), 4 at a time
         for (int i = 0; i < 16; i += 4) {
-            List<Account> accountList = dao.getAccounts(i, 4, "id", true, null);
+            List<AccountModel> accountList = dao.getAccounts(i, 4, "id", true, null);
             Assert.assertEquals(4, accountList.size());
         }
 
         // get all accounts, filter by email
         for (int i = 0; i < 16; i += 4) {
-            List<Account> accountList = dao.getAccounts(i, 4, "id", true, "testGetAccounts");
+            List<AccountModel> accountList = dao.getAccounts(i, 4, "id", true, "testGetAccounts");
             Assert.assertEquals(4, accountList.size());
         }
     }
@@ -84,15 +85,15 @@ public class AccountDAOTest extends HibernateRepositoryTest {
     @Test
     public void testGetAccountsCount() throws DAOException {
         for (int i = 15; i < 24; i += 1) {
-            Account account = createAccountObject("testGetAccountsCount" + i);
+            AccountModel account = createAccountObject("testGetAccountsCount" + i);
             Assert.assertNotNull(dao.create(account));
         }
 
         Assert.assertEquals(5, dao.getAccountsCount("testGetAccountsCount1"));
     }
 
-    private Account createAccountObject(String email) {
-        Account account = new Account();
+    private AccountModel createAccountObject(String email) {
+        AccountModel account = new AccountModel();
         account.setEmail(email);
         account.setFirstName("First");
         account.setLastName("Last");

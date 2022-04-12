@@ -2,9 +2,12 @@ package org.jbei.ice.services.rest;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.entry.sequence.Sequences;
+import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.dto.DNAFeature;
+import org.jbei.ice.dto.common.Results;
+import org.jbei.ice.entry.sequence.Features;
+import org.jbei.ice.entry.sequence.Sequences;
+import org.jbei.ice.logging.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -45,5 +48,18 @@ public class SequenceResource extends RestResource {
     public Response getSequenceHistory(@PathParam("id") String identifier) {
         String userId = requireUserId();
         return super.respond(false);
+    }
+
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/annotations")
+    public Response getSequenceAnnotations(@PathParam("id") String identifier,
+                                           @DefaultValue("20") @QueryParam("limit") int limit,
+                                           @DefaultValue("0") @QueryParam("start") int start) {
+        String userId = requireUserId();
+        Features features = new Features(userId, identifier);
+        Results<DNAFeature> results = features.get(start, limit);
+        return super.respond(results);
     }
 }

@@ -5,19 +5,22 @@ export class Paging {
     limit: number;
     offset: number;
     index?: number;
-    filterText: string;
+    filter: string;
     processing?: boolean;
     type?: string;
     sort: string;
 
-    constructor() {
+    constructor(sort?: string) {
         this.currentPage = 1;
         this.available = 0;
-        this.limit = 15;
+        this.limit = 10;
         this.offset = 0;
-        this.filterText = '';
+        this.filter = '';
         this.processing = false;
-        this.sort = 'id';
+        if (!sort)
+            this.sort = 'id';
+        else
+            this.sort = sort;
         this.asc = false;
     }
 }

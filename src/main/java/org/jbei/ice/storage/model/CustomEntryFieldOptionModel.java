@@ -1,6 +1,6 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.entry.CustomField;
+import org.jbei.ice.dto.entry.CustomField;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;

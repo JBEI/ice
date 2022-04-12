@@ -1,8 +1,8 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.message.MessageInfo;
-import org.jbei.ice.lib.message.Messages;
+import org.jbei.ice.dto.message.MessageInfo;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.message.Messages;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

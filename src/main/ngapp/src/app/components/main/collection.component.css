@@ -1,0 +1,20 @@
+table a {
+    color: #2c7be5;
+    text-decoration: none;
+}
+
+table a:hover {
+    color: #2362b7;
+    text-decoration: underline;
+}
+
+.btn-primary {
+    border-color: #006fcf;
+    background-color: #006fcf;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}

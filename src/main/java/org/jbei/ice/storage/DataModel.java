@@ -3,9 +3,9 @@ package org.jbei.ice.storage;
 /**
  * @author Hector Plahar
  */
-public interface DataModel<T extends IDataTransferModel> {
+public interface DataModel {
 
     long getId();
 
-    T toDataTransferObject();
+    IDataTransferModel toDataTransferObject();
 }

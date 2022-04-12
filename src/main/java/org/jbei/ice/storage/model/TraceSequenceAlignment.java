@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.model;
 
 import org.hibernate.annotations.Type;
-import org.jbei.ice.lib.dto.entry.TraceSequenceAlignmentInfo;
+import org.jbei.ice.dto.entry.TraceSequenceAlignmentInfo;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -23,7 +23,7 @@ public class TraceSequenceAlignment implements DataModel {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "trace_sequence_id", nullable = false, unique = true)
-    private TraceSequence traceSequence;
+    private org.jbei.ice.storage.model.TraceSequence traceSequence;
 
     @Column(name = "score", nullable = false)
     private int score;
@@ -63,9 +63,9 @@ public class TraceSequenceAlignment implements DataModel {
     public TraceSequenceAlignment() {
     }
 
-    public TraceSequenceAlignment(TraceSequence traceSequence, int score, int strand,
-            int queryStart, int queryEnd, int subjectStart, int subjectEnd, String queryAlignment,
-            String subjectAlignment, String sequenceHash, Date modificationTime) {
+    public TraceSequenceAlignment(org.jbei.ice.storage.model.TraceSequence traceSequence, int score, int strand,
+                                  int queryStart, int queryEnd, int subjectStart, int subjectEnd, String queryAlignment,
+                                  String subjectAlignment, String sequenceHash, Date modificationTime) {
         this.traceSequence = traceSequence;
         this.strand = strand;
         this.score = score;
@@ -79,7 +79,7 @@ public class TraceSequenceAlignment implements DataModel {
         this.modificationTime = modificationTime;
     }
 
-    public TraceSequence getTraceSequence() {
+    public org.jbei.ice.storage.model.TraceSequence getTraceSequence() {
         return traceSequence;
     }
 

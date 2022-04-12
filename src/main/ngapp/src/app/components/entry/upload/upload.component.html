@@ -1,0 +1,12 @@
+<div class="bg-white">
+    <hot-table
+            [data]="dataset"
+            [colHeaders]="true"
+            [rowHeaders]="true"
+            height="auto"
+            licenseKey="non-commercial-and-evaluation">
+
+        <hot-column [readOnly]="true" [title]="field.label" *ngFor="let field of fields"></hot-column>
+
+    </hot-table>
+</div>

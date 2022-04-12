@@ -4,7 +4,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
-import org.jbei.ice.lib.dto.entry.AttachmentInfo;
+import org.jbei.ice.dto.entry.AttachmentInfo;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.hibernate.bridge.EntryBooleanPropertiesBridge;
 import org.jbei.ice.storage.hibernate.dao.AttachmentDAO;
@@ -50,7 +50,7 @@ public class Attachment implements DataModel {
     @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
             @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasAttachment")
     }))
-    private Entry entry;
+    private org.jbei.ice.storage.model.Entry entry;
 
     public Attachment() {
     }
@@ -62,7 +62,7 @@ public class Attachment implements DataModel {
      * @param fileName    Original file name.
      * @param entry       Entry instance.
      */
-    public Attachment(String description, String fileName, Entry entry) {
+    public Attachment(String description, String fileName, org.jbei.ice.storage.model.Entry entry) {
         this.description = description;
         this.fileName = fileName;
         this.entry = entry;
@@ -100,7 +100,7 @@ public class Attachment implements DataModel {
         this.fileId = fileId;
     }
 
-    public Entry getEntry() {
+    public org.jbei.ice.storage.model.Entry getEntry() {
         return entry;
     }
 

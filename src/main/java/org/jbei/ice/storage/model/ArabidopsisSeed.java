@@ -3,7 +3,7 @@ package org.jbei.ice.storage.model;
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
-import org.jbei.ice.lib.dto.entry.*;
+import org.jbei.ice.dto.entry.*;
 
 import javax.persistence.*;
 import java.text.DateFormat;

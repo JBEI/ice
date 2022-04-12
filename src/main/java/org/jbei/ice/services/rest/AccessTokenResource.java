@@ -1,12 +1,12 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.account.UserSessions;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.net.WebPartners;
+import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.account.Account;
+import org.jbei.ice.account.AccountController;
+import org.jbei.ice.account.UserSessions;
+import org.jbei.ice.dto.web.RegistryPartner;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.net.WebPartners;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -32,8 +32,8 @@ public class AccessTokenResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response create(final AccountTransfer transfer) {
-        final AccountTransfer info = accountController.authenticate(transfer);
+    public Response create(final Account transfer) {
+        final Account info = accountController.authenticate(transfer);
         if (info == null) {
             Logger.warn("Authentication failed for user " + transfer.getEmail());
             return respond(Response.Status.UNAUTHORIZED);
@@ -51,7 +51,7 @@ public class AccessTokenResource extends RestResource {
         // ensure the user is valid
         String userId = requireUserId();
         log(userId, "logging out");
-        UserSessions.invalidateSession(userId);
+        accountController.invalidate(userId);
         return super.respond(Response.Status.OK);
     }
 
@@ -65,8 +65,8 @@ public class AccessTokenResource extends RestResource {
     public Response get() {
         String userId = requireUserId();
         try {
-            AccountTransfer accountTransfer = UserSessions.getUserAccount(userId, sessionId);
-            return super.respond(accountTransfer);
+            Account account = UserSessions.getUserAccount(userId, sessionId);
+            return super.respond(account);
         } catch (PermissionException pe) {
             throw new WebApplicationException(Response.Status.FORBIDDEN);
         }

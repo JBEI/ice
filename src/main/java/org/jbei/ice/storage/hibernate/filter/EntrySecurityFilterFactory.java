@@ -6,7 +6,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.hibernate.search.annotations.Factory;
-import org.jbei.ice.lib.access.IndexField;
+import org.jbei.ice.access.IndexField;
 
 import java.util.HashSet;
 

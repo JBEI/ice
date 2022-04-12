@@ -1,0 +1,81 @@
+package org.jbei.ice.net;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.UrlValidator;
+import org.jbei.ice.dto.ConfigurationKey;
+import org.jbei.ice.dto.web.RegistryPartner;
+import org.jbei.ice.executor.Task;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.utils.Utils;
+
+import java.util.List;
+
+/**
+ * Task to enable or disable web of registries by contacting a master node to obtain a (potentially curated) list
+ * of other ICE instances. This task then contacts each ICE instance in turn, to exchange access tokens
+ *
+ * @author Hector Plahar
+ */
+public class WebOfRegistriesTask extends Task {
+
+    private final boolean enable;
+    private final String myUrl;
+    private final String userId;
+    private final RemoteContact remoteContact;
+
+    WebOfRegistriesTask(String userId, String thisUrl, boolean enable) {
+        this.enable = enable;
+        this.myUrl = thisUrl;
+        this.userId = userId;
+        this.remoteContact = new RemoteContact();
+    }
+
+    @Override
+    public void execute() {
+        if (!UrlValidator.getInstance().isValid("https://" + this.myUrl)) {
+            Logger.warn("Invalid url (" + this.myUrl + "). Aborting run of web of registries task");
+            return;
+        }
+
+        final String NODE_MASTER = Utils.getConfigValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER);
+        if (NODE_MASTER.equalsIgnoreCase(this.myUrl) || StringUtils.isEmpty(NODE_MASTER)) {
+            Logger.warn("Aborting contact of node master since this instance has been set as master");
+            return;
+        }
+
+        if (!this.enable) {
+            // delete from the node master
+            this.remoteContact.deleteInstanceFromMaster(this.myUrl);
+            return;
+        }
+
+        // exchange key information with the master registry
+        WebPartners webPartners = new WebPartners();
+        RegistryPartner masterPartner = new RegistryPartner();
+        masterPartner.setUrl(NODE_MASTER);
+
+        masterPartner = webPartners.addNewPartner(this.userId, masterPartner, this.myUrl);
+        if (masterPartner == null) {
+            Logger.error("Could not connect to master node");
+            return;
+        }
+
+        // get partners from master (this call requires that this ice instance already be a partner, so
+        // the requestToJoin call above must succeed)
+        List<RegistryPartner> partners = this.remoteContact.getPartners(masterPartner.getUrl(), masterPartner.getApiKey());
+        if (partners == null) {
+            Logger.error("Could not retrieve list of partners from master node");
+            return;
+        }
+
+        Logger.info("Received " + partners.size() + " partner(s) from master");
+        // for potential, check already in partner list and add if not by performing exchange
+        for (RegistryPartner registryPartner : partners) {
+            if (registryPartner.getUrl().equalsIgnoreCase(myUrl))
+                continue;
+
+            // perform exchange with partners
+            webPartners.addNewPartner(userId, registryPartner, myUrl);
+        }
+    }
+}

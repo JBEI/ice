@@ -2,7 +2,7 @@ package org.jbei.ice.storage.model;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.jbei.ice.lib.experiment.Study;
+import org.jbei.ice.experiment.Study;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -39,9 +39,9 @@ public class Experiment implements DataModel {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "experiment_entry", joinColumns = {@JoinColumn(name = "experiment_id", nullable = false)},
-               inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
+            inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
     @LazyCollection(LazyCollectionOption.EXTRA)
-    private Set<Entry> subjects = new LinkedHashSet<>();
+    private Set<org.jbei.ice.storage.model.Entry> subjects = new LinkedHashSet<>();
 
     public long getId() {
         return id;
@@ -71,7 +71,7 @@ public class Experiment implements DataModel {
         this.creationTime = creationTime;
     }
 
-    public Set<Entry> getSubjects() {
+    public Set<org.jbei.ice.storage.model.Entry> getSubjects() {
         return subjects;
     }
 

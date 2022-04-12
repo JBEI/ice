@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.AccountCreator;
+import org.jbei.ice.dto.folder.FolderType;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.*;
@@ -27,7 +27,7 @@ public class PermissionDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetByFolder() throws Exception {
-        Account account = AccountCreator.createTestAccount("RemoteShareModelDAOTest.testGetByFolder", false);
+        AccountModel account = AccountCreator.createTestAccount("RemoteShareModelDAOTest.testGetByFolder", false);
 
         Permission model = new Permission();
         model.setSecret("s3crit3");

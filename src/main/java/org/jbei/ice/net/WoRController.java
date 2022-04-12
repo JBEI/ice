@@ -1,0 +1,130 @@
+package org.jbei.ice.net;
+
+import org.jbei.ice.account.AccountController;
+import org.jbei.ice.config.ConfigurationSettings;
+import org.jbei.ice.dto.ConfigurationKey;
+import org.jbei.ice.dto.web.RegistryPartner;
+import org.jbei.ice.dto.web.RemotePartnerStatus;
+import org.jbei.ice.dto.web.WebOfRegistries;
+import org.jbei.ice.executor.IceExecutorService;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.services.rest.IceRestClient;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
+import org.jbei.ice.storage.model.RemotePartner;
+import org.jbei.ice.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Controller for Web of Registries functionality
+ *
+ * @author Hector Plahar
+ */
+public class WoRController {
+
+    private final RemotePartnerDAO dao;
+
+    public WoRController() {
+        dao = DAOFactory.getRemotePartnerDAO();
+    }
+
+    /**
+     * @return true if the administrator of this registry instance has explicitly
+     * enable the web of registries functionality
+     */
+    private boolean isWebEnabled() {
+        String value = new ConfigurationSettings().getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
+        return "yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
+    }
+
+    public WebOfRegistries getRegistryPartners(boolean approvedOnly) {
+        WebOfRegistries webOfRegistries = new WebOfRegistries();
+        webOfRegistries.setWebEnabled(isWebEnabled());
+
+        // retrieve actual partners
+        List<RemotePartner> partners = dao.getRegistryPartners();
+
+        ArrayList<RegistryPartner> registryPartners = new ArrayList<>();
+        for (RemotePartner partner : partners) {
+            if (approvedOnly && partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+                continue;
+            registryPartners.add(partner.toDataTransferObject());
+        }
+
+        webOfRegistries.setPartners(registryPartners);
+        return webOfRegistries;
+    }
+
+    /**
+     * Removes the web partner uniquely identified by the url
+     *
+     * @param partnerUrl url identifier for partner
+     */
+    public boolean removeWebPartner(String userId, String partnerUrl) {
+        if (!new AccountController().isAdministrator(userId))
+            return false;
+
+        RemotePartner partner = dao.getByUrl(partnerUrl);
+        if (partner == null)
+            return true;
+
+        dao.delete(partner);
+        return true;
+    }
+
+    public boolean updateWebPartner(String userId, String url, RegistryPartner partner) {
+        if (!new AccountController().isAdministrator(userId))
+            return false;
+
+        Logger.info(userId + ": updating partner (" + url + ") to " + partner.toString());
+        RemotePartner existing = dao.getByUrl(url);
+        if (existing == null)
+            return false;
+
+        if (partner.getStatus() == existing.getPartnerStatus())
+            return true;
+
+        // contact remote with new api key that allows them to contact this instance
+        String apiKey = Utils.generateToken();
+        String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+        String myName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
+
+        RegistryPartner thisPartner = new RegistryPartner();
+        thisPartner.setUrl(myURL);
+        thisPartner.setName(myName);
+        thisPartner.setApiKey(apiKey);  // key to use in contacting this instance
+
+        IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
+        try {
+            client.post("/rest/web/partner/remote", thisPartner, RegistryPartner.class);
+            existing.setPartnerStatus(partner.getStatus());
+            existing.setAuthenticationToken(apiKey);
+            dao.update(existing);
+            return true;
+        } catch (Exception e) {
+            Logger.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * Runs the web of registries task for contacting the appropriate partners to enable or disable
+     * web of registries functionality
+     *
+     * @param enable if true, enables WoR; disables it otherwise
+     * @param url    the url for this ice instance
+     */
+    public void setEnable(String userId, boolean enable, String url) {
+        String thisUrl = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+        if (!thisUrl.equalsIgnoreCase(url)) {
+            Logger.info("Auto updating uri to " + url);
+            ConfigurationSettings settings = new ConfigurationSettings();
+            settings.setPropertyValue(ConfigurationKey.URI_PREFIX, url);
+        }
+
+        WebOfRegistriesTask contactTask = new WebOfRegistriesTask(userId, url, enable);
+        IceExecutorService.getInstance().runTask(contactTask);
+    }
+}

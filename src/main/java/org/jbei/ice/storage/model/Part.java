@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.model;
 
 import org.hibernate.search.annotations.Indexed;
-import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.EntryType;
 
 import javax.persistence.*;
 
@@ -17,7 +17,7 @@ import javax.persistence.*;
 public class Part extends Entry {
 
     public enum AssemblyStandard {
-        RAW, BIOBRICKA, BIOBRICKB;
+        RAW, BIOBRICKA, BIOBRICKB
     }
 
     @Column(name = "package_format", nullable = false)
@@ -27,6 +27,6 @@ public class Part extends Entry {
     public Part() {
         super();
         setRecordType(EntryType.PART.getName());
-        this.packageFormat = Part.AssemblyStandard.RAW;
+        this.packageFormat = AssemblyStandard.RAW;
     }
 }

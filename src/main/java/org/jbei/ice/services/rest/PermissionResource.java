@@ -1,8 +1,8 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.access.RemoteAccess;
-import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.access.RemoteAccess;
+import org.jbei.ice.dto.access.AccessPermission;
+import org.jbei.ice.dto.web.RegistryPartner;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;

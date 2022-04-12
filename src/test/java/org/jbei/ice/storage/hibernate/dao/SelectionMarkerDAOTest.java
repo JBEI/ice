@@ -14,7 +14,7 @@ public class SelectionMarkerDAOTest extends HibernateRepositoryTest {
     public void testGetMatchingSelectionMarkers() throws Exception {
         // TODO
 //        String email = "testGetMatchingSelectionMarkers";
-//        Account account = AccountCreator.createTestAccount(email, false);
+//        AccountModel account= AccountCreator.createTestAccount(email, false);
 //        Assert.assertNotNull(account);
 //
 //        Entry entry = InfoToModelFactory.infoToEntry(new PartData(EntryType.STRAIN));

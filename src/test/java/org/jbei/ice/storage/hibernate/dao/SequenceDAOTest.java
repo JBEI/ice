@@ -1,12 +1,12 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.TestEntryCreator;
-import org.jbei.ice.lib.dto.FeaturedDNASequence;
-import org.jbei.ice.lib.entry.sequence.SequenceUtil;
-import org.jbei.ice.lib.parsers.GeneralParser;
+import org.jbei.ice.AccountCreator;
+import org.jbei.ice.TestEntryCreator;
+import org.jbei.ice.dto.FeaturedDNASequence;
+import org.jbei.ice.entry.sequence.SequenceUtil;
+import org.jbei.ice.parsers.GeneralParser;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Plasmid;
 import org.jbei.ice.storage.model.Sequence;
 import org.jbei.ice.storage.model.Strain;
@@ -24,7 +24,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testCreate() throws Exception {
-        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testCreate", false);
+        AccountModel account = AccountCreator.createTestAccount("SequenceDAOTest.testCreate", false);
         Strain strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
 
@@ -44,7 +44,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testRetrieve() throws Exception {
-        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testRetrieve", false);
+        AccountModel account = AccountCreator.createTestAccount("SequenceDAOTest.testRetrieve", false);
         Strain strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
 
@@ -64,7 +64,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testUpdate() throws Exception {
-        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testUpdate", false);
+        AccountModel account = AccountCreator.createTestAccount("SequenceDAOTest.testUpdate", false);
         Strain strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
 
@@ -97,7 +97,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testDelete() throws Exception {
-        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testDelete", false);
+        AccountModel account = AccountCreator.createTestAccount("SequenceDAOTest.testDelete", false);
         Strain strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
 
@@ -124,7 +124,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetByEntry() throws Exception {
-        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testGetByEntry", false);
+        AccountModel account = AccountCreator.createTestAccount("SequenceDAOTest.testGetByEntry", false);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         Assert.assertNotNull(plasmid);
 
@@ -146,7 +146,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testSequenceString() throws Exception {
-        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testSequenceString", false);
+        AccountModel account = AccountCreator.createTestAccount("SequenceDAOTest.testSequenceString", false);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         Assert.assertNotNull(plasmid);
 
@@ -166,9 +166,9 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testHasSequence() throws Exception {
-        Account account1 = AccountCreator.createTestAccount("SequenceDAOTest.testHasSequence1", false);
-        Account account2 = AccountCreator.createTestAccount("SequenceDAOTest.testHasSequence2", false);
-        Account account3 = AccountCreator.createTestAccount("SequenceDAOTest.testHasSequence3", false);
+        AccountModel account1 = AccountCreator.createTestAccount("SequenceDAOTest.testHasSequence1", false);
+        AccountModel account2 = AccountCreator.createTestAccount("SequenceDAOTest.testHasSequence2", false);
+        AccountModel account3 = AccountCreator.createTestAccount("SequenceDAOTest.testHasSequence3", false);
 
         Plasmid plasmid1 = TestEntryCreator.createTestPlasmid(account1);
         Plasmid plasmid2 = TestEntryCreator.createTestPlasmid(account2);
@@ -198,7 +198,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetSequenceFilename() throws Exception {
-        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testGetSequenceFilename", false);
+        AccountModel account = AccountCreator.createTestAccount("SequenceDAOTest.testGetSequenceFilename", false);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         Assert.assertNotNull(plasmid);
 
@@ -218,7 +218,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testHasOriginalSequence() throws Exception {
-        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testHasOriginalSequence", false);
+        AccountModel account = AccountCreator.createTestAccount("SequenceDAOTest.testHasOriginalSequence", false);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         Assert.assertNotNull(plasmid);
 
@@ -249,7 +249,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetSequence() throws Exception {
-        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testGetSequence", false);
+        AccountModel account = AccountCreator.createTestAccount("SequenceDAOTest.testGetSequence", false);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         Assert.assertNotNull(plasmid);
 
@@ -267,7 +267,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetSequenceCount() throws Exception {
-        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testGetSequenceCount", false);
+        AccountModel account = AccountCreator.createTestAccount("SequenceDAOTest.testGetSequenceCount", false);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         Assert.assertNotNull(plasmid);
 
@@ -313,8 +313,8 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
 //    @Test
 //    public void testUpdateSequence() throws Exception {
-//        // create account and sequence
-//        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testUpdateSequence", false);
+//        // create AccountModel and sequence
+//        AccountModel account= AccountCreator.createTestAccount("SequenceDAOTest.testUpdateSequence", false);
 //        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
 //        FeaturedDNASequence dnaSequence = GeneralParser.parse(sequenceString);
 //        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);

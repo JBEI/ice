@@ -1,7 +1,7 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.manuscript.Manuscript;
-import org.jbei.ice.lib.manuscript.Manuscripts;
+import org.jbei.ice.manuscript.Manuscript;
+import org.jbei.ice.manuscript.Manuscripts;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

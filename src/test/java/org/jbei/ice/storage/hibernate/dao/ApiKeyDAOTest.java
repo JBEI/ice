@@ -1,8 +1,8 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.AccountCreator;
+import org.jbei.ice.AccountCreator;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.ApiKey;
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,7 +28,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGet() throws Exception {
-        Account account = AccountCreator.createTestAccount("ApiKeyDAOTest.testGet", false);
+        AccountModel account = AccountCreator.createTestAccount("ApiKeyDAOTest.testGet", false);
         ApiKey key = createKey(account.getEmail(), null);
         Assert.assertNotNull(key);
         ApiKey get = dao.get(key.getId());
@@ -38,7 +38,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetApiKeysForUser() throws Exception {
-        Account account = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetApiKeysForUser", false);
+        AccountModel account = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetApiKeysForUser", false);
         List<ApiKey> keys = dao.getApiKeysForUser(account.getEmail(), "id", 10, 0, false);
         Assert.assertNotNull(keys);
         Assert.assertTrue(keys.isEmpty());
@@ -58,9 +58,9 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
     @Test
     public void testGetAllApiKeys() throws Exception {
         // create accounts
-        Account account1 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetAllApiKeys1", false);
-        Account account2 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetAllApiKeys2", false);
-        Account account3 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetAllApiKeys3", false);
+        AccountModel account1 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetAllApiKeys1", false);
+        AccountModel account2 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetAllApiKeys2", false);
+        AccountModel account3 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetAllApiKeys3", false);
 
         Random random = new Random();
         int limit1 = random.nextInt(10);
@@ -91,9 +91,9 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetApiKeysCount() throws Exception {
-        Account account1 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetApiKeysCount1", false);
-        Account account2 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetApiKeysCount2", false);
-        Account account3 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetApiKeysCount3", false);
+        AccountModel account1 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetApiKeysCount1", false);
+        AccountModel account2 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetApiKeysCount2", false);
+        AccountModel account3 = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetApiKeysCount3", false);
 
         Random random = new Random();
         int limit1 = random.nextInt(10);
@@ -124,7 +124,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetByClientId() throws Exception {
-        Account account = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetByClientId", false);
+        AccountModel account = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetByClientId", false);
         ApiKey apiKey = createKey(account.getEmail(), account.getEmail() + "_client");
         Assert.assertNotNull(apiKey);
         Optional<ApiKey> result = dao.getByClientId(account.getEmail() + "_client");

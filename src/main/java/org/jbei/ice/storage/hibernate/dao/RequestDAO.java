@@ -1,11 +1,11 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.sample.SampleRequest;
-import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
+import org.jbei.ice.dto.sample.SampleRequest;
+import org.jbei.ice.dto.sample.SampleRequestStatus;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Request;
 
@@ -28,7 +28,7 @@ public class RequestDAO extends HibernateRepository<Request> {
         return super.get(Request.class, id);
     }
 
-    public List<Request> getSampleRequestByStatus(Account account, Entry entry, SampleRequestStatus status) {
+    public List<Request> getSampleRequestByStatus(AccountModel account, Entry entry, SampleRequestStatus status) {
         try {
             CriteriaQuery<Request> query = getBuilder().createQuery(Request.class);
             Root<Request> from = query.from(Request.class);
@@ -44,7 +44,7 @@ public class RequestDAO extends HibernateRepository<Request> {
         }
     }
 
-    public Request getSampleRequestInCart(Account account, Entry entry) {
+    public Request getSampleRequestInCart(AccountModel account, Entry entry) {
         try {
             CriteriaQuery<Request> query = getBuilder().createQuery(Request.class);
             Root<Request> from = query.from(Request.class);
@@ -69,7 +69,7 @@ public class RequestDAO extends HibernateRepository<Request> {
         }
     }
 
-    public int getCount(Account account) {
+    public int getCount(String filter, AccountModel account) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Request> from = query.from(Request.class);
@@ -91,7 +91,7 @@ public class RequestDAO extends HibernateRepository<Request> {
             query.select(getBuilder().countDistinct(from.get("id")));
             List<Predicate> predicates = createPredicates(from, filter, status);
             if (!predicates.isEmpty())
-                query.where(predicates.toArray(new Predicate[predicates.size()]));
+                query.where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).uniqueResult().intValue();
         } catch (Exception he) {
             Logger.error(he);
@@ -105,7 +105,7 @@ public class RequestDAO extends HibernateRepository<Request> {
             Root<Request> from = query.from(Request.class);
             List<Predicate> predicates = createPredicates(from, filter, status);
             if (!predicates.isEmpty())
-                query.where(predicates.toArray(new Predicate[predicates.size()]));
+                query.where(predicates.toArray(new Predicate[0]));
 
             query.orderBy(asc ? getBuilder().asc(from.get(sort)) : getBuilder().desc(from.get(sort)));
             return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
@@ -121,7 +121,7 @@ public class RequestDAO extends HibernateRepository<Request> {
             predicates.add(root.get("status").in(status));
 
         if (filter != null) {
-            Join<SampleRequest, Account> account = root.join("account");
+            Join<SampleRequest, AccountModel> account = root.join("account");
             filter = filter.toLowerCase();
             predicates.add(getBuilder().or(
                     getBuilder().like(getBuilder().lower(account.get("firstName")), "%" + filter + "%"),
@@ -130,8 +130,8 @@ public class RequestDAO extends HibernateRepository<Request> {
         return predicates;
     }
 
-    public List<Request> getAccountRequests(Account account, SampleRequestStatus status, int start, int limit,
-                                            String sort, boolean asc) {
+    public List<Request> getAccountRequests(AccountModel account, SampleRequestStatus status, int start, int limit,
+                                            String sort, boolean asc, String filter) {
         try {
             CriteriaQuery<Request> query = getBuilder().createQuery(Request.class);
             Root<Request> from = query.from(Request.class);

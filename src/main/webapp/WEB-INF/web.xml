@@ -17,7 +17,7 @@
     <display-name>ice</display-name>
 
     <listener>
-        <listener-class>org.jbei.ice.servlet.IceServletContextListener</listener-class>
+        <listener-class>org.jbei.org.jbei.ice.servlet.IceServletContextListener</listener-class>
     </listener>
 
     <!-- jersey rest service -->
@@ -34,7 +34,7 @@
         </init-param>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>org.jbei.ice.services.rest.multipart.IceApplication</param-value>
+            <param-value>org.jbei.org.jbei.ice.services.rest.multipart.IceApplication</param-value>
         </init-param>
     </servlet>
 

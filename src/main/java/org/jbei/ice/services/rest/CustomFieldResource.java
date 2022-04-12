@@ -1,7 +1,7 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.dto.entry.CustomField;
-import org.jbei.ice.lib.dto.entry.CustomFields;
+import org.jbei.ice.dto.entry.CustomField;
+import org.jbei.ice.dto.entry.CustomFields;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -16,7 +16,7 @@ import java.util.List;
 @Path("/custom-fields")
 public class CustomFieldResource extends RestResource {
 
-    private CustomFields fields = new CustomFields();
+    private final CustomFields fields = new CustomFields();
 
     @GET
     @Path("/parts")

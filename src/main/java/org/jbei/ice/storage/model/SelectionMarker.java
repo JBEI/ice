@@ -29,12 +29,12 @@ public class SelectionMarker implements DataModel {
     @ContainedIn
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
-    private Entry entry;
+    private org.jbei.ice.storage.model.Entry entry;
 
     public SelectionMarker() {
     }
 
-    public SelectionMarker(String name, Entry entry) {
+    public SelectionMarker(String name, org.jbei.ice.storage.model.Entry entry) {
         this.name = name;
         this.entry = entry;
     }
@@ -57,7 +57,7 @@ public class SelectionMarker implements DataModel {
     }
 
     @XmlTransient
-    public Entry getEntry() {
+    public org.jbei.ice.storage.model.Entry getEntry() {
         return entry;
     }
 

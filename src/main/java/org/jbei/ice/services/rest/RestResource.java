@@ -1,12 +1,11 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.access.TokenVerification;
-import org.jbei.ice.lib.account.UserSessions;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationSettings;
-import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.access.TokenVerification;
+import org.jbei.ice.account.UserSessions;
+import org.jbei.ice.dto.web.RegistryPartner;
+import org.jbei.ice.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HeaderParam;
@@ -23,12 +22,12 @@ import javax.ws.rs.core.Response;
  */
 public class RestResource {
 
-    final String WOR_PARTNER_TOKEN = Headers.WOR_PARTNER_TOKEN;
-    private final String AUTHENTICATION_PARAM_NAME = Headers.AUTHENTICATION_PARAM_NAME;
-    private final String API_KEY_TOKEN = Headers.API_KEY_TOKEN;               // token for validation
-    private final String API_KEY_USER = Headers.API_KEY_USER;           // optional user. system checks and uses assigned token user if not specified
-    private final String API_KEY_CLIENT_ID = Headers.API_KEY_CLIENT_ID;    // client id
-    private final String REMOTE_USER_TOKEN = Headers.REMOTE_USER_TOKEN;   // token for remote user
+    private final String AUTHENTICATION_PARAM_NAME = org.jbei.ice.services.rest.Headers.AUTHENTICATION_PARAM_NAME;
+    final String WOR_PARTNER_TOKEN = org.jbei.ice.services.rest.Headers.WOR_PARTNER_TOKEN;
+    private final String API_KEY_TOKEN = org.jbei.ice.services.rest.Headers.API_KEY_TOKEN;               // token for validation
+    private final String API_KEY_USER = org.jbei.ice.services.rest.Headers.API_KEY_USER;           // optional user. system checks and uses assigned token user if not specified
+    private final String API_KEY_CLIENT_ID = org.jbei.ice.services.rest.Headers.API_KEY_CLIENT_ID;    // client id
+    private final String REMOTE_USER_TOKEN = org.jbei.ice.services.rest.Headers.REMOTE_USER_TOKEN;   // token for remote user
     private final String REMOTE_USER_ID = Headers.REMOTE_USER_ID;         // id for remote user
 
     @HeaderParam(value = WOR_PARTNER_TOKEN)
@@ -79,9 +78,6 @@ public class RestResource {
      * @throws WebApplicationException with status 401 if the user id cannot be retrieved
      */
     protected String requireUserId() {
-        if (!new ConfigurationSettings().hasDataDirectory())
-            throw new WebApplicationException(Response.Status.SERVICE_UNAVAILABLE);
-
         String userId = getUserId();
         if (userId == null)
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
@@ -237,6 +233,9 @@ public class RestResource {
 
     Response addHeaders(Response.ResponseBuilder response, String fileName) {
         response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        if (StringUtils.isEmpty(fileName))
+            return response.build();
+
         int dotIndex = fileName.lastIndexOf('.') + 1;
         if (dotIndex == 0)
             return response.build();

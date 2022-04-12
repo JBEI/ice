@@ -1,19 +1,16 @@
 package org.jbei.ice;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.account.AdminAccount;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationSettings;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.entry.sequence.annotation.AutoAnnotationBlastDbBuildTask;
-import org.jbei.ice.lib.executor.IceExecutorService;
-import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
-import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.account.Accounts;
+import org.jbei.ice.config.ConfigurationSettings;
+import org.jbei.ice.dto.ConfigurationKey;
+import org.jbei.ice.entry.sequence.annotation.AutoAnnotationBlastDbBuildTask;
+import org.jbei.ice.executor.IceExecutorService;
+import org.jbei.ice.group.GroupController;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.search.blast.RebuildBlastIndexTask;
 import org.jbei.ice.storage.hibernate.DbType;
 import org.jbei.ice.storage.hibernate.HibernateConfiguration;
-import org.jbei.ice.storage.hibernate.dao.ConfigurationDAO;
-import org.jbei.ice.storage.model.ConfigurationModel;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,6 +33,8 @@ public class ApplicationInitialize {
     /**
      * Responsible for initializing the system and checking for the existence of needed
      * data (such as settings) and creating as needed
+     *
+     * @return a valid data directory path or null if none could be detected
      */
     public static Path configure() {
         try {
@@ -85,55 +84,6 @@ public class ApplicationInitialize {
         }
     }
 
-    public static void loadAuthentication() {
-
-    }
-
-    public static void start(Path dataDirectory) {
-
-        IceExecutorService.getInstance().startService();
-
-        // check for and create public group
-        GroupController groupController = new GroupController();
-        groupController.createOrRetrievePublicGroup();
-
-        // check for and create admin account
-        AdminAccount adminAccount = new AdminAccount();
-        adminAccount.resetPassword();
-
-        // check for and create default settings
-        ConfigurationSettings settings = new ConfigurationSettings();
-        settings.initPropertyValues();
-
-        // check data directory
-        checkDataDirectory(dataDirectory);
-
-        try {
-            // check blast database exists and build if it doesn't
-            RebuildBlastIndexTask task = new RebuildBlastIndexTask();
-            IceExecutorService.getInstance().runTask(task);
-
-            AutoAnnotationBlastDbBuildTask autoAnnotationBlastDbBuildTask = new AutoAnnotationBlastDbBuildTask();
-            IceExecutorService.getInstance().runTask(autoAnnotationBlastDbBuildTask);
-        } catch (Exception e) {
-            Logger.error(e);
-        }
-    }
-
-    private static void checkDataDirectory(Path dataDirectory) {
-        ConfigurationKey dataKey = ConfigurationKey.DATA_DIRECTORY;
-        ConfigurationDAO dao = DAOFactory.getConfigurationDAO();
-
-        ConfigurationModel model = dao.get(dataKey);
-        if (model != null && !StringUtils.isEmpty(model.getValue()))
-            return;
-
-        model = new ConfigurationModel();
-        model.setKey(dataKey.name());
-        model.setValue(dataDirectory.toString());
-        dao.create(model);
-    }
-
     // this should not create a home directory
     private static Path initializeDataDirectory() {
         // check environ variable
@@ -167,7 +117,7 @@ public class ApplicationInitialize {
             iceHome = Paths.get(propertyHome);
         }
 
-        Logger.info("Using ICE data directory: " + iceHome.toString());
+        Logger.info("Using ICE data directory: " + iceHome);
         return iceHome;
     }
 
@@ -177,11 +127,63 @@ public class ApplicationInitialize {
         Properties properties = new Properties();
         properties.load(new FileInputStream(serverPropertiesPath.toFile()));
 
+        Logger.info("Loading server properties from " + serverPropertiesPath);
+
         // get type of data base
         String dbTypeString = properties.getProperty("connectionType");
-        DbType type = DbType.valueOf(dbTypeString.toUpperCase());
+        DbType type;
+        if (StringUtils.isBlank(dbTypeString)) {
+            Logger.error("Property \"connectionType\" not found. Defaulting to value of " + DbType.POSTGRESQL);
+            type = DbType.POSTGRESQL;
+        } else {
+            type = DbType.valueOf(dbTypeString.toUpperCase());
+        }
 
         // get type of database etc
         HibernateConfiguration.initialize(type, properties, dataDirectory);
+    }
+
+    /**
+     * Responsible for initializing the system and checking for the existence of needed
+     * data (such as settings) and creating as needed
+     */
+    public static void start(Path dataDirectory) {
+
+        IceExecutorService.getInstance().startService();
+
+        // check for and create public group
+        GroupController groupController = new GroupController();
+        groupController.createOrRetrievePublicGroup();
+
+        // check for and create admin account
+        Accounts accounts = new Accounts();
+        accounts.createDefaultAdminAccount();
+
+        // check for and create default settings
+        ConfigurationSettings settings = new ConfigurationSettings();
+        settings.initPropertyValues();
+
+        try {
+            // check blast database exists and build if it doesn't
+            RebuildBlastIndexTask task = new RebuildBlastIndexTask();
+            IceExecutorService.getInstance().runTask(task);
+
+            AutoAnnotationBlastDbBuildTask autoAnnotationBlastDbBuildTask = new AutoAnnotationBlastDbBuildTask();
+            IceExecutorService.getInstance().runTask(autoAnnotationBlastDbBuildTask);
+        } catch (Exception e) {
+            Logger.error(e);
+        }
+
+        // check data directory
+        checkDataDirectory(dataDirectory);
+    }
+
+    private static void checkDataDirectory(Path dataDirectory) {
+        ConfigurationSettings settings = new ConfigurationSettings();
+        String value = settings.getPropertyValue(ConfigurationKey.DATA_DIRECTORY);
+        if (!StringUtils.isEmpty(value))
+            return;
+
+        settings.setPropertyValue(ConfigurationKey.DATA_DIRECTORY, dataDirectory.toString());
     }
 }

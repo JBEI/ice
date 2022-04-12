@@ -7,38 +7,38 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.FeaturedDNASequence;
-import org.jbei.ice.lib.dto.ShotgunSequenceDTO;
-import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.comment.UserComment;
-import org.jbei.ice.lib.dto.common.Results;
-import org.jbei.ice.lib.dto.entry.*;
-import org.jbei.ice.lib.dto.sample.PartSample;
-import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.entry.*;
-import org.jbei.ice.lib.entry.attachment.Attachments;
-import org.jbei.ice.lib.entry.export.CustomExportTask;
-import org.jbei.ice.lib.entry.sample.SampleService;
-import org.jbei.ice.lib.entry.sequence.PartSequence;
-import org.jbei.ice.lib.entry.sequence.PartTraceSequences;
-import org.jbei.ice.lib.entry.sequence.SequenceFormat;
-import org.jbei.ice.lib.entry.sequence.Sequences;
-import org.jbei.ice.lib.entry.sequence.analysis.Shotgun;
-import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
-import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
-import org.jbei.ice.lib.executor.IceExecutorService;
-import org.jbei.ice.lib.experiment.Experiments;
-import org.jbei.ice.lib.experiment.Study;
-import org.jbei.ice.lib.net.RemoteEntries;
-import org.jbei.ice.lib.net.TransferredParts;
-import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.dto.ConfigurationKey;
+import org.jbei.ice.dto.FeaturedDNASequence;
+import org.jbei.ice.dto.ShotgunSequenceDTO;
+import org.jbei.ice.dto.access.AccessPermission;
+import org.jbei.ice.dto.comment.UserComment;
+import org.jbei.ice.dto.common.Results;
+import org.jbei.ice.dto.entry.*;
+import org.jbei.ice.dto.sample.PartSample;
+import org.jbei.ice.dto.web.RegistryPartner;
+import org.jbei.ice.entry.*;
+import org.jbei.ice.entry.attachment.Attachments;
+import org.jbei.ice.entry.export.CustomExportTask;
+import org.jbei.ice.entry.sample.SampleService;
+import org.jbei.ice.entry.sequence.PartSequence;
+import org.jbei.ice.entry.sequence.PartTraceSequences;
+import org.jbei.ice.entry.sequence.SequenceFormat;
+import org.jbei.ice.entry.sequence.Sequences;
+import org.jbei.ice.entry.sequence.analysis.Shotgun;
+import org.jbei.ice.entry.sequence.analysis.TraceSequences;
+import org.jbei.ice.entry.sequence.annotation.Annotations;
+import org.jbei.ice.executor.IceExecutorService;
+import org.jbei.ice.experiment.Experiments;
+import org.jbei.ice.experiment.Study;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.net.RemoteEntries;
+import org.jbei.ice.net.TransferredParts;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.ShotgunSequence;
+import org.jbei.ice.utils.Utils;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -60,10 +60,10 @@ import java.util.List;
 @Path("/parts")
 public class PartResource extends RestResource {
 
-    private EntryController controller = new EntryController();
-    private Attachments attachments = new Attachments();
-    private SampleService sampleService = new SampleService();
-    private RemoteEntries remoteEntries = new RemoteEntries();
+    private final EntryController controller = new EntryController();
+    private final Attachments attachments = new Attachments();
+    private final SampleService sampleService = new SampleService();
+    private final RemoteEntries remoteEntries = new RemoteEntries();
 
     /**
      * Retrieves a part using any of the unique identifiers. e.g. Part number, synthetic id, or
@@ -96,25 +96,46 @@ public class PartResource extends RestResource {
         }
     }
 
+//    /**
+//     * Retrieves the defaults for the requested entry types.
+//     *
+//     * @param type the type of entry i.e. <code>PLASMID</code>, <code>PART</code>, <code>STRAIN</code> or
+//     *             <code>SEED</code>. Used to retrieve the default values for that entry
+//     * @deprecated This is has been replaced by /rest/parts/fields/{type}
+//     */
+//    @GET
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Path("/defaults/{type}")
+//    public Response get(@PathParam("type") String type) {
+//        String userId = requireUserId();
+//        final EntryType entryType = EntryType.nameToType(type);
+//        if (entryType == null)
+//            throw new WebApplicationException();
+//
+//        PartDefaults partDefaults = new PartDefaults(userId);
+//        PartData partData = partDefaults.get(entryType);
+//        partData.setCustomEntryFields(new CustomFields().get(entryType).getData());
+//        return super.respond(partData);
+//    }
+
     /**
-     * Retrieves the defaults for the requested entry types.
+     * Retrieves list of fields for the specified entry type. If also includes
+     * the default user values and custom fields for the type
      *
-     * @param type the type of entry i.e. <code>PLASMID</code>, <code>PART</code>, <code>STRAIN</code> or
-     *             <code>SEED</code>. Used to retrieve the default values for that entry
+     * @param type type of entry.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/defaults/{type}")
-    public Response get(@PathParam("type") String type) {
+    @Path("/fields/{type}")
+    public Response getPartFields(@PathParam("type") String type,
+                                  @QueryParam("includeCustom") @DefaultValue("true") boolean includeCustom) {
         String userId = requireUserId();
         final EntryType entryType = EntryType.nameToType(type);
         if (entryType == null)
-            throw new WebApplicationException();
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
 
-        PartDefaults partDefaults = new PartDefaults(userId);
-        PartData partData = partDefaults.get(entryType);
-        partData.setCustomEntryFields(new CustomFields().get(entryType).getData());
-        return super.respond(partData);
+        PartFields partFields = new PartFields(userId, entryType);
+        return super.respond(partFields.get());
     }
 
     /**
@@ -528,7 +549,8 @@ public class PartResource extends RestResource {
                                 @DefaultValue("false") @QueryParam("remote") boolean isRemote,
                                 @QueryParam("token") String remoteUserToken,
                                 @QueryParam("userId") String remoteUserId,
-                                @QueryParam("folderId") long fid) {
+                                @QueryParam("folderId") long fid,
+                                @DefaultValue("true") @QueryParam("annotations") boolean includeAnnotations) {
         final FeaturedDNASequence sequence;
         final String userId = getUserId();
         Sequences sequences = new Sequences(userId);
@@ -541,13 +563,13 @@ public class PartResource extends RestResource {
             if (StringUtils.isEmpty(userId)) {
                 RegistryPartner partner = requireWebPartner();
                 if (StringUtils.isEmpty(remoteUserToken) || fid == 0) {
-                    sequence = new PartSequence(userId, partId).get();
+                    sequence = new PartSequence(userId, partId).get(includeAnnotations);
                 } else {
                     sequence = sequences.getRequestedSequence(partner, remoteUserId, remoteUserToken, partId, fid);
                 }
             } else {
                 // user id can be null if partId is public
-                sequence = new PartSequence(userId, partId).get();
+                sequence = new PartSequence(userId, partId).get(includeAnnotations);
             }
         }
         return Response.status(Response.Status.OK).entity(sequence).build();
@@ -746,10 +768,13 @@ public class PartResource extends RestResource {
     @POST
     @Path("/custom")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response customExport(@QueryParam("sequenceFormat") String sequenceFormat, EntrySelection selection) {
+    public Response customExport(
+            @QueryParam("sequenceFormat") String sequenceFormat,
+            @DefaultValue("true") @QueryParam("onePerFolder") boolean onePerFolder,
+            EntrySelection selection) {
         String userId = super.requireUserId();
         SequenceFormat format = SequenceFormat.fromString(sequenceFormat.toUpperCase());
-        CustomExportTask task = new CustomExportTask(userId, selection, format);
+        CustomExportTask task = new CustomExportTask(userId, selection, format, onePerFolder);
         IceExecutorService.getInstance().runTask(task);
         return super.respond(true);
     }

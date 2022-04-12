@@ -2,13 +2,13 @@ package org.jbei.ice.services.rest;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.jbei.ice.lib.bulkupload.*;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.entry.*;
-import org.jbei.ice.lib.entry.PartDefaults;
-import org.jbei.ice.lib.entry.sequence.PartSequence;
-import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.bulkupload.*;
+import org.jbei.ice.dto.access.AccessPermission;
+import org.jbei.ice.dto.entry.*;
+import org.jbei.ice.entry.PartDefaults;
+import org.jbei.ice.entry.sequence.PartSequence;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.utils.Utils;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -27,7 +27,7 @@ import java.util.List;
 @Path("/uploads")
 public class BulkUploadResource extends RestResource {
 
-    private BulkUploads controller = new BulkUploads();
+    private final BulkUploads controller = new BulkUploads();
 
     /**
      * Retrieves specified bulk upload resource including

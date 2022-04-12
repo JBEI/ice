@@ -1,15 +1,14 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
-import {catchError} from 'rxjs/operators';
-import {Router} from '@angular/router';
-import {environment} from "../../environments/environment";
+import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
+import {Observable, of} from "rxjs";
+import {catchError} from "rxjs/operators";
 import {UserService} from "./user.service";
+import {Router} from "@angular/router";
+import {environment} from "../../environments/environment";
 
 @Injectable({
     providedIn: 'root'
 })
-
 export class HttpService {
 
     private readonly apiUrl: string;
@@ -22,14 +21,14 @@ export class HttpService {
     constructor(private http: HttpClient, private userService: UserService, private router: Router) {
         this.apiUrl = environment.apiUrl;
 
-        this.get('settings/register').subscribe(result => {
-            console.log(result);
-        }, error => {
-            console.error(error);
-        });
+        // this.get('settings/register').subscribe(result => {
+        //     console.log(result);
+        // }, error => {
+        //     console.error(error);
+        // });
     }
 
-    get<T>(api: string, options?, redirect?): Observable<T> {
+    get<T>(api: string, options?: any, redirect?: boolean): Observable<T> {
         this.setOptions(options);
         if (this.userService.getUser(redirect)) {
             const sid = this.userService.getUser().sessionId;
@@ -46,7 +45,7 @@ export class HttpService {
             );
     }
 
-    post<T>(api: string, payload: T, options?): Observable<any> {
+    post<T>(api: string, payload: T, options?: any): Observable<any> {
         this.setOptions(options);
         const url = `${this.apiUrl}/${api}`;
         return this.http.post<T>(url, payload, this.httpOptions);
@@ -57,13 +56,13 @@ export class HttpService {
         return this.http.delete(url, this.httpOptions);
     }
 
-    put<T>(api: string, payload: T, options?): Observable<any> {
+    put<T>(api: string, payload: T, options?: any): Observable<any> {
         this.setOptions(options);
         const url = `${this.apiUrl}/${api}`;
         return this.http.put(url, payload, this.httpOptions);
     }
 
-    private setOptions(options): void {
+    private setOptions(options: any): void {
         this.httpOptions.params = new HttpParams();
         if (!options) {
             return;
@@ -78,13 +77,12 @@ export class HttpService {
         }
     }
 
-    private handleError<T>(result?) {
+    private handleError<T>(result?: any) {
         return (error: any): Observable<T> => {
 
             // TODO: send the error to remote logging infrastructure
             if (error.status === 401) {
                 this.router.navigate(['/login']);
-                return;
             }
 
             console.error(error); // log to console instead

@@ -1,12 +1,12 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.shared.ColumnField;
 
 public class EntryAccessorUtilities {
 
     public static String columnFieldToString(ColumnField field) {
         if (field == null)
-            return "id";
+            return "creationTime";
 
         switch (field) {
             case TYPE:
@@ -29,7 +29,7 @@ public class EntryAccessorUtilities {
 
             case CREATED:
             default:
-                return "id";
+                return "creationTime";
         }
     }
 }

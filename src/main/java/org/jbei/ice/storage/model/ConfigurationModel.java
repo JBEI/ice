@@ -1,35 +1,41 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.Setting;
+import org.jbei.ice.dto.ConfigurationKey;
+import org.jbei.ice.dto.Setting;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
 
 /**
- * Site wide configuration values. See {@link org.jbei.ice.lib.dto.ConfigurationKey} for
+ * Site wide configuration values. See {@link ConfigurationKey} for
  * the built in configuration values
  *
  * @author Hector Plahar, Timothy Ham
  */
 @Entity
-@Table(name = "configuration")
+@Table(name = "\"configuration\"")
 @SequenceGenerator(name = "configuration_id", sequenceName = "configuration_id_seq", allocationSize = 1)
-public class ConfigurationModel implements DataModel<Setting> {
+public class ConfigurationModel implements DataModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "configuration_id")
     private long id;
 
-    @Column(name = "key", length = 255, nullable = false, unique = true)
+    @Column(name = "\"key\"", length = 255, nullable = false, unique = true)
     private String key;
 
-    @Column(name = "value", length = 1024, nullable = false)
+    @Column(name = "\"value\"", length = 1024, nullable = false)
     private String value;
 
     public ConfigurationModel() {
+        super();
     }
 
-    @Override
+    public ConfigurationModel(String key, String value) {
+        setKey(key);
+        setValue(value);
+    }
+
     public long getId() {
         return id;
     }

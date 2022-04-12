@@ -2,7 +2,7 @@ package org.jbei.ice.storage.hibernate;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IRepository;
@@ -22,7 +22,7 @@ public abstract class HibernateRepository<T extends DataModel> implements IRepos
      * @return {@link Session}
      */
     protected static Session currentSession() {
-        return HibernateConfiguration.currentSession();
+        return HibernateConfiguration.getCurrentSession();
     }
 
     protected CriteriaBuilder getBuilder() {

@@ -1,8 +1,8 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
-import org.jbei.ice.lib.bulkupload.BulkUploadStatus;
+import org.jbei.ice.account.Account;
+import org.jbei.ice.bulkupload.BulkUploadInfo;
+import org.jbei.ice.bulkupload.BulkUploadStatus;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Saved draft of bulk imports. Encapsulates a list of {@link Entry}s that are created and updated
+ * Saved draft of bulk imports. Encapsulates a list of {@link org.jbei.ice.storage.model.Entry}s that are created and updated
  * as part of a draft
  *
  * @author Hector Plahar
@@ -39,7 +39,7 @@ public class BulkUpload implements DataModel {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
+    private AccountModel account;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_time", nullable = false)
@@ -57,7 +57,7 @@ public class BulkUpload implements DataModel {
     @JoinTable(name = "bulk_upload_entry",
             joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
             inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
-    private Set<Entry> contents = new HashSet<>();
+    private Set<org.jbei.ice.storage.model.Entry> contents = new HashSet<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
     @JoinTable(name = "bulk_upload_permissions",
@@ -85,11 +85,11 @@ public class BulkUpload implements DataModel {
         this.lastUpdateTime = lastUpdateTime;
     }
 
-    public Account getAccount() {
+    public AccountModel getAccount() {
         return account;
     }
 
-    public void setAccount(Account account) {
+    public void setAccount(AccountModel account) {
         this.account = account;
     }
 
@@ -101,7 +101,7 @@ public class BulkUpload implements DataModel {
         this.name = name;
     }
 
-    public Set<Entry> getContents() {
+    public Set<org.jbei.ice.storage.model.Entry> getContents() {
         return contents;
     }
 
@@ -149,12 +149,12 @@ public class BulkUpload implements DataModel {
         bulkUploadInfo.setType(this.importType);
         bulkUploadInfo.setLinkType(this.linkType);
 
-        Account draftAccount = getAccount();
-        AccountTransfer accountTransfer = new AccountTransfer();
-        accountTransfer.setEmail(draftAccount.getEmail());
-        accountTransfer.setFirstName(draftAccount.getFirstName());
-        accountTransfer.setLastName(draftAccount.getLastName());
-        bulkUploadInfo.setAccount(accountTransfer);
+        AccountModel draftAccount = getAccount();
+        Account account = new Account();
+        account.setEmail(draftAccount.getEmail());
+        account.setFirstName(draftAccount.getFirstName());
+        account.setLastName(draftAccount.getLastName());
+        bulkUploadInfo.setAccount(account);
 
         if (permissions != null) {
             for (Permission permission : permissions) {

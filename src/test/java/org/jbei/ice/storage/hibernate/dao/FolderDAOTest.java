@@ -1,16 +1,16 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.TestEntryCreator;
-import org.jbei.ice.lib.dto.common.PageParameters;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.entry.Entries;
-import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.AccountCreator;
+import org.jbei.ice.TestEntryCreator;
+import org.jbei.ice.dto.common.PageParameters;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.PartData;
+import org.jbei.ice.dto.folder.FolderType;
+import org.jbei.ice.entry.Entries;
+import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Folder;
 import org.junit.Assert;
@@ -56,7 +56,7 @@ public class FolderDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testRemoveFolderEntries() throws Exception {
-        Account account = AccountCreator.createTestAccount("testRemoveFolderEntries", false);
+        AccountModel account = AccountCreator.createTestAccount("testRemoveFolderEntries", false);
         String email = account.getEmail();
 
         // create test folder
@@ -91,7 +91,7 @@ public class FolderDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetFolderSize() throws Exception {
-        Account account = AccountCreator.createTestAccount("testGetFolderSize", false);
+        AccountModel account = AccountCreator.createTestAccount("testGetFolderSize", false);
         String email = account.getEmail();
 
         // create test folder
@@ -130,7 +130,7 @@ public class FolderDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetFolderContents() throws Exception {
-        Account account = AccountCreator.createTestAccount("testGetFolderContents", false);
+        AccountModel account = AccountCreator.createTestAccount("testGetFolderContents", false);
         String email = account.getEmail();
 
         // create test folder
@@ -154,7 +154,7 @@ public class FolderDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testAddFolderContents() throws Exception {
-        Account account = AccountCreator.createTestAccount("testAddFolderContents", false);
+        AccountModel account = AccountCreator.createTestAccount("testAddFolderContents", false);
         String email = account.getEmail();
 
         // create test folder
@@ -178,7 +178,7 @@ public class FolderDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testRetrieveFolderContents() throws Exception {
-        Account account = AccountCreator.createTestAccount("FolderDAOTest.testRetrieveFolderContents", false);
+        AccountModel account = AccountCreator.createTestAccount("FolderDAOTest.testRetrieveFolderContents", false);
         String email = account.getEmail();
         Folder folder = createFolderObject(email);
         folder = dao.create(folder);

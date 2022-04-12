@@ -1,8 +1,8 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.dto.web.RemoteUser;
+import org.jbei.ice.account.Account;
+import org.jbei.ice.dto.web.RegistryPartner;
+import org.jbei.ice.dto.web.RemoteUser;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -36,12 +36,12 @@ public class RemoteClientModel implements DataModel {
 
     @OneToOne
     @JoinColumn(name = "remote_partner_id", nullable = false)
-    private RemotePartner remotePartner;
+    private org.jbei.ice.storage.model.RemotePartner remotePartner;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "client_group", joinColumns = @JoinColumn(name = "account_id"),
             inverseJoinColumns = @JoinColumn(name = "group_id"))
-    private Set<Group> groups = new LinkedHashSet<>();
+    private Set<org.jbei.ice.storage.model.Group> groups = new LinkedHashSet<>();
 
     @Override
     public long getId() {
@@ -56,7 +56,7 @@ public class RemoteClientModel implements DataModel {
         this.email = email;
     }
 
-    public RemotePartner getRemotePartner() {
+    public org.jbei.ice.storage.model.RemotePartner getRemotePartner() {
         return remotePartner;
     }
 
@@ -77,9 +77,9 @@ public class RemoteClientModel implements DataModel {
         partner.setName(remotePartner.getName());
         remoteUser.setPartner(partner);
 
-        AccountTransfer accountTransfer = new AccountTransfer();
-        accountTransfer.setEmail(email);
-        remoteUser.setUser(accountTransfer);
+        Account account = new Account();
+        account.setEmail(email);
+        remoteUser.setUser(account);
         return remoteUser;
     }
 }

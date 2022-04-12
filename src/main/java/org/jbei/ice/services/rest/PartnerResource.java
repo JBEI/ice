@@ -1,18 +1,18 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.access.RemoteAccess;
-import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.FeaturedDNASequence;
-import org.jbei.ice.lib.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
-import org.jbei.ice.lib.dto.web.PartnerEntries;
-import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.entry.EntrySelection;
-import org.jbei.ice.lib.net.*;
+import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.access.RemoteAccess;
+import org.jbei.ice.account.Account;
+import org.jbei.ice.dto.FeaturedDNASequence;
+import org.jbei.ice.dto.entry.AttachmentInfo;
+import org.jbei.ice.dto.entry.PartData;
+import org.jbei.ice.dto.entry.TraceSequenceAnalysis;
+import org.jbei.ice.dto.web.PartnerEntries;
+import org.jbei.ice.dto.web.RegistryPartner;
+import org.jbei.ice.entry.EntrySelection;
+import org.jbei.ice.logging.Logger;
+import org.jbei.ice.net.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -205,8 +205,8 @@ public class PartnerResource extends RestResource {
                                   @PathParam("email") final String email) {
         requireUserId();
         RemoteAccess remoteAccess = new RemoteAccess();
-        AccountTransfer accountTransfer = remoteAccess.getRemoteUser(remoteId, email);
-        return super.respond(accountTransfer);
+        Account account = remoteAccess.getRemoteUser(remoteId, email);
+        return super.respond(account);
     }
 
     /**

@@ -3,11 +3,11 @@ package org.jbei.ice.services.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.DNAFeature;
-import org.jbei.ice.lib.dto.FeaturedDNASequence;
-import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
+import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.dto.DNAFeature;
+import org.jbei.ice.dto.FeaturedDNASequence;
+import org.jbei.ice.entry.sequence.annotation.Annotations;
+import org.jbei.ice.logging.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

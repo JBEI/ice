@@ -1,15 +1,15 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.dto.entry.AutoCompleteFieldValues;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.search.IndexType;
-import org.jbei.ice.lib.dto.search.SearchQuery;
-import org.jbei.ice.lib.dto.search.SearchResults;
-import org.jbei.ice.lib.search.IndexBuildStatus;
-import org.jbei.ice.lib.search.SearchIndexes;
-import org.jbei.ice.lib.search.WebSearch;
-import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.dto.entry.AutoCompleteFieldValues;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.search.IndexType;
+import org.jbei.ice.dto.search.SearchQuery;
+import org.jbei.ice.dto.search.SearchResults;
+import org.jbei.ice.search.IndexBuildStatus;
+import org.jbei.ice.search.SearchIndexes;
+import org.jbei.ice.search.WebSearch;
+import org.jbei.ice.shared.ColumnField;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -26,7 +26,7 @@ import java.util.List;
 @Path("/search")
 public class SearchResource extends RestResource {
 
-    private SearchIndexes controller = new SearchIndexes();
+    private final SearchIndexes controller = new SearchIndexes();
 
     /**
      * Search entries by using filters on the values
@@ -98,7 +98,7 @@ public class SearchResource extends RestResource {
             return super.respond(Response.Status.FORBIDDEN);
         }
 
-        log(userId, "query \'" + queryString + '\'');
+        log(userId, "query '" + queryString + '\'');
         final SearchQuery query = new SearchQuery();
         query.setQueryString(queryString);
         final SearchQuery.Parameters parameters = query.getParameters();

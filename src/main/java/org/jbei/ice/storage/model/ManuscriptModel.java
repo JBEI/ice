@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.manuscript.Manuscript;
-import org.jbei.ice.lib.manuscript.ManuscriptStatus;
+import org.jbei.ice.manuscript.Manuscript;
+import org.jbei.ice.manuscript.ManuscriptStatus;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -23,7 +23,7 @@ public class ManuscriptModel implements DataModel {
     private String title;
 
     @OneToOne
-    private Folder folder;
+    private org.jbei.ice.storage.model.Folder folder;
 
     @Column(name = "paragonUrl")
     private String paragonUrl;
@@ -54,7 +54,7 @@ public class ManuscriptModel implements DataModel {
         this.title = title;
     }
 
-    public Folder getFolder() {
+    public org.jbei.ice.storage.model.Folder getFolder() {
         return folder;
     }
 

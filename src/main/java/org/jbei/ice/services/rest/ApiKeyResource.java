@@ -1,9 +1,9 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.account.UserApiKeys;
-import org.jbei.ice.lib.dto.access.AccessKey;
+import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.account.UserApiKeys;
+import org.jbei.ice.dto.access.AccessKey;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

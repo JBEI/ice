@@ -3,8 +3,8 @@ package org.jbei.ice.storage.model;
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.ClassBridge;
 import org.hibernate.search.annotations.ContainedIn;
-import org.jbei.ice.lib.access.PermissionEntryBridge;
-import org.jbei.ice.lib.dto.access.AccessPermission;
+import org.jbei.ice.access.PermissionEntryBridge;
+import org.jbei.ice.dto.access.AccessPermission;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -27,11 +27,11 @@ public class Permission implements DataModel {
 
     @ManyToOne
     @JoinColumn(name = "account_id")
-    private Account account;
+    private AccountModel account;
 
     @ManyToOne
     @JoinColumn(name = "group_id")
-    private Group group;
+    private org.jbei.ice.storage.model.Group group;
 
     @Column(name = "can_read")
     private boolean canRead;
@@ -42,16 +42,16 @@ public class Permission implements DataModel {
     @ManyToOne
     @JoinColumn(name = "entry_id")
     @ContainedIn
-    private Entry entry;
+    private org.jbei.ice.storage.model.Entry entry;
 
     @ManyToOne
     @JoinColumn(name = "folder_id")
     @ContainedIn
-    private Folder folder;
+    private org.jbei.ice.storage.model.Folder folder;
 
     @ManyToOne
     @JoinColumn(name = "upload_id")
-    private BulkUpload upload;
+    private org.jbei.ice.storage.model.BulkUpload upload;
 
     // access verification token
     @Column(name = "secret")
@@ -60,7 +60,7 @@ public class Permission implements DataModel {
     // who is sharing (must be a local account)
     @OneToOne
     @JoinColumn(name = "sharer_id", nullable = true)
-    private Account sharer;
+    private AccountModel sharer;
 
     // who it's being shared with
     @OneToOne
@@ -71,15 +71,15 @@ public class Permission implements DataModel {
         return id;
     }
 
-    public Account getAccount() {
+    public AccountModel getAccount() {
         return account;
     }
 
-    public void setAccount(Account account) {
+    public void setAccount(AccountModel account) {
         this.account = account;
     }
 
-    public Group getGroup() {
+    public org.jbei.ice.storage.model.Group getGroup() {
         return group;
     }
 
@@ -87,7 +87,7 @@ public class Permission implements DataModel {
         this.group = group;
     }
 
-    public BulkUpload getUpload() {
+    public org.jbei.ice.storage.model.BulkUpload getUpload() {
         return upload;
     }
 
@@ -111,7 +111,7 @@ public class Permission implements DataModel {
         this.canWrite = canWrite;
     }
 
-    public Entry getEntry() {
+    public org.jbei.ice.storage.model.Entry getEntry() {
         return entry;
     }
 
@@ -119,7 +119,7 @@ public class Permission implements DataModel {
         this.entry = entry;
     }
 
-    public Folder getFolder() {
+    public org.jbei.ice.storage.model.Folder getFolder() {
         return folder;
     }
 
@@ -135,11 +135,11 @@ public class Permission implements DataModel {
         this.secret = secret;
     }
 
-    public Account getSharer() {
+    public AccountModel getSharer() {
         return sharer;
     }
 
-    public void setSharer(Account sharer) {
+    public void setSharer(AccountModel sharer) {
         this.sharer = sharer;
     }
 

@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.model;
 
 import org.hibernate.annotations.Type;
-import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
+import org.jbei.ice.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -23,7 +23,7 @@ public class TraceSequence implements DataModel {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
-    private Entry entry;
+    private org.jbei.ice.storage.model.Entry entry;
 
     @Column(name = "file_id", length = 36, nullable = false, unique = true)
     private String fileId;
@@ -49,8 +49,8 @@ public class TraceSequence implements DataModel {
     public TraceSequence() {
     }
 
-    public TraceSequence(Entry entry, String fileId, String filename, String depositor,
-            String sequence, Date creationTime) {
+    public TraceSequence(org.jbei.ice.storage.model.Entry entry, String fileId, String filename, String depositor,
+                         String sequence, Date creationTime) {
         super();
 
         this.entry = entry;
@@ -69,7 +69,7 @@ public class TraceSequence implements DataModel {
         this.id = id;
     }
 
-    public Entry getEntry() {
+    public org.jbei.ice.storage.model.Entry getEntry() {
         return entry;
     }
 

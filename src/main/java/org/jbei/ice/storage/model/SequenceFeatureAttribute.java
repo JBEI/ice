@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.model;
 
+import org.jbei.ice.dto.DNAFeatureNote;
 import org.jbei.ice.storage.DataModel;
-import org.jbei.ice.storage.IDataTransferModel;
 
 import javax.persistence.*;
 
@@ -19,10 +19,10 @@ public class SequenceFeatureAttribute implements DataModel {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence_feature_attribute_id")
     private long id;
 
-    @Column(name = "key", length = 511)
+    @Column(name = "\"key\"", length = 511)
     private String key;
 
-    @Column(name = "value", length = 4095)
+    @Column(name = "\"value\"", length = 4095)
     private String value;
 
     @Column(name = "quoted", nullable = false)
@@ -30,7 +30,7 @@ public class SequenceFeatureAttribute implements DataModel {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sequence_feature_id")
-    private SequenceFeature sequenceFeature;
+    private org.jbei.ice.storage.model.SequenceFeature sequenceFeature;
 
     public SequenceFeatureAttribute() {
         super();
@@ -68,7 +68,7 @@ public class SequenceFeatureAttribute implements DataModel {
         this.quoted = quoted;
     }
 
-    public SequenceFeature getSequenceFeature() {
+    public org.jbei.ice.storage.model.SequenceFeature getSequenceFeature() {
         return sequenceFeature;
     }
 
@@ -77,7 +77,12 @@ public class SequenceFeatureAttribute implements DataModel {
     }
 
     @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public String toString() {
+        return "(" + this.key + ", " + this.value + ")";
+    }
+
+    @Override
+    public DNAFeatureNote toDataTransferObject() {
+        return new DNAFeatureNote(this.key, this.value);
     }
 }

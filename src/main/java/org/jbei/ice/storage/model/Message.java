@@ -2,8 +2,8 @@ package org.jbei.ice.storage.model;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.*;
-import org.jbei.ice.lib.dto.message.MessageInfo;
-import org.jbei.ice.lib.message.MessageStatus;
+import org.jbei.ice.dto.message.MessageInfo;
+import org.jbei.ice.message.MessageStatus;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -36,13 +36,13 @@ public class Message implements DataModel {
     @JoinTable(name = "message_destination_accounts",
             joinColumns = {@JoinColumn(name = "message_id")},
             inverseJoinColumns = {@JoinColumn(name = "account_id")})
-    private Set<Account> destinationAccounts = new HashSet<>();
+    private Set<AccountModel> destinationAccounts = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "message_destination_groups",
             joinColumns = {@JoinColumn(name = "message_id")},
             inverseJoinColumns = {@JoinColumn(name = "group_id")})
-    private Set<Group> destinationGroups = new HashSet<>();
+    private Set<org.jbei.ice.storage.model.Group> destinationGroups = new HashSet<>();
 
     @Column(name = "message")
     @Lob
@@ -134,15 +134,15 @@ public class Message implements DataModel {
         this.status = status;
     }
 
-    public Set<Account> getDestinationAccounts() {
+    public Set<AccountModel> getDestinationAccounts() {
         return destinationAccounts;
     }
 
-    public void setDestinationAccounts(HashSet<Account> destinationAccounts) {
+    public void setDestinationAccounts(HashSet<AccountModel> destinationAccounts) {
         this.destinationAccounts = destinationAccounts;
     }
 
-    public Set<Group> getDestinationGroups() {
+    public Set<org.jbei.ice.storage.model.Group> getDestinationGroups() {
         return destinationGroups;
     }
 

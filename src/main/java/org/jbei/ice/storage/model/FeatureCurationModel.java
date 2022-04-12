@@ -1,6 +1,6 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.Curation;
+import org.jbei.ice.dto.Curation;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -18,7 +18,7 @@ public class FeatureCurationModel implements DataModel {
     private long id;
 
     @OneToOne
-    private Feature feature;
+    private org.jbei.ice.storage.model.Feature feature;
 
     @Column(name = "exclude")
     private boolean exclude;
@@ -28,7 +28,7 @@ public class FeatureCurationModel implements DataModel {
         return id;
     }
 
-    public Feature getFeature() {
+    public org.jbei.ice.storage.model.Feature getFeature() {
         return feature;
     }
 

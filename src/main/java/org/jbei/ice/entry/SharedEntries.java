@@ -1,0 +1,56 @@
+package org.jbei.ice.entry;
+
+import org.jbei.ice.dto.entry.PartData;
+import org.jbei.ice.group.GroupController;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.ModelToInfoFactory;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.model.AccountModel;
+import org.jbei.ice.storage.model.Group;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Entries that have been shared with the specified user
+ * or with groups that the specified user is a member of
+ *
+ * @author Hector Plahar
+ */
+public class SharedEntries {
+
+    private final AccountModel account;
+    private final EntryDAO entryDAO;
+
+    public SharedEntries(String userId) {
+        this.account = DAOFactory.getAccountDAO().getByEmail(userId);
+        if (this.account == null)
+            throw new IllegalArgumentException("Cannot retrieve account for \"" + userId + "\"");
+        this.entryDAO = DAOFactory.getEntryDAO();
+    }
+
+    public long getNumberOfEntries(String filter) {
+        GroupController groupController = new GroupController();
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        Set<Group> accountGroups = account.getGroups();
+        accountGroups.remove(publicGroup);
+        return this.entryDAO.sharedEntryCount(account, accountGroups, filter);
+    }
+
+    public List<PartData> getEntries(ColumnField field, boolean asc, int start, int limit, String filter, List<String> fields) {
+        GroupController groupController = new GroupController();
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        Set<Group> accountGroups = account.getGroups();
+        accountGroups.remove(publicGroup);
+        List<Long> entries = this.entryDAO.sharedWithUserEntries(account, accountGroups, field, asc, start, limit, filter);
+
+        ArrayList<PartData> data = new ArrayList<>();
+        for (Long id : entries) {
+            PartData info = ModelToInfoFactory.createTableView(id, fields);
+            data.add(info);
+        }
+        return data;
+    }
+}

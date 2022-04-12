@@ -1,10 +1,10 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.dto.group.GroupType;
+import org.jbei.ice.AccountCreator;
+import org.jbei.ice.dto.group.GroupType;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
-import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Group;
 import org.junit.Assert;
 import org.junit.Test;
@@ -64,7 +64,7 @@ public class GroupDAOTest extends HibernateRepositoryTest {
         Random random = new Random();
         int x = random.nextInt(30);
         for (int i = 0; i < x; i += 1) {
-            Account account1 = AccountCreator.createTestAccount("GroupDAOTest.testGetMemberCount" + i, false);
+            AccountModel account1 = AccountCreator.createTestAccount("GroupDAOTest.testGetMemberCount" + i, false);
             account1.getGroups().add(group);
             DAOFactory.getAccountDAO().update(account1);
             Assert.assertEquals(i + 1, dao.getMemberCount(group.getUuid()));
@@ -79,7 +79,7 @@ public class GroupDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testRetrieveMemberGroups() throws Exception {
-        Account account = AccountCreator.createTestAccount("GroupDAOTest.testRetrieveMemberGroups", false);
+        AccountModel account = AccountCreator.createTestAccount("GroupDAOTest.testRetrieveMemberGroups", false);
         Random random = new Random();
         int count = random.nextInt(5);
         List<String> uuids = new ArrayList<>(count);
@@ -99,7 +99,7 @@ public class GroupDAOTest extends HibernateRepositoryTest {
 
     @Test
     public void testGetMemberGroupUUIDs() throws Exception {
-        Account account = AccountCreator.createTestAccount("GroupDAOTest.testGetMemberGroupUUIDs", false);
+        AccountModel account = AccountCreator.createTestAccount("GroupDAOTest.testGetMemberGroupUUIDs", false);
         Random random = new Random();
         int count = random.nextInt(5) + 1;
         List<String> uuids = new ArrayList<>(count);

@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.model;
 
-import org.jbei.ice.lib.dto.group.GroupType;
-import org.jbei.ice.lib.dto.group.UserGroup;
+import org.jbei.ice.dto.group.GroupType;
+import org.jbei.ice.dto.group.UserGroup;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -33,7 +33,7 @@ public class Group implements DataModel {
     protected String description;
 
     @ManyToOne
-    private Account owner;
+    private AccountModel owner;
 
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
@@ -50,7 +50,7 @@ public class Group implements DataModel {
     private GroupType type;
 
     @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private Set<Account> members = new HashSet<>();
+    private Set<AccountModel> members = new HashSet<>();
 
     // Getters and setters
     public long getId() {
@@ -93,15 +93,15 @@ public class Group implements DataModel {
         this.type = type;
     }
 
-    public Set<Account> getMembers() {
+    public Set<AccountModel> getMembers() {
         return members;
     }
 
-    public Account getOwner() {
+    public AccountModel getOwner() {
         return owner;
     }
 
-    public void setOwner(Account owner) {
+    public void setOwner(AccountModel owner) {
         this.owner = owner;
     }
 

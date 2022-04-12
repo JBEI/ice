@@ -1,9 +1,9 @@
 package org.jbei.ice.storage.model;
 
 import org.hibernate.annotations.Type;
-import org.jbei.ice.lib.dto.DNAFeature;
-import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.dto.DNAFeature;
 import org.jbei.ice.storage.DataModel;
+import org.jbei.ice.utils.SequenceUtils;
 
 import javax.persistence.*;
 

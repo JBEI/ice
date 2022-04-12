@@ -1,8 +1,8 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.dto.ConfigurationKey;
+import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.ConfigurationModel;
@@ -23,7 +23,7 @@ public class ConfigurationDAO extends HibernateRepository<ConfigurationModel> {
     }
 
     /**
-     * Retrieve the {@link ConfigurationModel} object with the given {@link org.jbei.ice.lib.dto.ConfigurationKey}.
+     * Retrieve the {@link ConfigurationModel} object with the given {@link ConfigurationKey}.
      *
      * @param key unique configuration key for retrieval
      * @return Configuration
