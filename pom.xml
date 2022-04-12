@@ -17,17 +17,17 @@
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet-core</artifactId>
-            <version>2.34</version>
+            <version>2.35</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-multipart</artifactId>
-            <version>2.34</version>
+            <version>2.35</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
-            <version>2.34</version>
+            <version>2.35</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>5.6.5.Final</version>
+            <version>5.6.7.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>7.0.3.Final</version>
+            <version>7.0.4.Final</version>
         </dependency>
         <dependency>
             <groupId>javax.el</groupId>
@@ -85,7 +85,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-c3p0</artifactId>
-            <version>5.6.5.Final</version>
+            <version>5.6.7.Final</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -133,7 +133,7 @@
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.10.0</version>
+            <version>3.10.1</version>
         </dependency>
         <dependency>
             <groupId>org.sbolstandard</groupId>
