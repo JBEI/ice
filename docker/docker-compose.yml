@@ -1,43 +1,22 @@
 ---
-version: '3.7'
+version: "3.7"
 volumes:
-  postgres: {}
-  index: {}
-  localdata: {}
+  ice_index:
+  ice_home:
+  postgres_db:
 services:
   ice:
-    build: .
     image: jbei/ice:latest
-    ### To allow attaching a debugger:
-    ###  1) uncomment the below command
-    ###  2) uncomment the JPDA_* environment variables
-    ###  3) uncomment the port mapping to container port 8000
-    # command: ['catalina.sh', 'jpda', 'run']
-    restart: always
-    environment:
-      # JPDA_ADDRESS: "8000"
-      # JPDA_TRANSPORT: "dt_socket"
-    links:
-      - postgres
     ports:
-      - '127.0.0.1:9999:8080'
-      # - '127.0.0.1:9000:8000'
+    - 127.0.0.1:9999:8080
     volumes:
-      - index:/var/lib/ice/lucene
-      - localdata:/usr/local/tomcat/data
+    - ice_index:/var/lib/ice/lucene
+    - ice_home:/usr/local/tomcat/data
   postgres:
-    image: library/postgres:9.6
-    restart: always
+    image: library/postgres:latest
     environment:
       POSTGRES_DB: ice
-      POSTGRES_PASSWORD: icepass
+      POSTGRES_PASS: icepass
       POSTGRES_USER: iceuser
     volumes:
-      - postgres:/var/lib/postgresql/data
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: 1m
-        max-file: '5'
-    expose:
-      - '5432'
+    - postgres_db:/var/lib/postgresql/data
