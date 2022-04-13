@@ -8,9 +8,9 @@
 
     <session-factory>
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
-        <property name="hibernate.connection.url">jdbc:postgresql://postgres/ice</property>
-        <property name="hibernate.connection.username">iceuser</property>
-        <property name="hibernate.connection.password">icepass</property>
+        <property name="hibernate.connection.url">${ice.db.url}</property>
+        <property name="hibernate.connection.username">${ice.db.user}</property>
+        <property name="hibernate.connection.password">${ice.db.pass}</property>
         <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQL95Dialect</property>
 
         <property name="hibernate.search.default.indexBase">/var/lib/ice/lucene</property>

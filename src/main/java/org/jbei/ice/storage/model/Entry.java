@@ -204,7 +204,7 @@ public class Entry implements DataModel {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
     @IndexedEmbedded(depth = 1)
-    private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<>();
+    private final Set<SelectionMarker> selectionMarkers = new LinkedHashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
     @IndexedEmbedded(depth = 1)
@@ -221,12 +221,12 @@ public class Entry implements DataModel {
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents", fetch = FetchType.LAZY)
     @IndexedEmbedded(depth = 1)
-    private Set<Folder> folders = new HashSet<>();
+    private final Set<Folder> folders = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
     @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "entry_id", nullable = false)},
             inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
-    private Set<Entry> linkedEntries = new HashSet<>();
+    private final Set<Entry> linkedEntries = new HashSet<>();
 
     @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "entry")
     @IndexedEmbedded(depth = 1)
@@ -444,10 +444,7 @@ public class Entry implements DataModel {
     }
 
     public void setVisibility(Integer visibility) {
-        if (visibility == null)
-            this.visibility = Visibility.OK.getValue();
-        else
-            this.visibility = visibility;
+        this.visibility = Objects.requireNonNullElseGet(visibility, Visibility.OK::getValue);
     }
 
     public String getIntellectualProperty() {

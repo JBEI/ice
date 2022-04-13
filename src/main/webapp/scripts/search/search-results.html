@@ -363,7 +363,9 @@
                 <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
                     {{result.entryInfo.type | uppercase}}
                 </td>
-                <td><a ng-click="goToEntryDetails(result.entryInfo, $index)" class="cell_mouseover form-group"
+                <td><a ng-click="goToEntryDetails(result.entryInfo, $index)"
+                       class="cell_mouseover form-group"
+                       ng-href="entry/{{result.entryInfo.id}}"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
                        uib-popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>

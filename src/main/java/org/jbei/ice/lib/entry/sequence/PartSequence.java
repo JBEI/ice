@@ -56,6 +56,8 @@ public class PartSequence {
     private final SequenceFeatureDAO sequenceFeatureDAO;
     private final FeatureDAO featureDAO;
     private final EntryAuthorization entryAuthorization;
+    private static final String SEQUENCE_FOLDER_NAME = "sequences";
+    private static final float MB_FILE_SIZE = 1000000f;
 
     /**
      * Constructor for creating a new part to associate with a sequence
@@ -129,7 +131,7 @@ public class PartSequence {
      * Parses a sequence in a file and associates it with the current entry
      *
      * @param inputStream      input stream of bytes representing the file
-     * @param fileName         name of file being parsed
+     * @param fileName         name of file being parsed as uploaded by the user
      * @param extractHierarchy for SBOL2 sequences only. If set to <code>true</code>, creates a hierarchy of ICE entries
      *                         as needed
      * @return wrapper around the internal model used to represent sequence information
@@ -140,15 +142,16 @@ public class PartSequence {
         AbstractParser parser;
 
         // write sequence file to disk (tmp)
-        String tmpDir = new ConfigurationSettings().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+        ConfigurationSettings configurationSettings = new ConfigurationSettings();
+        String tmpDir = configurationSettings.getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         if (StringUtils.isEmpty(tmpDir))
             throw new IllegalArgumentException("Cannot parse sequence without valid tmp directory");
 
         Path tmpPath = Paths.get(tmpDir);
         if (!Files.isDirectory(tmpPath) || !Files.isWritable(tmpPath))
-            throw new IllegalArgumentException("Cannot write to tmp directory: " + tmpPath.toString());
+            throw new IllegalArgumentException("Cannot write to tmp directory: " + tmpPath);
 
-        Path sequencePath = Paths.get(tmpPath.toString(), UUID.randomUUID().toString() + "-" + fileName);
+        Path sequencePath = Paths.get(tmpPath.toString(), UUID.randomUUID() + "-" + fileName);
         Files.copy(inputStream, sequencePath, StandardCopyOption.REPLACE_EXISTING);
 
         // detect sequence
@@ -163,13 +166,36 @@ public class PartSequence {
             format = SequenceUtil.detectFormat(firstLine);
         }
 
-        // special handling for sbol format
+        // handle SBOL . TODO : use new python sbol handler
         try {
             if (format == SBOL2) {
                 SBOLParser sbolParser = new SBOLParser(this.userId, Long.toString(this.entry.getId()), extractHierarchy);
                 return sbolParser.parseToEntry(Files.newInputStream(sequencePath), fileName);
             }
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
 
+        // store the file in the data directory and avoid parsing if file size is above 500kb
+        if ((sequencePath.toFile().length() / MB_FILE_SIZE) > 0.5) {
+            String dataDirectoryString = configurationSettings.getPropertyValue(ConfigurationKey.DATA_DIRECTORY);
+            String sequenceFileName = UUID.randomUUID().toString();
+            Path dataSequencePath = Paths.get(dataDirectoryString, SEQUENCE_FOLDER_NAME, sequenceFileName);
+            Files.move(sequencePath, dataSequencePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // create sequence object
+            Sequence sequence = new Sequence();
+            sequence.setSequence(sequenceFileName);
+            sequence.setFileName(fileName);
+            sequence.setFormat(format);
+            sequence.setEntry(this.entry);
+            sequence = sequenceDAO.create(sequence);
+            return sequence.toDataTransferObject();
+        }
+
+        // special handling for sbol format
+        try {
             switch (format) {
                 case GENBANK:
                     parser = new GenBankParser();
@@ -360,7 +386,7 @@ public class PartSequence {
             }
         }
 
-        existing.getSequenceFeatures().removeAll(toRemoveFeatures);
+        toRemoveFeatures.forEach(existing.getSequenceFeatures()::remove);
     }
 
     private void checkForUpdatedFeatures(Sequence existing, Sequence updated) {
@@ -598,6 +624,23 @@ public class PartSequence {
         Sequence sequence = sequenceDAO.getByEntry(entry);
         if (sequence == null) {
             return null;
+        }
+
+        String potentialFileId = sequence.getSequenceUser();
+        if (!StringUtils.isBlank(potentialFileId)) {
+            ConfigurationSettings configurationSettings = new ConfigurationSettings();
+            String dataDirectoryString = configurationSettings.getPropertyValue(ConfigurationKey.DATA_DIRECTORY);
+            Path dataSequencePath = Paths.get(dataDirectoryString, SEQUENCE_FOLDER_NAME, potentialFileId);
+
+            // get file properties
+            if (Files.exists(dataSequencePath)) {
+                if ((dataSequencePath.toFile().length() / MB_FILE_SIZE) > 0.5) {
+                    FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence();
+                    return featuredDNASequence;
+                }
+            } else {
+                return null;
+            }
         }
 
         List<SequenceFeature> sequenceFeatures;
