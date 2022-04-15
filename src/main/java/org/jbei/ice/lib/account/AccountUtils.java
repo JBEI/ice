@@ -7,7 +7,9 @@ import org.jbei.ice.storage.model.Account;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.xml.bind.DatatypeConverter;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
@@ -17,6 +19,13 @@ import java.security.spec.KeySpec;
  * @author Hector Plahar
  */
 public class AccountUtils {
+
+    public static String generateRandomToken(int byteSize) {
+        SecureRandom random = new SecureRandom();
+        byte[] token = new byte[byteSize];
+        random.nextBytes(token);
+        return DatatypeConverter.printBase64Binary(token);
+    }
 
     /**
      * Return the encrypted version of the given password, using the salt from the settings file.

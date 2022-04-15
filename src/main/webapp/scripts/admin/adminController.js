@@ -49,6 +49,11 @@ angular.module('ice.admin.controller', [])
             $scope.emailConfig.type = type;
         };
 
+        $scope.submitAuthSetting = function (val) {
+            $scope.submitSetting({key: 'AUTHENTICATION_METHOD', value: val});
+            $scope.authentication.value = val;
+        };
+
         $scope.saveEmailConfig = function () {
             $scope.submitSetting({key: "EMAILER", value: $scope.emailConfig.type});
 
@@ -66,6 +71,7 @@ angular.module('ice.admin.controller', [])
         $scope.getSetting = function () {
             $scope.generalSettings = [];
             $scope.emailSettings = [];
+            $scope.authentication = undefined;
             $scope.sampleRequestSettings = [];
             $scope.emailConfig = {type: "", smtp: "", pass: "", edit: false, showEdit: false, showPass: false};
 
@@ -106,6 +112,11 @@ angular.module('ice.admin.controller', [])
                                 $scope.emailConfig.smtp = setting.value;
                                 break;
                         }
+                    }
+
+                    if (AdminSettings.getAuthenticationOption().indexOf(setting.key) !== -1) {
+                        console.log(setting);
+                        $scope.authentication = setting;
                     }
                 });
             });

@@ -46,7 +46,7 @@
                 <!--for non boolean fields-->
                 <div class="col-md-9" ng-if="!setting.isBoolean" ng-mouseover="partIdEdit=true"
                      ng-mouseout="partIdEdit=false">
-                    <div data-ng-if="!setting.editMode">
+                    <div ng-if="!setting.editMode">
                         <span ng-if="setting.value.trim() !==''">{{setting.value.trim()}}</span>
                         <i class='opacity_4' ng-if="!setting.value">
                             <span ng-if="!setting.canAutoInstall || !autoInstalling">No value entered</span>
@@ -66,12 +66,12 @@
                         </span>
                     </div>
 
-                    <div class="input-group" data-ng-if="setting.editMode">
+                    <div class="input-group" ng-if="setting.editMode">
                         <form ng-submit="submitSetting(setting)">
                             <input type="text" ng-model="setting.value" class="input_box_group" maxlength="125"
                                    style="width: 205px;">
                         </form>
-        <span class="input-group-addon" data-ng-click="setting.editMode=false" style="padding:3px; background-color:
+                        <span class="input-group-addon" ng-click="setting.editMode=false" style="padding:3px; background-color:
         #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
                     </div>
                 </div>
@@ -141,20 +141,47 @@
                 <!--for non boolean fields-->
                 <div class="col-md-9" ng-if="!setting.isBoolean" ng-mouseover="partIdEdit=true"
                      ng-mouseout="partIdEdit=false">
-                    <div data-ng-if="!setting.editMode"><span ng-if="setting.value&&setting.value.trim()!=''">{{setting.value}}</span>
+                    <div ng-if="!setting.editMode"><span
+                            ng-if="setting.value&&setting.value.trim()!=''">{{setting.value}}</span>
                         <i class='opacity_4' ng-if="!setting.value">No value entered</i><span
                                 ng-click="setting.editMode=true">
                          <i ng-show="partIdEdit" class="fa fa-pencil edit_icon"
                             style="margin-left: 5px; font-size: 14px;"></i></span>
                     </div>
 
-                    <div class="input-group" data-ng-if="setting.editMode">
+                    <div class="input-group" ng-if="setting.editMode">
                         <form ng-submit="submitSetting(setting)">
                             <input type="text" ng-model="setting.value" class="input_box_group" maxlength="125"
                                    style="width: 205px;">
                         </form>
-        <span class="input-group-addon" data-ng-click="setting.editMode=false" style="padding:3px; background-color:
+                        <span class="input-group-addon" ng-click="setting.editMode=false" style="padding:3px; background-color:
      #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
+                    </div>
+                </div>
+            </div>
+        </uib-tab>
+
+        <uib-tab>
+            <uib-tab-heading><i class="fa fa-key"></i> Authentication</uib-tab-heading>
+            <div class="pad_top">
+                <div class="col-md-4 entryLabel text-right">
+                    Authentication Method
+                </div>
+
+                <div class="col-md-8">
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-sm btn-default" uib-dropdown-toggle>
+                            {{authentication.value}} <i class="fa fa-fw fa-fw fa-caret-down"></i>
+                        </button>
+
+                        <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+                            <li role="menuitem" ng-click="submitAuthSetting('DEFAULT')"
+                                ng-if="authentication.value !== 'DEFAULT'"><a href="#">DEFAULT</a></li>
+                            <li role="menuitem" ng-click="submitAuthSetting('OPEN')"
+                                ng-if="authentication.value !== 'OPEN'"><a href="#">OPEN</a></li>
+                            <li role="menuitem" ng-click="submitAuthSetting('LDAP')"
+                                ng-if="authentication.value !== 'LDAP'"><a href="#">LDAP</a></li>
+                        </ul>
                     </div>
                 </div>
             </div>
