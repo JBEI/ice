@@ -2,9 +2,7 @@ package org.jbei.ice.lib.account;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.account.authentication.AuthenticationException;
-import org.jbei.ice.lib.account.authentication.IAuthentication;
-import org.jbei.ice.lib.account.authentication.LocalAuthentication;
+import org.jbei.ice.lib.account.authentication.*;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.group.GroupType;
@@ -33,7 +31,6 @@ import java.util.List;
 public class AccountController {
 
     private static final String ADMIN_ACCOUNT_EMAIL = "Administrator";
-    private static final String ADMIN_ACCOUNT_PASSWORD = "Administrator";
     private final AccountDAO dao;
     private final GroupDAO groupDAO;
 
@@ -254,29 +251,40 @@ public class AccountController {
     /**
      * @return new admin account
      */
-    public Account createAdminAccount() {
+    public void createAdminAccount() {
         Account adminAccount = getByEmail(ADMIN_ACCOUNT_EMAIL);
+        String newPassword = AccountUtils.generateRandomToken(48);
+
         if (adminAccount != null) {
-            return adminAccount;
+            Logger.info("Resetting Administrator account password");
+            adminAccount.setPassword(AccountUtils.encryptNewUserPassword(newPassword, adminAccount.getSalt()));
+            adminAccount.setModificationTime(new Date());
+            dao.update(adminAccount);
+        } else {
+            adminAccount = new Account();
+            adminAccount.setEmail(ADMIN_ACCOUNT_EMAIL);
+            adminAccount.setLastName("Administrator");
+            adminAccount.setFirstName("");
+            adminAccount.setInitials("");
+            adminAccount.setInstitution("");
+            adminAccount.setSalt(Utils.generateSaltForUserAccount());
+            adminAccount.setPassword(AccountUtils.encryptNewUserPassword(newPassword, adminAccount.getSalt()));
+            adminAccount.setDescription("Administrator Account");
+
+            adminAccount.setIp("");
+            final Date currentTime = Calendar.getInstance().getTime();
+            adminAccount.setCreationTime(currentTime);
+            adminAccount.setModificationTime(currentTime);
+            adminAccount.setLastLoginTime(currentTime);
+            adminAccount.setType(AccountType.ADMIN);
+            save(adminAccount);
         }
 
-        adminAccount = new Account();
-        adminAccount.setEmail(ADMIN_ACCOUNT_EMAIL);
-        adminAccount.setLastName("Administrator");
-        adminAccount.setFirstName("");
-        adminAccount.setInitials("");
-        adminAccount.setInstitution("");
-        adminAccount.setSalt(Utils.generateSaltForUserAccount());
-        adminAccount.setPassword(AccountUtils.encryptNewUserPassword(ADMIN_ACCOUNT_PASSWORD, adminAccount.getSalt()));
-        adminAccount.setDescription("Administrator Account");
-
-        adminAccount.setIp("");
-        final Date currentTime = Calendar.getInstance().getTime();
-        adminAccount.setCreationTime(currentTime);
-        adminAccount.setModificationTime(currentTime);
-        adminAccount.setLastLoginTime(currentTime);
-        adminAccount.setType(AccountType.ADMIN);
-        return save(adminAccount);
+        // add log information for admin password
+        Logger.info("NEW ADMIN PASSWORD");
+        Logger.info("************************");
+        Logger.info(newPassword);
+        Logger.info("************************");
     }
 
     /**
@@ -351,6 +359,30 @@ public class AccountController {
         return account != null && account.getType() == AccountType.ADMIN;
     }
 
+    private IAuthentication getAuthentication() {
+        try {
+            String clazz = Utils.getConfigValue(ConfigurationKey.AUTHENTICATION_METHOD);
+            if (StringUtils.isEmpty(clazz))
+                return new LocalAuthentication();
+
+            switch (AuthType.valueOf(clazz.toUpperCase())) {
+                case LDAP:
+                    return new LblLdapAuthentication();
+
+                case OPEN:
+                    return new UserIdAuthentication();
+
+                case DEFAULT:
+                default:
+                    return new LocalAuthentication();
+            }
+        } catch (Exception e) {
+            Logger.error("Exception loading authentication class: ", e);
+            Logger.error("Using default authentication");
+            return new LocalAuthentication();
+        }
+    }
+
     /**
      * Authenticate a user in the database.
      * <p>
@@ -363,7 +395,7 @@ public class AccountController {
      * @return the account identifier (email) on a successful login, otherwise {@code null}
      */
     protected Account authenticate(final String login, final String password, final String ip) {
-        final IAuthentication authentication = new LocalAuthentication();
+        final IAuthentication authentication = getAuthentication();
         String email;
 
         try {

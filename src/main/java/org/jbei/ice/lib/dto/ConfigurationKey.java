@@ -11,7 +11,7 @@ import org.jbei.ice.storage.IDataTransferModel;
  */
 public enum ConfigurationKey implements IDataTransferModel {
 
-    APPLICATION_VERSION("5.9.4"),
+    APPLICATION_VERSION("5.9.5"),
     TEMPORARY_DIRECTORY("/tmp"),
     DATA_DIRECTORY("data"),
 
@@ -37,7 +37,8 @@ public enum ConfigurationKey implements IDataTransferModel {
     WEB_OF_REGISTRIES_MASTER("registry.jbei.org"),
 
     // sample request config
-    SAMPLE_CREATE_APPROVAL_MESSAGE("");
+    SAMPLE_CREATE_APPROVAL_MESSAGE(""),
+    AUTHENTICATION_METHOD("DEFAULT");
 
     private String defaultValue;
 

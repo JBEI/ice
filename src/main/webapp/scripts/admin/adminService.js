@@ -44,6 +44,8 @@ adminService.factory('AdminSettings', function () {
         //'ADD_TO_CART_DEFAULT_SET_TO_LOCAL'
     ];
 
+    const authenticationKey = 'AUTHENTICATION_METHOD';
+
     const menuOptions = [
         {
             url: 'scripts/admin/settings.html',
@@ -142,6 +144,10 @@ adminService.factory('AdminSettings', function () {
 
         getMenuOptions: function () {
             return menuOptions;
+        },
+
+        getAuthenticationOption: function () {
+            return authenticationKey;
         }
     }
 });
