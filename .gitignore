@@ -49,3 +49,5 @@ testem.log
 Thumbs.db
 /src/main/ngapp/package-lock.json
 /ice.iml
+/data/
+/db/
