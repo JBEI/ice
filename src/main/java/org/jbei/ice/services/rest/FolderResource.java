@@ -50,6 +50,7 @@ public class FolderResource extends RestResource {
     }
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getFolders() {
         String userId = requireUserId();
         log(userId, "retrieving folders");
