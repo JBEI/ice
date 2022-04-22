@@ -1,8 +1,9 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, SimpleChanges} from '@angular/core';
 import {Part} from "../../models/Part";
 import {Paging} from "../../models/paging";
-import {Result} from "../../models/Result";
 import {HttpService} from "../../services/http.service";
+import {FolderDetails} from "../../models/folder-details";
+import {Result} from "../../models/result";
 
 @Component({
     selector: 'app-parts-table',
@@ -11,13 +12,11 @@ import {HttpService} from "../../services/http.service";
 })
 export class PartsTableComponent implements OnInit {
 
-    loadingPage: boolean;
-    partHeaders: string[];
     selectedParts: number[];
     allSelected: boolean;
 
     @Input() parts: Part[];
-    paging: Paging;
+    paging: Paging = new Paging('created');
 
     @Output() retrieveParts: EventEmitter<any> = new EventEmitter<any>();
     @Output() partsChange: EventEmitter<any> = new EventEmitter<any>();
@@ -29,26 +28,59 @@ export class PartsTableComponent implements OnInit {
     //     this.partsChange.emit(this.parts);
     // }
 
+    @Input() folderId: number;
+    @Input() collection: string;
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.collection) {
+            // check if there is a change from a previous value
+            if (!changes.collection.previousValue)
+                return;
+
+            // handle the new value
+            this.collection = changes.collection.currentValue;
+            this.getCollectionEntries();
+        } else {
+            // changes to the folder
+        }
+    }
+
     constructor(private http: HttpService) {
     }
 
     ngOnInit(): void {
         this.selectedParts = [];
-        this.paging = new Paging();
-        this.paging.sort = 'created';
         this.getParts();
     }
 
-    getParts(): void {
-        this.paging.offset = (this.paging.currentPage - 1) * this.paging.limit;
-        console.log(this.paging);
-        // this.retrieveParts.emit();
+    private getParts(): void {
+        if (this.collection) {
+            this.getCollectionEntries();
+        } else if (this.folderId) {
+            this.getFolderEntries();
+        }
+    }
 
-        this.http.get("collections/personal/entries", this.paging).subscribe((result: Result<Part>) => {
-            console.log(result);
-            this.paging.available = result.resultCount;
+    getFolderEntries(): void {
+        this.paging.processing = true;
+        this.http.get('folders/' + this.folderId + '/entries', this.paging).subscribe((result: FolderDetails) => {
+            this.parts = result.entries;
+            this.paging.processing = false;
+            this.paging.available = result.count;
+        });
+    }
+
+    getCollectionEntries(): void {
+        this.paging.processing = true;
+        this.http.get('collections/' + this.collection + '/entries', this.paging).subscribe((result: Result<Part>) => {
+            this.paging.processing = false;
+            if (!result)
+                return;
+
+            this.paging.available = result.available;
             this.parts = result.data;
-        }, (err) => {
+        }, error => {
+            this.paging.processing = false;
         });
     }
 
@@ -77,4 +109,9 @@ export class PartsTableComponent implements OnInit {
         const pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
         return pageNum + " - " + (pageCount) + " of " + (resultCount);
     };
+
+    pageChange(page: number): void {
+        this.paging.offset = ((page - 1) * this.paging.limit);
+        this.getParts();
+    }
 }

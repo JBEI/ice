@@ -1,7 +1,7 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {CollectionMenuOption} from "../../models/collection-menu-option";
 import {CollectionMenuService} from "../../services/collection-menu.service";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {User} from "../../models/User";
 import {UserService} from "../../services/user.service";
 
@@ -16,16 +16,27 @@ export class MainSidebarMenuComponent implements OnInit {
     selectedOption: string;
     user: User;
 
-    constructor(private menuService: CollectionMenuService, private router: Router, private userService: UserService) {
+    @Output() selectedCollectionChange: EventEmitter<CollectionMenuOption> = new EventEmitter<CollectionMenuOption>();
+
+    constructor(private menuService: CollectionMenuService, private router: Router, private userService: UserService,
+                private activatedRoute: ActivatedRoute) {
         this.user = this.userService.getUser(false);
         this.collections = this.menuService.menuOptions;
         if (this.menuService.selected)
             this.selectedOption = this.menuService.selected.name;
-        else
-            this.selectedOption = this.menuService.getDefaultOption().name;
+
     }
 
     ngOnInit(): void {
+        this.activatedRoute.params.subscribe(params => {
+            const collectionName = params['name'];
+            if (!this.selectedOption) {
+                if (collectionName)
+                    this.selectedOption = collectionName;
+                else
+                    this.selectedOption = this.menuService.getDefaultOption().name;
+            }
+        });
     }
 
     goHome(): void {
@@ -37,6 +48,8 @@ export class MainSidebarMenuComponent implements OnInit {
      * @param option collection
      */
     selectCollection(option: CollectionMenuOption): void {
+        this.selectedCollectionChange.emit(option);
+
         this.menuService.selected = option;
         // this.router.navigate((['collections']));
 

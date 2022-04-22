@@ -3,6 +3,7 @@ import {User} from "../../models/User";
 import {HttpService} from "../../services/http.service";
 import {Router} from "@angular/router";
 import {UserService} from "../../services/user.service";
+import {FormControl, FormGroup, Validators} from "@angular/forms";
 
 @Component({
     selector: 'app-login',
@@ -14,10 +15,14 @@ export class LoginComponent implements OnInit {
     loggedInUser: User;
     processing = false;
     remember?: boolean;
-    validation: { validId: boolean, validPassword: boolean, invalidPassword: boolean };
+    validation: { invalidPassword: boolean };
+    form = new FormGroup({
+        id: new FormControl('', [Validators.required]),
+        password: new FormControl('', [Validators.required])
+    })
 
     constructor(private http: HttpService, private router: Router, private userService: UserService) {
-        this.validation = {validId: true, validPassword: true, invalidPassword: false};
+        this.validation = {invalidPassword: false};
         this.loggedInUser = new User();
     }
 
@@ -29,6 +34,8 @@ export class LoginComponent implements OnInit {
         // redirect user to main page if so
         this.loggedInUser = this.userService.getUser(false);
         if (this.loggedInUser && this.loggedInUser.sessionId) {
+            this.form.setValue({"id": this.loggedInUser.id, "password": this.loggedInUser.password})
+
             this.http.get('accesstokens').subscribe((result: any) => {
                 if (!result) {
                     this.userService.clearUser();
@@ -59,12 +66,6 @@ export class LoginComponent implements OnInit {
     }
 
     loginUser(): void {
-        this.validation.validId = (this.loggedInUser.email !== undefined && this.loggedInUser.email !== '');
-        this.validation.validPassword = (this.loggedInUser.password !== undefined && this.loggedInUser.password !== '');
-
-        if (!this.validation.validId || !this.validation.validPassword) {
-            return;
-        }
         this.validation.invalidPassword = false;
 
         this.processing = true;
@@ -105,5 +106,13 @@ export class LoginComponent implements OnInit {
                 this.validation.invalidPassword = true;
             }
         });
+    }
+
+    get idIsInvalidAndTouched() {
+        return this.form.controls.id.invalid && this.form.controls.id.touched
+    }
+
+    get passwordIsInvalidAndTouched() {
+        return this.form.controls.password.invalid && this.form.controls.password.touched
     }
 }

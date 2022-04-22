@@ -1,0 +1,33 @@
+<div class="container-fluid" *ngIf="folderDetails">
+
+    <div class="row">
+        <div class="col px-0 pt-5 pb-3">
+            <div class="d-flex justify-content-between">
+                <h2 class="text-secondary">
+                    {{folderDetails.folderName}}
+                    <!--                                                            <span *ngIf="selectedFolderId">-->
+                    <!--                                                                <i class="bi bi-chevron-right small"></i> {{selectedFolder.folderName}}-->
+                    <!--                                                            </span>-->
+                </h2>
+                <div>
+                    <!--                                                            <button type="button" class="btn btn-white"-->
+                    <!--                                                                    [disabled]="!selectedFolderId|| !selectedFolder.canEdit">-->
+                    <!--                                                                <i class="bi bi-people-fill"></i> Share-->
+                    <!--                                                            </button>-->
+
+                    <button class="btn btn-primary ms-2">Upload</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col bg-white p-3 rounded-bottom">
+
+            <app-parts-table [folderId]="folderDetails.id"></app-parts-table>
+        </div>
+    </div>
+</div>
+
+<pre>{{folderDetails | json}}</pre>

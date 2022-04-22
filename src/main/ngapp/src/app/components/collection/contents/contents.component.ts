@@ -49,23 +49,23 @@ export class ContentsComponent implements OnInit {
         this.folderPageChange();
     }
 
-    pageParts(): void {
-        this.http.get(this.resource + "/PERSONAL/entries", this.paging).subscribe((result: any) => {
-            if (this.resource === "collections") {
-                this.folder = new Folder();
-                this.folder.entries = result.data;
-                this.folder.count = result.resultCount;
-                this.paging.available = result.resultCount; // used in context display
-            } else {
-                // retrieved folders
-                this.folder = result;
-                this.paging.available = result.count;
-                // if (result.canEdit)
-                //     folderNameTooltip = "Click to rename";
-            }
-        }, (err) => {
-        });
-    }
+    // pageParts(): void {
+    //     this.http.get(this.resource + "/PERSONAL/entries", this.paging).subscribe((result: any) => {
+    //         if (this.resource === "collections") {
+    //             this.folder = new Folder();
+    //             this.folder.entries = result.data;
+    //             this.folder.count = result.resultCount;
+    //             this.paging.available = result.resultCount; // used in context display
+    //         } else {
+    //             // retrieved folders
+    //             this.folder = result;
+    //             this.paging.available = result.count;
+    //             // if (result.canEdit)
+    //             //     folderNameTooltip = "Click to rename";
+    //         }
+    //     }, (err) => {
+    //     });
+    // }
 
     pageCounts(currentPage, resultCount, maxPageCount = 15): string {
         const pageNum = ((currentPage - 1) * maxPageCount) + 1;

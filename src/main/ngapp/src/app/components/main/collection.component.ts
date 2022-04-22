@@ -21,7 +21,7 @@ export class CollectionComponent implements OnInit {
     selectedOption: CollectionMenuOption;
 
     folders: Folder[];
-    selectedFolder: Folder;
+    selectedFolderId: number;
 
     user: User;
     paging: Paging;
@@ -35,10 +35,13 @@ export class CollectionComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log('init');
+        if (this.activatedRoute.firstChild) {
+            this.selectedFolderId = this.activatedRoute.firstChild.snapshot.params['id'];
+        }
 
         this.activatedRoute.params.subscribe(params => {
             const collectionName = params['name'];
+
             if (!collectionName)
                 this.selectedOption = this.menuService.getDefaultOption();
             else
@@ -48,23 +51,13 @@ export class CollectionComponent implements OnInit {
             this.getSubFolders(this.selectedOption);
 
             // get collection entries
-            this.getCollectionEntries(this.selectedOption);
+            // this.getCollectionEntries(this.selectedOption);
         });
     }
 
-    /**
-     * collection selected by user. retrieves the entries for that collection as well as contained folders
-     * @param option collection
-     */
-    selectCollection(option: CollectionMenuOption): void {
-        this.selectedOption = option;
-        this.selectedFolder = undefined;
-        this.getSubFolders(option)
-        this.getCollectionEntries(option);
-    }
-
     selectFolder(folder: Folder): void {
-        this.selectedFolder = folder;
+        this.selectedFolderId = folder.id;
+        this.router.navigate(['collection', this.selectedOption.name, 'folder', folder.id]);
     }
 
     getSubFolders(option: CollectionMenuOption): void {
@@ -95,5 +88,8 @@ export class CollectionComponent implements OnInit {
         this.getCollectionEntries();
     }
 
-
+    collectionSelected(option: CollectionMenuOption): void {
+        this.selectedOption = option;
+        this.selectedFolderId = undefined;
+    }
 }

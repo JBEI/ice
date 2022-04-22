@@ -7,8 +7,8 @@ import {Router} from "@angular/router";
 })
 export class UserService {
 
-    user: User;
-    redirectUrl: string;
+    private user: User;
+    private redirectUrl: string;
 
     constructor(private router: Router) {
     }

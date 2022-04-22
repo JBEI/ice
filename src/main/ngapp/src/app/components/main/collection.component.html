@@ -3,7 +3,7 @@
         <div class="px-0 col d-flex">
 
             <div class="border-end bg-white" style="flex:0 0 250px">
-                <app-main-sidebar-menu></app-main-sidebar-menu>
+                <app-main-sidebar-menu (selectedCollectionChange)="collectionSelected($event)"></app-main-sidebar-menu>
             </div>
 
             <div class="flex-grow-1">
@@ -12,11 +12,6 @@
                 </div>
 
                 <div class="container-fluid">
-                    <!--                    <div class="row">-->
-                    <!--                        <div class="col bg-white border-bottom mx-0">-->
-                    <!--                            <app-header></app-header>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
 
                     <div class="row">
                         <div class="col">
@@ -26,49 +21,22 @@
 
                                     <div class="col">
 
-                                        <div class="container-fluid p-0">
-                                            <!--                <div class="row">-->
-                                            <!--                    <div class="col bg-white d-flex justify-content-between border-bottom py-3">-->
-                                            <!--                        <div>-->
-                                            <!--                            <button class="btn btn-primary">-->
-                                            <!--                                <span class="small"><i class="bi bi-plus-square-dotted"></i> Add single entry</span>-->
-                                            <!--                            </button>-->
-
-                                            <!--                            &nbsp;-->
-
-                                            <!--                            <button class="btn btn-primary">-->
-                                            <!--                                <span class="small"><i class="bi bi-table"></i> Upload multiple entries</span>-->
-                                            <!--                            </button>-->
-                                            <!--                        </div>-->
-                                            <!--                        <div style="width: 350px">-->
-                                            <!--                            <input class="form-control" placeholder="Search">-->
-                                            <!--                        </div>-->
-                                            <!--                        <div>-->
-                                            <!--                            <i class="bi bi-bell"></i>-->
-                                            <!--                            <span class="text-light"> |</span>-->
-                                            <!--                            {{user.email}}-->
-                                            <!--                            <span class="text-light"> |</span>-->
-                                            <!--                            <button class="btn btn-sm btn-link" (click)="logout()">Logout</button>-->
-                                            <!--                        </div>-->
-                                            <!--                    </div>-->
-                                            <!--                </div>-->
-
+                                        <div *ngIf="!selectedFolderId" class="container-fluid p-0">
 
                                             <div class="row">
                                                 <div class="col px-4 pt-5 pb-3">
                                                     <div class="d-flex justify-content-between">
                                                         <h2 class="text-secondary">
                                                             {{selectedOption.display}}
-                                                            <span *ngIf="selectedFolder">
-                                                                <i class="bi bi-chevron-right small"></i> {{selectedFolder.folderName}}
-                                                            </span>
+                                                            <!--                                                            <span *ngIf="selectedFolderId">-->
+                                                            <!--                                                                <i class="bi bi-chevron-right small"></i> {{selectedFolder.folderName}}-->
+                                                            <!--                                                            </span>-->
                                                         </h2>
                                                         <div>
-                                                            <button type="button" class="btn btn-white"
-                                                                    [disabled]="!selectedFolder || !selectedFolder.canEdit">
-                                                                <i
-                                                                    class="bi bi-people-fill"></i> Share
-                                                            </button>
+                                                            <!--                                                            <button type="button" class="btn btn-white"-->
+                                                            <!--                                                                    [disabled]="!selectedFolderId|| !selectedFolder.canEdit">-->
+                                                            <!--                                                                <i class="bi bi-people-fill"></i> Share-->
+                                                            <!--                                                            </button>-->
 
                                                             <button class="btn btn-primary ms-2">Upload</button>
                                                         </div>
@@ -85,7 +53,7 @@
 
                                                         <!--                        <div class="border btn btn-white mb-1 me-2 px-2">-->
                                                         <div
-                                                            class="border btn btn-white me-2 mb-1 text-black-50 py-0 shadow-sm">
+                                                                class="border btn btn-white me-2 mb-1 text-black-50 py-0 shadow-sm">
                                                             <i class="bi bi-plus" style="font-size: 2.7em"></i>
                                                             <div class="small">Add</div>
                                                         </div>
@@ -100,7 +68,7 @@
                                                                 <div class="border-top mt-2 pt-2 text-muted">
                                                                     {{folder.count | number}} entries
                                                                     <div
-                                                                        class="mt-1">{{folder.creationTime | date}}</div>
+                                                                            class="mt-1">{{folder.creationTime | date}}</div>
                                                                     <!--                                                                                                        <pre>{{folder | json}}</pre>-->
                                                                 </div>
                                                             </div>
@@ -115,8 +83,8 @@
                                                     <div class="d-flex justify-content-between">
                                                         <div>
                                                             <button class="btn btn-white btn-sm"><i
-                                                                class="bi bi-funnel"></i> Filter &nbsp;<span
-                                                                class="small fw-bold border-start ps-2 py-1">0</span>
+                                                                    class="bi bi-funnel"></i> Filter &nbsp;<span
+                                                                    class="small fw-bold border-start ps-2 py-1">0</span>
                                                             </button>
                                                             <button class="btn btn-sm ms-3"><i class="bi bi-search"></i>
                                                             </button>
@@ -140,7 +108,7 @@
                                                             </div>
 
                                                             <button type="button" class="btn btn-sm btn-white ms-3"><i
-                                                                class="bi bi-download"></i>
+                                                                    class="bi bi-download"></i>
                                                                 Export
                                                             </button>
 
@@ -150,86 +118,18 @@
                                                     <div class="bg-white rounded mt-4">
                                                     </div>
 
-                                                    <table class="table mb-0 shadow-sm"
-                                                           [ngClass]="{'opacity-25': paging.processing}">
-                                                        <thead style="color: #344050; font-size: 0.80em"
-                                                               class="text-uppercase text-muted">
-                                                        <tr>
-                                                            <th scope="col"></th>
-                                                            <th scope="col">Type</th>
-                                                            <th scope="col">Part ID</th>
-                                                            <th scope="col">Name</th>
-                                                            <th scope="col">Status</th>
-                                                            <th scope="col">Created</th>
-                                                        </tr>
-                                                        </thead>
-                                                    </table>
-
-                                                    <div class="bg-white p-3 rounded-bottom" *ngIf="entries">
-                                                        <table class="table"
-                                                               [ngClass]="{'opacity-25': paging.processing}">
-                                                            <!--                                                        <thead style="color: #344050; font-size: 0.80em"-->
-                                                            <!--                                                               class="text-uppercase  text-muted">-->
-                                                            <!--                                                        <tr>-->
-                                                            <!--                                                            <th scope="col"></th>-->
-                                                            <!--                                                            <th scope="col">Type</th>-->
-                                                            <!--                                                            <th scope="col">Part ID</th>-->
-                                                            <!--                                                            <th scope="col">Name</th>-->
-                                                            <!--                                                            <th scope="col">Status</th>-->
-                                                            <!--                                                            <th scope="col">Created</th>-->
-                                                            <!--                                                        </tr>-->
-                                                            <!--                                                        </thead>-->
-                                                            <tbody style="font-size: 0.95em">
-                                                            <tr *ngFor="let entry of entries">
-                                                                <td><i class="bi bi-square"></i></td>
-                                                                <td class="small text-uppercase"
-                                                                    style="color: #5e6e82; font-weight: 500; width: 90px">{{entry.type}}</td>
-                                                                <td style="width: 120px"><a
-                                                                    [href]="'entry/' + entry.id">{{entry.partId}}</a>
-                                                                </td>
-                                                                <td>{{entry.name}}
-                                                                    <div
-                                                                        class="small text-muted text-truncate">{{entry.shortDescription}}</div>
-                                                                </td>
-                                                                <td>
-                                                                    <i class="text-success bi bi-circle-fill"></i>
-                                                                    <span class="text-muted"> {{entry.status}}</span>
-                                                                </td>
-                                                                <td>{{entry.creationTime | date}}</td>
-
-                                                            </tr>
-                                                            </tbody>
-                                                        </table>
-
-                                                        <ngb-pagination [collectionSize]="70"
-                                                                        [(page)]="paging.currentPage"
-                                                                        [boundaryLinks]="true"
-                                                                        (pageChange)="pageCollectionEntries($event)"
-                                                                        size="sm">
-                                                            <ng-template ngbPaginationFirst><i
-                                                                class="fa fa-fw fa-angle-double-left"></i> First
-                                                            </ng-template>
-                                                            <ng-template ngbPaginationPrevious><i
-                                                                class="fa fa-fw fa-angle-left"></i>Prev
-                                                            </ng-template>
-                                                            <!--                            <ng-template ngbPaginationNumber let-p><button class="btn btn-sm btn-white">{{p}}</button></ng-template>-->
-                                                            <ng-template ngbPaginationNext>Next<i
-                                                                class="fa fa-fw fa-angle-right"></i></ng-template>
-                                                            <ng-template ngbPaginationLast>Last<i
-                                                                class="fa fa-fw fa-angle-double-right"></i>
-                                                            </ng-template>
-                                                        </ngb-pagination>
-
+                                                    <div class="bg-white p-3 rounded-bottom">
+                                                        <app-parts-table
+                                                                [collection]="selectedOption.name"></app-parts-table>
                                                     </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col">
 
                                                 </div>
                                             </div>
+
                                         </div>
+
+                                        <router-outlet *ngIf="selectedFolderId"></router-outlet>
+
                                     </div>
                                 </div>
                             </div>

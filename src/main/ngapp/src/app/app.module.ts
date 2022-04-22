@@ -7,7 +7,7 @@ import {LoginComponent} from './components/login/login.component';
 import {CollectionComponent} from './components/main/collection.component';
 import {HeaderComponent} from './components/header/header.component';
 import {NgbDropdownModule, NgbModule, NgbNavModule} from "@ng-bootstrap/ng-bootstrap";
-import {FormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
 import {EntryDetailComponent} from './components/entry/entry-detail/entry-detail.component';
 import {EntryResolver} from "./components/entry/entry.resolver";
@@ -17,7 +17,9 @@ import {registerAllModules} from "handsontable/registry";
 import {HotTableModule} from "@handsontable/angular";
 import {MainSidebarMenuComponent} from './components/main-sidebar-menu/main-sidebar-menu.component';
 import {FooterComponent} from './components/footer/footer.component';
-import {CollectionEntriesComponent} from './components/collection-entries/collection-entries.component';
+import {FolderComponent} from "./components/collection/folder/folder.component";
+import {PersonalCollectionComponent} from './components/collection/personal-collection/personal-collection.component';
+import {PartsTableComponent} from "./components/parts-table/parts-table.component";
 
 // register Handsontable's modules
 registerAllModules();
@@ -33,7 +35,9 @@ registerAllModules();
         UploadComponent,
         MainSidebarMenuComponent,
         FooterComponent,
-        CollectionEntriesComponent
+        FolderComponent,
+        PersonalCollectionComponent,
+        PartsTableComponent
     ],
     imports: [
         BrowserModule,
@@ -43,7 +47,8 @@ registerAllModules();
         NgbModule,
         NgbNavModule,
         HttpClientModule,
-        HotTableModule
+        HotTableModule,
+        ReactiveFormsModule
     ],
     providers: [EntryResolver],
     bootstrap: [AppComponent]
