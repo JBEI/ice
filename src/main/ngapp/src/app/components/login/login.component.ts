@@ -34,7 +34,6 @@ export class LoginComponent implements OnInit {
         // redirect user to main page if so
         this.loggedInUser = this.userService.getUser(false);
         if (this.loggedInUser && this.loggedInUser.sessionId) {
-            this.form.setValue({"id": this.loggedInUser.id, "password": this.loggedInUser.password})
 
             this.http.get('accesstokens').subscribe((result: any) => {
                 if (!result) {
@@ -67,6 +66,10 @@ export class LoginComponent implements OnInit {
 
     loginUser(): void {
         this.validation.invalidPassword = false;
+        this.loggedInUser.email = this.form.get('id').value;
+        this.loggedInUser.password = this.form.get('password').value;
+
+        console.log(this.loggedInUser, this.form.get('id').value);
 
         this.processing = true;
         this.http.post('accesstokens', this.loggedInUser).subscribe((result: User) => {

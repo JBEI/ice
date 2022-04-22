@@ -76,7 +76,7 @@ export class CollectionComponent implements OnInit {
             if (!result)
                 return;
 
-            this.paging.available = result.available;
+            this.paging.available = result.resultCount;
             this.entries = result.data;
         }, error => {
             this.paging.processing = false;

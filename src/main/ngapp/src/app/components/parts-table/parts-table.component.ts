@@ -77,7 +77,7 @@ export class PartsTableComponent implements OnInit {
             if (!result)
                 return;
 
-            this.paging.available = result.available;
+            this.paging.available = result.resultCount;
             this.parts = result.data;
         }, error => {
             this.paging.processing = false;

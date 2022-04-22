@@ -11,7 +11,7 @@ import org.jbei.ice.storage.IDataTransferModel;
  */
 public enum ConfigurationKey implements IDataTransferModel {
 
-    APPLICATION_VERSION("4.0.0"),
+    APPLICATION_VERSION("5.9.4"),
     TEMPORARY_DIRECTORY("/tmp"),
     DATA_DIRECTORY("data"),
 
@@ -27,7 +27,6 @@ public enum ConfigurationKey implements IDataTransferModel {
 
     BLAST_INSTALL_DIR(""),
 
-    ADD_TO_CART_DEFAULT_SET_TO_LOCAL("YES"),
     NEW_REGISTRATION_ALLOWED("NO"),
     PASSWORD_CHANGE_ALLOWED("YES"),
     PROFILE_EDIT_ALLOWED("YES"),
@@ -38,9 +37,10 @@ public enum ConfigurationKey implements IDataTransferModel {
     WEB_OF_REGISTRIES_MASTER("registry.jbei.org"),
 
     // sample request config
-    SAMPLE_CREATE_APPROVAL_MESSAGE("");
+    SAMPLE_CREATE_APPROVAL_MESSAGE(""),
+    AUTHENTICATION_METHOD("DEFAULT");
 
-    private final String defaultValue;
+    private String defaultValue;
 
     ConfigurationKey(String defaultValue) {
         this.defaultValue = defaultValue;

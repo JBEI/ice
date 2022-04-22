@@ -32,7 +32,7 @@
                         </div>
 
                         <input type="password" class="form-control" id="password" name="password"
-                               [attr.aria-invalid]="passwordIsInvalidAndTouched"
+                               [attr.aria-invalid]="passwordIsInvalidAndTouched" formControlName="password"
                                [ngClass]="{'is-invalid': passwordIsInvalidAndTouched}" required>
 
                         <div class="mt-5">

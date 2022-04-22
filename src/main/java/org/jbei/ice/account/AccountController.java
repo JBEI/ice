@@ -2,9 +2,7 @@ package org.jbei.ice.account;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.account.authentication.AuthenticationException;
-import org.jbei.ice.account.authentication.IAuthentication;
-import org.jbei.ice.account.authentication.LocalAuthentication;
+import org.jbei.ice.account.authentication.*;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.group.GroupType;
 import org.jbei.ice.email.EmailFactory;
@@ -24,10 +22,10 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * ABI to manipulate {@link AccountModel} objects.
+ * ABI to manipulate {@link Account} objects.
  * <p>
  * This class contains methods that wrap {@link AccountDAO} to
- * manipulate {@link AccountModel} objects.
+ * manipulate {@link Account} objects.
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
@@ -124,23 +122,24 @@ public class AccountController {
             final SimpleDateFormat dateFormat = new SimpleDateFormat(
                     "EEE, MMM d, yyyy 'at' HH:mm aaa, z");
 
-            String builder = "Dear " +
-                    name +
-                    ",\n\n" +
-                    "The password for your " +
-                    projectName +
-                    " account (" +
-                    targetEmail +
-                    ") was reset on " +
-                    dateFormat.format(new Date()) +
-                    ".\nYour new temporary password is\n\n" +
-                    newPassword +
-                    "\n\n" +
-                    "Please go to the following link to login and change your password.\n\n" +
-                    "https://" + url + "/profile/" + account.getId() +
-                    "\n\nThank you.";
+            final StringBuilder builder = new StringBuilder();
+            builder.append("Dear ")
+                    .append(name)
+                    .append(",\n\n")
+                    .append("The password for your ")
+                    .append(projectName)
+                    .append(" account (")
+                    .append(targetEmail)
+                    .append(") was reset on ")
+                    .append(dateFormat.format(new Date()))
+                    .append(".\nYour new temporary password is\n\n")
+                    .append(newPassword)
+                    .append("\n\n")
+                    .append("Please go to the following link to login and change your password.\n\n")
+                    .append("https://").append(url).append("/profile/").append(account.getId())
+                    .append("\n\nThank you.");
 
-            EmailFactory.getEmail().send(account.getEmail(), subject, builder);
+            EmailFactory.getEmail().send(account.getEmail(), subject, builder.toString());
         } catch (final Exception ex) {
             Logger.error(ex);
             return false;
@@ -259,7 +258,7 @@ public class AccountController {
      * Retrieve {@link AccountModel} by user id.
      *
      * @param email unique identifier for account, typically email
-     * @return {@link AccountModel}
+     * @return {@link Account}
      */
     public AccountModel getByEmail(final String email) {
         return dao.getByEmail(email);
@@ -299,10 +298,10 @@ public class AccountController {
     }
 
     /**
-     * Store {@link AccountModel} into the database.
+     * Store {@link Account} into the database.
      *
      * @param account
-     * @return {@link AccountModel} that has been saved.
+     * @return {@link Account} that has been saved.
      */
     public AccountModel save(final AccountModel account) {
         account.setModificationTime(Calendar.getInstance().getTime());
@@ -327,6 +326,30 @@ public class AccountController {
         return account != null && account.getType() == AccountType.ADMIN;
     }
 
+    private IAuthentication getAuthentication() {
+        try {
+            String clazz = Utils.getConfigValue(ConfigurationKey.AUTHENTICATION_METHOD);
+            if (StringUtils.isEmpty(clazz))
+                return new LocalAuthentication();
+
+            switch (org.jbei.ice.lib.account.authentication.AuthType.valueOf(clazz.toUpperCase())) {
+                case LDAP:
+                    return new LblLdapAuthentication();
+
+                case OPEN:
+                    return new UserIdAuthentication();
+
+                case DEFAULT:
+                default:
+                    return new LocalAuthentication();
+            }
+        } catch (Exception e) {
+            Logger.error("Exception loading authentication class: ", e);
+            Logger.error("Using default authentication");
+            return new LocalAuthentication();
+        }
+    }
+
     /**
      * Authenticate a user in the database.
      * <p>
@@ -339,7 +362,7 @@ public class AccountController {
      * @return the account identifier (email) on a successful login, otherwise {@code null}
      */
     protected AccountModel authenticate(final String login, final String password, final String ip) {
-        final IAuthentication authentication = new LocalAuthentication();
+        final IAuthentication authentication = getAuthentication();
         String email;
 
         try {
@@ -399,6 +422,12 @@ public class AccountController {
      * @return {@link Account}
      */
     public Account authenticate(final Account transfer) {
+        if (StringUtils.isEmpty(transfer.getEmail()) || StringUtils.isEmpty(transfer.getPassword())) {
+            Logger.error("Invalid login or password");
+            return null;
+        }
+
+
         final AccountModel account = authenticate(transfer.getEmail(), transfer.getPassword(), "");
         if (account == null) {
             return null;
