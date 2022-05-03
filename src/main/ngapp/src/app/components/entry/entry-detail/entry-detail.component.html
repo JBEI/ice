@@ -1,110 +1,110 @@
-<div class="container-fluid">
+<app-header></app-header>
+
+<div class="container-fluid p-0">
     <div class="row">
-        <div class="col">
-            <div class="container-fluid p-0">
-                <div class="row">
-                    <div class="col px-4 pt-5 pb-3">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h3 class="mb-0">
-                                    <span class="text-secondary">{{entry.type}}</span> {{entry.name}}
-                                </h3>
-                                <div class="small text-muted">{{entry.creationTime | date : 'medium'}}</div>
-                                <!--                <a type="button" class="btn bg-white"><i class="bi bi-people-fill"></i> Share</a>-->
-                            </div>
+        <div class="col px-4 pt-5 pb-3">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h3 class="mb-0">
+                        <span class="text-secondary">{{entry.type}}</span> {{entry.name}}
+                    </h3>
 
-                            <div>
-                                <a class="border btn btn-sm bg-white shadow-sm" style="color: #525f7f; font-weight: 500"
-                                   [ngbTooltip]="entry.name" [placement]="'top'">
-                                    <i class="bi bi-arrow-90deg-up"></i> Strain
-                                </a>
-                            </div>
-                        </div>
+                    <div class="small text-muted">
+                        {{entry.creationTime | date : 'medium'}}
+                        <a class="ms-2" routerLink="/profile/{{entry.ownerId}}">{{entry.owner}}</a>
                     </div>
+                    <!--                <a type="button" class="btn bg-white"><i class="bi bi-people-fill"></i> Share</a>-->
                 </div>
 
-                <div class="row">
-                    <div class="col px-4">
-                        <div class="p-3 bg-white rounded">
-
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col d-inline-block">
-                                        <span class="text-muted fw-bold">Part ID</span> &nbsp; <span
-                                            style="color: #5e6e82">{{entry.partId}}</span>
-                                    </div>
-                                    <div class="col d-inline-block">
-                                        <span class="text-muted fw-bold">Name</span> &nbsp; <span
-                                            style="color: #5e6e82">{{entry.name}}</span>
-                                    </div>
-                                    <div class="col d-inline-block">
-                                        <span class="text-muted fw-bold">Alias</span> &nbsp; <span
-                                            style="color: #5e6e82">{{entry.alias}}</span>
-                                    </div>
-                                </div>
-
-                                <div class="row mt-2">
-                                    <div class="col d-inline-block">
-                                        <span class="text-muted fw-bold">Owner</span> &nbsp;
-                                        <a href="#" style="color: #5e6e82">{{entry.owner}} ({{entry.ownerEmail}})</a>
-                                    </div>
-
-                                    <div class="col d-inline-block">
-                                        <span class="text-muted fw-bold">Status</span> &nbsp;
-                                        <a href="#" style="color: #5e6e82">{{entry.status}}</a>
-                                    </div>
-
-                                    <div class="col d-inline-block">
-                                        <span class="text-muted fw-bold">Creator</span> &nbsp;
-                                        <a href="#" style="color: #5e6e82">{{entry.creator}} ({{entry.creatorEmail}}
-                                            )</a>
-                                    </div>
-                                </div>
-
-                                <div class="row mt-2">
-                                    <div class="col d-inline-block">
-                                        <span class="text-muted fw-bold">BioSafety Level</span> &nbsp;
-                                        <a href="#" style="color: #5e6e82">{{entry.bioSafetyLevel}}</a>
-                                    </div>
-
-                                    <div class="col d-inline-block">
-                                        <span class="text-muted fw-bold">Status</span> &nbsp;
-                                        <a href="#" style="color: #5e6e82">{{entry.status}}</a>
-                                    </div>
-
-                                    <div class="col d-inline-block">
-
-                                    </div>
-                                </div>
-
-                                <div class="row mt-4">
-                                    <div class="col">
-                                        <b>Notes</b>
-                                        <div class="py-3">
-                                            {{entry.longDescription}}
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                    </div>
+                <div>
+                    <a class="border btn btn-sm bg-white shadow-sm" style="color: #525f7f; font-weight: 500"
+                       [ngbTooltip]="entry.name" [placement]="'top'">
+                        <i class="bi bi-arrow-90deg-up"></i> Strain
+                    </a>
                 </div>
-
-                <div class="row mt-4">
-                    <div class="col px-4">
-                        <div>
-                            SEQUENCE
-                            <app-part-visualization [entry]="entry"></app-part-visualization>
-                        </div>
-                    </div>
-
-                </div>
-
-                <pre>{{entry | json}}</pre>
-
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col px-4">
+            <div class="p-3 bg-white rounded">
+
+                <div class="container">
+                    <div class="row">
+                        <div class="col d-inline-block">
+                            <span class="text-muted fw-bold">Part ID</span> &nbsp; <span
+                                style="color: #5e6e82">{{entry.partId}}</span>
+                        </div>
+                        <div class="col d-inline-block">
+                            <span class="text-muted fw-bold">Name</span> &nbsp; <span
+                                style="color: #5e6e82">{{entry.name}}</span>
+                        </div>
+                        <div class="col d-inline-block">
+                            <span class="text-muted fw-bold">Alias</span> &nbsp; <span
+                                style="color: #5e6e82">{{entry.alias}}</span>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col d-inline-block">
+                            <span class="text-muted fw-bold">Owner</span> &nbsp;
+                            <a href="#" style="color: #5e6e82">{{entry.owner}} ({{entry.ownerEmail}})</a>
+                        </div>
+
+                        <div class="col d-inline-block">
+                            <span class="text-muted fw-bold">Status</span> &nbsp;
+                            <a href="#" style="color: #5e6e82">{{entry.status}}</a>
+                        </div>
+
+                        <div class="col d-inline-block">
+                            <span class="text-muted fw-bold">Creator</span> &nbsp;
+                            <a href="#" style="color: #5e6e82">{{entry.creator}} ({{entry.creatorEmail}}
+                                )</a>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col d-inline-block">
+                            <span class="text-muted fw-bold">BioSafety Level</span> &nbsp;
+                            <a href="#" style="color: #5e6e82">{{entry.bioSafetyLevel}}</a>
+                        </div>
+
+                        <div class="col d-inline-block">
+                            <span class="text-muted fw-bold">Status</span> &nbsp;
+                            <a href="#" style="color: #5e6e82">{{entry.status}}</a>
+                        </div>
+
+                        <div class="col d-inline-block">
+
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col">
+                            <b>Notes</b>
+                            <div class="py-3">
+                                {{entry.longDescription}}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col px-4">
+            <div>
+                SEQUENCE
+                <app-part-visualization [entry]="entry"></app-part-visualization>
+            </div>
+        </div>
+
+    </div>
+
+    <pre>{{entry | json}}</pre>
+
 </div>
