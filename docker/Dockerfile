@@ -16,11 +16,12 @@ RUN sed -i.bak -E \
         /tmp/src/main/webapp/WEB-INF/web.xml \
     && rm /tmp/src/main/webapp/WEB-INF/web.xml.bak \
     && cp /tmp/docker/hibernate.cfg.xml /tmp/src/main/resources/hibernate.cfg.xml \
+    && cp /tmp/docker/logback.xml /tmp/src/main/resources/logback.xml \
     && mvn -DskipTests=true package
 
 # -----
 
-FROM tomcat:9-jdk16
+FROM tomcat:9-jdk17
 
 RUN apt-get clean \
     && apt-get update \
