@@ -4,7 +4,7 @@ import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Group;
 import org.junit.*;
@@ -20,18 +20,18 @@ public class GroupControllerTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        HibernateUtil.initializeMock();
+        HibernateConfiguration.initializeMock();
     }
 
     @Before
     public void setUp() throws Exception {
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.beginTransaction();
         controller = new GroupController();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
+        HibernateConfiguration.commitTransaction();
     }
 
     @Test

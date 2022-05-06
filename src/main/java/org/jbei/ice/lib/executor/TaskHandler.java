@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.executor;
 
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 
 /**
  * Runnable for running tasks
@@ -20,13 +20,13 @@ class TaskHandler implements Runnable {
     public void run() {
         try {
             this.task.setStatus(TaskStatus.IN_PROGRESS);
-            HibernateUtil.beginTransaction();
+            HibernateConfiguration.beginTransaction();
             task.execute();
-            HibernateUtil.commitTransaction();
+            HibernateConfiguration.commitTransaction();
             this.task.setStatus(TaskStatus.COMPLETED);
         } catch (Throwable caught) {
             Logger.error(caught);
-            HibernateUtil.rollbackTransaction();
+            HibernateConfiguration.rollbackTransaction();
             this.task.setStatus(TaskStatus.EXCEPTION);
         }
     }

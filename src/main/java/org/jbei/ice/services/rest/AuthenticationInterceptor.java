@@ -11,7 +11,7 @@ import org.jbei.auth.hmac.HmacSignatureFactory;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
@@ -57,10 +57,10 @@ public class AuthenticationInterceptor implements ContainerRequestFilter, Reader
         private final File directory;
         {
             // need to force-create a transaction to get the DATA_DIRECTORY config value
-            HibernateUtil.beginTransaction();
+            HibernateConfiguration.beginTransaction();
             directory = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
                     "rest-auth").toFile();
-            HibernateUtil.commitTransaction();
+            HibernateConfiguration.commitTransaction();
         }
 
         @Override
