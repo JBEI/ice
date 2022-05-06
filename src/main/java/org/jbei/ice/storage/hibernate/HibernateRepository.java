@@ -22,7 +22,7 @@ public abstract class HibernateRepository<T extends DataModel> implements IRepos
      * @return {@link Session}
      */
     protected static Session currentSession() {
-        return HibernateUtil.currentSession();
+        return HibernateConfiguration.currentSession();
     }
 
     protected CriteriaBuilder getBuilder() {

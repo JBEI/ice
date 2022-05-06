@@ -3,7 +3,7 @@ package org.jbei.ice.lib.account;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.dto.search.SearchBoostField;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Preference;
 import org.junit.After;
@@ -25,14 +25,14 @@ public class PreferencesControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.initializeMock();
+        HibernateConfiguration.beginTransaction();
         controller = new PreferencesController();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
+        HibernateConfiguration.commitTransaction();
     }
 
     @Test

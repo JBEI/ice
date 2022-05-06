@@ -9,7 +9,7 @@ import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ConfigurationDAO;
-import org.jbei.ice.storage.model.Configuration;
+import org.jbei.ice.storage.model.ConfigurationModel;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 
@@ -45,14 +45,14 @@ public class ConfigurationSettings {
     }
 
     public String getPropertyValue(ConfigurationKey key) {
-        Configuration config = dao.get(key);
+        ConfigurationModel config = dao.get(key);
         if (config == null)
             return key.getDefaultValue();
         return config.getValue();
     }
 
     public Setting getPropertyValue(String key) {
-        Configuration config = dao.get(key);
+        ConfigurationModel config = dao.get(key);
         if (config == null)
             return null;
         return config.toDataTransferObject();
@@ -80,16 +80,16 @@ public class ConfigurationSettings {
     }
 
     private Setting getConfigValue(ConfigurationKey key) {
-        Configuration configuration = dao.get(key);
+        ConfigurationModel configuration = dao.get(key);
         if (configuration == null)
             return new Setting(key.name(), "");
         return new Setting(configuration.getKey(), configuration.getValue());
     }
 
-    public Configuration setPropertyValue(ConfigurationKey key, String value) {
-        Configuration configuration = dao.get(key);
+    public ConfigurationModel setPropertyValue(ConfigurationKey key, String value) {
+        ConfigurationModel configuration = dao.get(key);
         if (configuration == null) {
-            configuration = new Configuration();
+            configuration = new ConfigurationModel();
             configuration.setKey(key.name());
             configuration.setValue(value);
             return dao.create(configuration);
@@ -105,7 +105,7 @@ public class ConfigurationSettings {
             throw new PermissionException("Cannot update system setting without admin privileges");
 
         ConfigurationKey key = ConfigurationKey.valueOf(setting.getKey());
-        Configuration configuration = setPropertyValue(key, setting.getValue());
+        ConfigurationModel configuration = setPropertyValue(key, setting.getValue());
 
         // check if the setting being updated is related to the web of registries
         if (key == ConfigurationKey.JOIN_WEB_OF_REGISTRIES) {
@@ -123,12 +123,12 @@ public class ConfigurationSettings {
         if (!accountController.isAdministrator(userId))
             throw new PermissionException("Cannot auto update system setting without admin privileges");
 
-        Configuration configuration = dao.get(setting.getKey());
+        ConfigurationModel configuration = dao.get(setting.getKey());
         if (configuration == null) {
             Logger.warn("Could not retrieve setting " + setting.getKey() + ". Creating...");
             if (setting.getValue() == null)
                 setting.setValue("");
-            configuration = dao.create(new Configuration(setting.getKey(), setting.getValue()));
+            configuration = dao.create(new ConfigurationModel(setting.getKey(), setting.getValue()));
         }
 
         String osName = System.getProperty("os.name").replaceAll("\\s+", "").toLowerCase();
@@ -169,7 +169,7 @@ public class ConfigurationSettings {
      */
     public void initPropertyValues() {
         for (ConfigurationKey key : ConfigurationKey.values()) {
-            Configuration config = dao.get(key);
+            ConfigurationModel config = dao.get(key);
             if (config == null || (config.getValue().isBlank() && !key.getDefaultValue().isEmpty())) {
                 Logger.info("Setting value for " + key.name() + " to " + key.getDefaultValue());
                 setPropertyValue(key, key.getDefaultValue());

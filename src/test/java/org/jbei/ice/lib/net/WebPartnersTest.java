@@ -5,7 +5,7 @@ import org.jbei.ice.lib.access.AccessTokens;
 import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.Account;
 import org.junit.After;
 import org.junit.Assert;
@@ -22,8 +22,8 @@ public class WebPartnersTest {
 
     @Before
     public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
+        HibernateConfiguration.initializeMock();
+        HibernateConfiguration.beginTransaction();
 
         thisPartner = createThisPartnerObject();
 
@@ -63,7 +63,7 @@ public class WebPartnersTest {
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
+        HibernateConfiguration.commitTransaction();
     }
 
     @Test
