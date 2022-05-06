@@ -1,6 +1,6 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -19,9 +19,9 @@ public class IceResponseFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         if (responseContext.getStatus() == 500) {
-            HibernateUtil.rollbackTransaction();
+            HibernateConfiguration.rollbackTransaction();
         } else {
-            HibernateUtil.commitTransaction();
+            HibernateConfiguration.commitTransaction();
         }
     }
 }

@@ -653,7 +653,7 @@ public class PartSequence {
         FeaturedDNASequence featuredDNASequence = SequenceUtil.sequenceToDNASequence(sequence, sequenceFeatures);
         featuredDNASequence.setCanEdit(canEdit);
         featuredDNASequence.setIdentifier(entry.getPartNumber());
-        Configuration configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
+        ConfigurationModel configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
 
         if (configuration != null) {
             String uriPrefix = configuration.getValue();

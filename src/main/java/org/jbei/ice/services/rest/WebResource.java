@@ -16,7 +16,7 @@ import org.jbei.ice.lib.net.RemoteEntriesAsCSV;
 import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.lib.search.WebSearch;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.model.Configuration;
+import org.jbei.ice.storage.model.ConfigurationModel;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -123,7 +123,7 @@ public class WebResource extends RestResource {
             @PathParam("id") final long partnerId, @PathParam("entryId") final String entryId) {
         requireUserId();
         final FeaturedDNASequence result = remoteEntries.getPublicEntrySequence(partnerId, entryId);
-        Configuration configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
+        ConfigurationModel configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
         if (configuration != null && result != null) {
             String uriPrefix = configuration.getValue();
             result.setUri(uriPrefix + "/web/" + partnerId + "/entry/" + entryId);
