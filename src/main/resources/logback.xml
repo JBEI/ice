@@ -1,18 +1,29 @@
 <configuration>
 
-    <property name="LOG_PATH" value="/tmp"/>
+    <contextListener class="org.jbei.ice.lib.common.logging.LoggerStartupListener"/>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>${LOG_PATH}/ice.log</file>
+        <append>true</append>
 
+        <!-- Support multiple-JVM writing to the same log file -->
+        <prudent>true</prudent>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Daily rollover -->
+            <fileNamePattern>${LOG_PATH}/ice.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- Keep 28 days' worth of history -->
+            <maxHistory>28</maxHistory>
+        </rollingPolicy>
         <encoder>
-            <pattern>%date %level %msg%n</pattern>
+            <pattern>[%-5level] %d{dd MMM yyyy; HH:mm:ss.SSS} [%.6thread] - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
