@@ -63,7 +63,9 @@
                                                             <div *ngFor="let folder of this.folders"
                                                                  class="small rounded-1 p-2 me-2 shadow-sm border d-inline-block text-truncate"
                                                                  style="background-color: #f6fbff; width: 140px">
-                                                                <a (click)="selectFolder(folder)"
+                                                                <i class="bi bi-folder"></i>&nbsp;
+                                                                <a [routerLink]="'folder/' + folder.id"
+                                                                   (click)="selectFolder(folder)"
                                                                    class="cursor-pointer">{{folder.folderName}}</a>
                                                                 <div class="border-top mt-2 pt-2 text-muted">
                                                                     {{folder.count | number}} entries

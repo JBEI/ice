@@ -57,7 +57,7 @@ export class CollectionComponent implements OnInit {
 
     selectFolder(folder: Folder): void {
         this.selectedFolderId = folder.id;
-        this.router.navigate(['collection', this.selectedOption.name, 'folder', folder.id]);
+        // this.router.navigate(['collection', this.selectedOption.name, 'folder', folder.id]);
     }
 
     getSubFolders(option: CollectionMenuOption): void {
