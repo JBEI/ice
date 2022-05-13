@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.dto.entry;
 
 import org.jbei.ice.lib.dto.access.AccessPermission;
+import org.jbei.ice.lib.entry.sequence.SequenceType;
 import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class PartData implements IDataTransferModel {
     private boolean publicRead;
     private ArrayList<PartData> linkedParts;
     private ArrayList<CustomEntryField> customFields;
-
+    private SequenceType sequenceType;
     private StrainData strainData;
     private PlasmidData plasmidData;
     private SeedData seedData;
@@ -468,5 +469,13 @@ public class PartData implements IDataTransferModel {
 
     public void setSequenceFileName(String sequenceFileName) {
         this.sequenceFileName = sequenceFileName;
+    }
+
+    public SequenceType getSequenceType() {
+        return sequenceType;
+    }
+
+    public void setSequenceType(SequenceType sequenceType) {
+        this.sequenceType = sequenceType;
     }
 }

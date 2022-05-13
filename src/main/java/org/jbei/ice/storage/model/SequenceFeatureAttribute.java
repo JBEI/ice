@@ -19,10 +19,10 @@ public class SequenceFeatureAttribute implements DataModel {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence_feature_attribute_id")
     private long id;
 
-    @Column(name = "key", length = 511)
+    @Column(name = "\"key\"", length = 511)
     private String key;
 
-    @Column(name = "value", length = 4095)
+    @Column(name = "\"value\"", length = 4095)
     private String value;
 
     @Column(name = "quoted", nullable = false)
