@@ -1,19 +1,22 @@
 package org.jbei.ice.lib.entry.sequence;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 public class SequenceUtil {
 
@@ -258,5 +261,45 @@ public class SequenceUtil {
             return SequenceFormat.SBOL2;
 
         return SequenceFormat.PLAIN;
+    }
+
+    public static SequenceType getType(Entry entry) {
+        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
+        Sequence sequence = sequenceDAO.getByEntry(entry);
+        if (sequence == null) {
+            return SequenceType.NO_SEQUENCE;
+        }
+
+        String potentialFileId = sequence.getSequenceUser();
+        if (!StringUtils.isBlank(potentialFileId)) {
+            ConfigurationSettings configurationSettings = new ConfigurationSettings();
+            String dataDirectoryString = configurationSettings.getPropertyValue(ConfigurationKey.DATA_DIRECTORY);
+            Path dataSequencePath = Paths.get(dataDirectoryString, PartSequence.SEQUENCE_FOLDER_NAME, potentialFileId);
+
+            // get file properties
+            if (Files.exists(dataSequencePath)) {
+                if ((dataSequencePath.toFile().length() / PartSequence.MB_FILE_SIZE) > 0.5) {
+                    return SequenceType.GENOME_SCALE;
+                }
+            } else {
+                return SequenceType.NO_SEQUENCE;
+            }
+        }
+
+        // check format
+        Optional<SequenceFormat> format = DAOFactory.getSequenceDAO().getSequenceFormat(entry.getId());
+        if (format.isPresent()) {
+            switch (format.get()) {
+                case SBOL1:
+                case SBOL2:
+                    return SequenceType.SBOL_DOWNLOAD;
+
+                default:
+                    return SequenceType.CAN_VISUALIZE;
+            }
+        }
+
+        // default to can visualize since at this point there is a valid sequence
+        return SequenceType.CAN_VISUALIZE;
     }
 }

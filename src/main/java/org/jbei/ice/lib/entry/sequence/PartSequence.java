@@ -56,8 +56,8 @@ public class PartSequence {
     private final SequenceFeatureDAO sequenceFeatureDAO;
     private final FeatureDAO featureDAO;
     private final EntryAuthorization entryAuthorization;
-    private static final String SEQUENCE_FOLDER_NAME = "sequences";
-    private static final float MB_FILE_SIZE = 1000000f;
+    public static final String SEQUENCE_FOLDER_NAME = "sequences";
+    public static final float MB_FILE_SIZE = 1000000f;
 
     /**
      * Constructor for creating a new part to associate with a sequence
@@ -186,7 +186,7 @@ public class PartSequence {
 
             // create sequence object
             Sequence sequence = new Sequence();
-            sequence.setSequence(sequenceFileName);
+            sequence.setSequenceUser(sequenceFileName);
             sequence.setFileName(fileName);
             sequence.setFormat(format);
             sequence.setEntry(this.entry);
@@ -635,8 +635,7 @@ public class PartSequence {
             // get file properties
             if (Files.exists(dataSequencePath)) {
                 if ((dataSequencePath.toFile().length() / MB_FILE_SIZE) > 0.5) {
-                    FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence();
-                    return featuredDNASequence;
+                    return new FeaturedDNASequence();
                 }
             } else {
                 return null;

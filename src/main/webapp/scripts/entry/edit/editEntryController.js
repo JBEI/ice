@@ -48,17 +48,23 @@ angular.module('ice.entry.edit.controller', [])
         uploader.onProgressItem = function (item, progress) {
             $scope.serverError = undefined;
 
-            if (progress !== "100")  // isUploading is always true until it returns
-                return;
+            // if (progress !== "100")  // isUploading is always true until it returns
+            //     return;
+        };
 
-            // upload complete. have processing
+        // On file upload complete (independently of the success of the operation)
+        uploader.onCompleteItem = function (item, response, status, headers) {
+            console.log(item, response, status, headers);
+        };
+
+        // file successfully uploaded
+        uploader.onSuccessItem = function (item, response, status, headers) {
+            console.log(item, response, status, headers);
+            $scope.entry.hasSequence = true;
             $scope.processingFile = item.file.name;
         };
 
-        uploader.onSuccessItem = function () {
-            $scope.entry.hasSequence = true;
-        };
-
+        //On all loaded when uploading an entire queue, or on file loaded when uploading a single independent file
         uploader.onCompleteAll = function () {
             $scope.processingFile = undefined;
         };

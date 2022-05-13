@@ -20,10 +20,10 @@ public class ConfigurationModel implements DataModel {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "configuration_id")
     private long id;
 
-    @Column(name = "key", length = 255, nullable = false, unique = true)
+    @Column(name = "\"key\"", length = 255, nullable = false, unique = true)
     private String key;
 
-    @Column(name = "value", length = 1024, nullable = false)
+    @Column(name = "\"value\"", length = 1024, nullable = false)
     private String value;
 
     public ConfigurationModel() {

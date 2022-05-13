@@ -1059,12 +1059,6 @@ angular.module('ice.entry.controller', [])
                 $scope.showSBOL = !$scope.showSBOL;
             };
 
-            $scope.getSequenceSectionHeader = function () {
-                if ($scope.entry.hasSequence && !$scope.entry.basePairCount)
-                    return "SBOL INFORMATION";
-                return "SEQUENCE";
-            };
-
             $scope.entryFields = undefined;
             $scope.entry = undefined;
             $scope.notFound = undefined;

@@ -364,7 +364,7 @@
 <div class="row margin-top-10">
     <div class="col-md-12">
         <div class="entry-details-subheader">
-            <strong style="color: #233559">{{getSequenceSectionHeader() || "SEQUENCE"}}</strong>
+            <strong style="color: #233559">SEQUENCE</strong>
 
             <!-- menu if no sequence then [Create in VE | Upload File | Paste -->
             <div class="pull-right" ng-if='!entry.hasSequence&&entry.canEdit'>
@@ -389,7 +389,7 @@
                     <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                 </span>
 
-                <span ng-if="entry.basePairCount">
+                <span ng-if="entry.sequenceType === 'CAN_VISUALIZE'">
                     <small class="opacity_hover" ng-click="openSequenceInFullVectorEditor()">
                          Open in VectorEditor <i class="fa fa-expand"></i>
                     </small>
@@ -457,7 +457,7 @@
 
         <!--area where sequence is when there is no sequence available -->
         <div class="pad_top" ng-if='!entry.hasSequence' style="color: #999;">
-            <i style="color: #999" class="font-90em" ng-hide="isFileUpload||isPaste">No sequence data provided</i>
+            <i style="color: #999" ng-hide="isFileUpload||isPaste">No sequence data provided</i>
 
             <!--file upload-->
             <span ng-if="isFileUpload">
@@ -469,11 +469,13 @@
 
                 <div class="alert alert-danger font-90em" style="margin-bottom: 10px" ng-if="serverError">
                     <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> {{serverError ||
-                    "Unknown error parsing file"}}
+                "Unknown error parsing file"}}
                 </div>
 
-                <div class="margin-top-20 font-90em"><input nv-file-select uploader="sequenceFileUpload" type="file"/>
+                <div class="margin-top-20 font-90em">
+                    <input nv-file-select uploader="sequenceFileUpload" type="file"/>
                 </div>
+
                 <div style="height: 7px; background-color: #f9f9f9;" class="font-90em">
                     <div class="progress-bar" role="progressbar"
                          ng-style="{ 'width': sequenceFileUpload.progress + '%' }"></div>
@@ -490,16 +492,24 @@
                       style="width: 100%; height: 100%; color:#111"></textarea>
         </div>
 
-        <div ng-if="entry.hasSequence && entry.basePairCount" style="height: 600px; width: 100%">
-            <ice-vector-viewer entry="entry" remote="remoteParams" on-loaded="sequenceLoaded"
-                               reload-info="reloadInfo"></ice-vector-viewer>
-        </div>
+        <div ng-if="entry.hasSequence">
+            <div ng-if="entry.sequenceType === 'CAN_VISUALIZE'" style="height: 600px; width: 100%">
+                <ice-vector-viewer entry="entry" remote="remoteParams" on-loaded="sequenceLoaded"
+                                   reload-info="reloadInfo"></ice-vector-viewer>
+            </div>
 
-        <div ng-if="entry.hasSequence && (entry.basePairCount == 'SBOL1' || entry.basePairCount == 'SBOL2')"
-             class="alert alert-info font-90em"
-             style="margin-bottom: 10px; margin-top: 10px">
-            <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i>
-            <span>The SBOL information associated with this entry cannot be visualized. Use the download links to access it</span>
+            <div ng-if="entry.sequenceType == 'SBOL_DOWNLOAD'"
+                 class="alert alert-info font-90em"
+                 style="margin-bottom: 10px; margin-top: 10px">
+                <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i>
+                <span>The SBOL information associated with this entry cannot be visualized. Use the download links to access it</span>
+            </div>
+
+            <div ng-if="entry.sequenceType == 'GENOME_SCALE'" class="alert alert-info font-90em"
+                 style="margin-bottom: 10px; margin-top: 10px">
+                <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i>
+                <span>The sequence information associated with this entry cannot be visualized due to its size. Use the download links to access it</span>
+            </div>
         </div>
     </div>
 </div>
