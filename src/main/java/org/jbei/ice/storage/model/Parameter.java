@@ -36,10 +36,10 @@ public class Parameter implements DataModel {
     @Column(name = "parameter_type", nullable = false)
     private String parameterType;
 
-    @Column(name = "key", length = 255, nullable = false)
+    @Column(name = "\"key\"", length = 255, nullable = false)
     private String key;
 
-    @Column(name = "value", length = 4095, nullable = false)
+    @Column(name = "\"value\"", length = 4095, nullable = false)
     @Field
     private String value;
 
