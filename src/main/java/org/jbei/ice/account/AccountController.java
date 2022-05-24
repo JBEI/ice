@@ -3,6 +3,7 @@ package org.jbei.ice.account;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.account.authentication.*;
+import org.jbei.ice.account.authentication.ldap.LdapAuthentication;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.group.GroupType;
 import org.jbei.ice.email.EmailFactory;
@@ -32,7 +33,7 @@ import java.util.List;
 
 public class AccountController {
 
-    public static final String ADMIN_ACCOUNT_EMAIL = "Administrator";
+    private static final String ADMIN_ACCOUNT_EMAIL = "Administrator";
     private final AccountDAO dao;
     private final GroupDAO groupDAO;
 
@@ -166,7 +167,7 @@ public class AccountController {
 
         if (!isAdministrator(userId) && !account.getEmail().equalsIgnoreCase(userId)) {
             throw new PermissionException("User " + userId + " does not have permission to change "
-                    + transfer.getEmail() + "'s password");
+                + transfer.getEmail() + "'s password");
         }
 
         try {
@@ -332,9 +333,9 @@ public class AccountController {
             if (StringUtils.isEmpty(clazz))
                 return new LocalAuthentication();
 
-            switch (org.jbei.ice.lib.account.authentication.AuthType.valueOf(clazz.toUpperCase())) {
+            switch (AuthType.valueOf(clazz.toUpperCase())) {
                 case LDAP:
-                    return new LblLdapAuthentication();
+                    return new LdapAuthentication();
 
                 case OPEN:
                     return new UserIdAuthentication();
