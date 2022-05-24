@@ -11,7 +11,7 @@ import org.jbei.ice.storage.IDataTransferModel;
  */
 public enum ConfigurationKey implements IDataTransferModel {
 
-    APPLICATION_VERSION("5.10.1"),
+    APPLICATION_VERSION("5.10.2"),
     TEMPORARY_DIRECTORY("/tmp"),
     DATA_DIRECTORY("data"),
 
