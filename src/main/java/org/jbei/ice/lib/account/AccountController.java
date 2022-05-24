@@ -3,6 +3,7 @@ package org.jbei.ice.lib.account;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.authentication.*;
+import org.jbei.ice.lib.account.authentication.ldap.LdapAuthentication;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.group.GroupType;
@@ -367,7 +368,7 @@ public class AccountController {
 
             switch (AuthType.valueOf(clazz.toUpperCase())) {
                 case LDAP:
-                    return new LblLdapAuthentication();
+                    return new LdapAuthentication();
 
                 case OPEN:
                     return new UserIdAuthentication();
