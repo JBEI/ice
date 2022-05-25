@@ -52,9 +52,8 @@ public class LdapAuthentication implements IAuthentication {
         if (isLDAPUser(loginId)) {
             try {
                 Account user = authenticateWithLDAP(loginId, password);
-                user.setEmail(loginId);
                 checkCreateAccount(user);
-                return loginId;
+                return user.getEmail();
             } catch (AuthenticationException ae) {
                 Logger.warn("Authentication failed for user " + loginId);
                 return null;
