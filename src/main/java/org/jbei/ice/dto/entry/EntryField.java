@@ -18,6 +18,7 @@ public class EntryField implements IDataTransferModel {
     private boolean required;
     private boolean custom;
     private String value;
+    private FieldInputType fieldInputType;
 
     private final List<CustomField> options = new ArrayList<>();
 
@@ -71,5 +72,13 @@ public class EntryField implements IDataTransferModel {
 
     public String getValue() {
         return this.value;
+    }
+
+    public FieldInputType getFieldInputType() {
+        return fieldInputType;
+    }
+
+    public void setFieldInputType(FieldInputType fieldInputType) {
+        this.fieldInputType = fieldInputType;
     }
 }

@@ -8,6 +8,8 @@ import {UploadComponent} from "./components/entry/upload/upload.component";
 import {AuthGuard} from "./guards/auth.guard";
 import {FolderComponent} from "./components/collection/folder/folder.component";
 import {ProfileComponent} from "./components/profile/profile/profile.component";
+import {CreateNewEntryComponent} from "./components/entry/create-new-entry/create-new-entry.component";
+import {EntryFieldsResolver} from "./components/entry/entry-fields.resolver";
 
 const routes: Routes = [
     {path: '', redirectTo: '/collection/personal', pathMatch: 'full'},
@@ -20,7 +22,8 @@ const routes: Routes = [
     {path: 'upload', component: UploadComponent},
     {path: 'entry/:id', component: EntryDetailComponent, resolve: {entry: EntryResolver}},
     {path: 'login', component: LoginComponent},
-    {path: 'profile/:id', component: ProfileComponent}
+    {path: 'profile/:id', component: ProfileComponent},
+    {path: 'create/:type', component: CreateNewEntryComponent, resolve: {fields: EntryFieldsResolver}}
 ];
 
 @NgModule({

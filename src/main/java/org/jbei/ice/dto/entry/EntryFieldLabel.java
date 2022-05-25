@@ -13,53 +13,55 @@ import java.util.List;
  */
 public enum EntryFieldLabel implements IDataTransferModel {
 
-    PI("Principal Investigator", true),
-    PI_EMAIL("Principal Investigator Email", false),
-    PART_NUMBER("Part Number", false),
-    FUNDING_SOURCE("Funding Source", false),
-    IP("Intellectual Property", false),
-    BIO_SAFETY_LEVEL("BioSafety Level", true),
-    NAME("Name", true),
-    ALIAS("Alias", false),
-    KEYWORDS("Keywords", false),
-    BACKBONE("Backbone", false),
-    SUMMARY("Summary", true),
-    NOTES("Notes", false),
-    REFERENCES("References", false),
-    EXTERNAL_URL("External URL", false),
-    LINKS("Links", false),
-    STATUS("Status", true),
-    CREATOR("Creator", true),
-    CREATOR_EMAIL("Creator Email", true),
-    SEQ_FILENAME("Sequence File", false),
-    ATT_FILENAME("Attachment File", false),
-    SEQ_TRACE_FILES("Sequence Trace File(s)", false),
-    SELECTION_MARKERS("Selection Markers", true),
-    HOST("Host", false),
-    GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype", false),
-    CIRCULAR("Circular", false),
-    PROMOTERS("Promoters", false),
-    REPLICATES_IN("Replicates In", false),
-    ORIGIN_OF_REPLICATION("Origin of Replication", false),
-    HOMOZYGOSITY("Homozygosity", false),
-    ECOTYPE("Ecotype", false),
-    HARVEST_DATE("Harvest Date", false),
-    GENERATION("Generation", false),
-    SENT_TO_ABRC("Sent to ABRC?", false),
-    PLANT_TYPE("Plant Type", false),
-    PARENTS("Parents", false),
-    EXISTING_PART_NUMBER("Existing Part Number", false),
-    ORGANISM("Organism", false),
-    FULL_NAME("Full Name", false),
-    GENE_NAME("Gene Name", false),
-    UPLOADED_FROM("Uploaded From", false);
+    PI("Principal Investigator", true, null),
+    PI_EMAIL("Principal Investigator Email", false, null),
+    PART_NUMBER("Part Number", false, null),
+    FUNDING_SOURCE("Funding Source", false, null),
+    IP("Intellectual Property", false, null),
+    BIO_SAFETY_LEVEL("BioSafety Level", true, null),
+    NAME("Name", true, null),
+    ALIAS("Alias", false, null),
+    KEYWORDS("Keywords", false, null),
+    BACKBONE("Backbone", false, null),
+    SUMMARY("Summary", true, null),
+    NOTES("Notes", false, null),
+    REFERENCES("References", false, null),
+    EXTERNAL_URL("External URL", false, null),
+    LINKS("Links", false, null),
+    STATUS("Status", true, null),
+    CREATOR("Creator", true, null),
+    CREATOR_EMAIL("Creator Email", true, null),
+    SEQ_FILENAME("Sequence File", false, null),
+    ATT_FILENAME("Attachment File", false, null),
+    SEQ_TRACE_FILES("Sequence Trace File(s)", false, null),
+    SELECTION_MARKERS("Selection Markers", true, null),
+    HOST("Host", false, null),
+    GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype", false, null),
+    CIRCULAR("Circular", false, FieldInputType.BOOLEAN),
+    PROMOTERS("Promoters", false, null),
+    REPLICATES_IN("Replicates In", false, null),
+    ORIGIN_OF_REPLICATION("Origin of Replication", false, null),
+    HOMOZYGOSITY("Homozygosity", false, null),
+    ECOTYPE("Ecotype", false, null),
+    HARVEST_DATE("Harvest Date", false, null),
+    GENERATION("Generation", false, null),
+    SENT_TO_ABRC("Sent to ABRC?", false, FieldInputType.BOOLEAN),
+    PLANT_TYPE("Plant Type", false, null),
+    PARENTS("Parents", false, null),
+    EXISTING_PART_NUMBER("Existing Part Number", false, null),
+    ORGANISM("Organism", false, null),
+    FULL_NAME("Full Name", false, null),
+    GENE_NAME("Gene Name", false, null),
+    UPLOADED_FROM("Uploaded From", false, null);
 
     private final String label;
     private final boolean required;
+    private final FieldInputType fieldType;
 
-    EntryFieldLabel(String label, boolean required) {
+    EntryFieldLabel(String label, boolean required, FieldInputType type) {
         this.label = label;
         this.required = required;
+        this.fieldType = type;
     }
 
     /**
@@ -194,5 +196,9 @@ public enum EntryFieldLabel implements IDataTransferModel {
 
     public boolean isRequired() {
         return this.required;
+    }
+
+    public FieldInputType getFieldType() {
+        return fieldType;
     }
 }

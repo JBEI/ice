@@ -1,0 +1,61 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="px-0 col d-flex">
+
+            <div class="border-end bg-white" style="flex:0 0 250px">
+                <app-main-sidebar-menu></app-main-sidebar-menu>
+            </div>
+
+            <div class="flex-grow-1">
+                <div class="bg-white border-bottom p-3">
+                    <app-header></app-header>
+                </div>
+
+                <div class="container-fluid">
+
+                    <div class="row">
+                        <div class="col">
+
+                            <div class="container-fluid" style="width: 75vw">
+                                <div class="row p-1" *ngFor="let field of fields">
+                                    <div class="col-3 offset-1 d-flex  align-items-center">
+                                        <label [for]="field.label">{{field.label}}
+                                            <span class="text-danger" *ngIf="field.required"
+                                                  style="font-size: larger">*</span>
+                                        </label>
+                                        {{field.options.length}}
+                                    </div>
+
+                                    <div class="col-4" [id]="field.label" *ngIf="field.options && field.options.length">
+                                        <select class="form-select form-select-sm" id="inputGroupSelect01">
+                                            <option selected>Choose...</option>
+                                            <option value="1" *ngFor="let option of field.options">
+                                                {{option.name}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-4" [id]="field.label" *ngIf="!field.options.length">
+
+                                        <input class="form-control form-control-sm"
+                                               *ngIf="field.fieldInputType === 'TEXT'">
+
+                                        <i class="bi bi-toggle2-off" style="font-size: x-large"
+                                           *ngIf="field.fieldInputType === 'BOOLEAN'"></i>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col">
+                                        <pre>{{fields | json}}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

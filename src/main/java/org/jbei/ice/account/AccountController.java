@@ -33,7 +33,7 @@ import java.util.List;
 
 public class AccountController {
 
-    private static final String ADMIN_ACCOUNT_EMAIL = "Administrator";
+    public static final String ADMIN_ACCOUNT_EMAIL = "Administrator";
     private final AccountDAO dao;
     private final GroupDAO groupDAO;
 

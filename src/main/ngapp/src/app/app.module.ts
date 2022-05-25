@@ -21,6 +21,8 @@ import {FolderComponent} from "./components/collection/folder/folder.component";
 import {PersonalCollectionComponent} from './components/collection/personal-collection/personal-collection.component';
 import {PartsTableComponent} from "./components/parts-table/parts-table.component";
 import {ProfileComponent} from './components/profile/profile/profile.component';
+import {CreateNewEntryComponent} from './components/entry/create-new-entry/create-new-entry.component';
+import {EntryFieldsResolver} from "./components/entry/entry-fields.resolver";
 
 // register Handsontable's modules
 registerAllModules();
@@ -39,7 +41,8 @@ registerAllModules();
         FolderComponent,
         PersonalCollectionComponent,
         PartsTableComponent,
-        ProfileComponent
+        ProfileComponent,
+        CreateNewEntryComponent
     ],
     imports: [
         BrowserModule,
@@ -52,7 +55,7 @@ registerAllModules();
         HotTableModule,
         ReactiveFormsModule
     ],
-    providers: [EntryResolver],
+    providers: [EntryResolver, EntryFieldsResolver],
     bootstrap: [AppComponent]
 })
 export class AppModule {

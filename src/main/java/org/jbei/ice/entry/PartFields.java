@@ -31,6 +31,8 @@ public class PartFields {
      */
     public List<EntryField> get() {
         List<EntryFieldLabel> labels;
+
+        // retrieves the default labels for the specific entry types
         switch (this.type) {
             case PART:
             default:
@@ -96,6 +98,7 @@ public class PartFields {
             EntryField field = new EntryField();
             field.setLabel(label.getLabel());
             field.setEntryType(this.type);
+            field.setFieldInputType(label.getFieldType());
             String defaultValue = partDefaults.getForLabel(label);
             if (!StringUtils.isEmpty(defaultValue))
                 field.setValue(defaultValue);
