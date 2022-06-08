@@ -15,7 +15,7 @@ import javax.ws.rs.ext.Provider;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -23,8 +23,8 @@ import java.util.ArrayList;
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ArrayDataJSONHandler implements MessageBodyWriter<ArrayList<IDataTransferModel>>,
-        MessageBodyReader<ArrayList<IDataTransferModel>> {
+public class ArrayDataJSONHandler implements MessageBodyWriter<List<IDataTransferModel>>,
+    MessageBodyReader<List<IDataTransferModel>> {
     @Override
     public boolean isReadable(final Class<?> type, final Type genericType,
                               final Annotation[] annotations, final MediaType mediaType) {
@@ -32,10 +32,10 @@ public class ArrayDataJSONHandler implements MessageBodyWriter<ArrayList<IDataTr
     }
 
     @Override
-    public ArrayList<IDataTransferModel> readFrom(final Class<ArrayList<IDataTransferModel>> type,
-                                                  final Type genericType, final Annotation[] annotations, final MediaType mediaType,
-                                                  final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream)
-            throws IOException, WebApplicationException {
+    public List<IDataTransferModel> readFrom(final Class<List<IDataTransferModel>> type,
+                                             final Type genericType, final Annotation[] annotations, final MediaType mediaType,
+                                             final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream)
+        throws IOException, WebApplicationException {
         final Gson gson = new GsonBuilder().create();
         try (Reader in = new InputStreamReader(entityStream)) {
             return gson.fromJson(in, type);
@@ -49,17 +49,17 @@ public class ArrayDataJSONHandler implements MessageBodyWriter<ArrayList<IDataTr
     }
 
     @Override
-    public long getSize(final ArrayList<IDataTransferModel> iDataTransferModels,
+    public long getSize(final List<IDataTransferModel> iDataTransferModels,
                         final Class<?> type, final Type genericType, final Annotation[] annotations,
                         final MediaType mediaType) {
         return 0;
     }
 
     @Override
-    public void writeTo(final ArrayList<IDataTransferModel> data, final Class<?> type,
+    public void writeTo(final List<IDataTransferModel> data, final Class<?> type,
                         final Type genericType, final Annotation[] annotations, final MediaType mediaType,
                         final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
-            throws IOException, WebApplicationException {
+        throws IOException, WebApplicationException {
         final Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (Writer out = new OutputStreamWriter(entityStream)) {
             gson.toJson(data, out);
