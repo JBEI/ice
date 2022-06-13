@@ -73,7 +73,7 @@ public class RemoteEntriesAsCSV {
         int i = 2;
         for (EntryFieldLabel field : fields) {
             i += 1;
-            headers[i] = field.getLabel();
+            headers[i] = field.getDisplay();
         }
         headers[i + 1] = "Sequence File";
         return headers;

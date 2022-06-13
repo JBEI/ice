@@ -3,63 +3,67 @@ package org.jbei.ice.dto.entry;
 import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Represents the complete (default) list of fields for parts.
- * // todo store input type along with labels
+ * Label for an entry field. Represents the default "built-in fields".
+ * Has three components defined as follows:
+ * \t display: the text to show when label is to be displayed
+ * \t required: whether this label is required or not (todo : should probably be in the context specific entry type)
+ * \t type: input type for field. e.g. whether it is a text field
  *
  * @author Hector Plahar
  */
 public enum EntryFieldLabel implements IDataTransferModel {
 
-    PI("Principal Investigator", true, null),
+    PI("Principal Investigator", true, FieldInputType.USER_WITH_EMAIL),
     PI_EMAIL("Principal Investigator Email", false, null),
     PART_NUMBER("Part Number", false, null),
-    FUNDING_SOURCE("Funding Source", false, null),
-    IP("Intellectual Property", false, null),
-    BIO_SAFETY_LEVEL("BioSafety Level", true, null),
-    NAME("Name", true, null),
-    ALIAS("Alias", false, null),
-    KEYWORDS("Keywords", false, null),
-    BACKBONE("Backbone", false, null),
-    SUMMARY("Summary", true, null),
-    NOTES("Notes", false, null),
-    REFERENCES("References", false, null),
-    EXTERNAL_URL("External URL", false, null),
-    LINKS("Links", false, null),
-    STATUS("Status", true, null),
-    CREATOR("Creator", true, null),
+    FUNDING_SOURCE("Funding Source", false, FieldInputType.LONG_TEXT),
+    IP("Intellectual Property", false, FieldInputType.TEXTAREA),
+    BIO_SAFETY_LEVEL("BioSafety Level", true, FieldInputType.SELECT),
+    NAME("Name", true, FieldInputType.TEXT),
+    ALIAS("Alias", false, FieldInputType.TEXT),
+    KEYWORDS("Keywords", false, FieldInputType.LONG_TEXT),
+    BACKBONE("Backbone", false, FieldInputType.TEXT),
+    SUMMARY("Summary", true, FieldInputType.TEXTAREA),
+    NOTES("Notes", false, FieldInputType.TEXTAREA),
+    REFERENCES("References", false, FieldInputType.LONG_TEXT),
+    EXTERNAL_URL("External URL", false, FieldInputType.MULTI_TEXT),
+    LINKS("Links", false, FieldInputType.TEXT),
+    STATUS("Status", true, FieldInputType.SELECT),
+    CREATOR("Creator", true, FieldInputType.USER_WITH_EMAIL),
     CREATOR_EMAIL("Creator Email", true, null),
     SEQ_FILENAME("Sequence File", false, null),
     ATT_FILENAME("Attachment File", false, null),
     SEQ_TRACE_FILES("Sequence Trace File(s)", false, null),
-    SELECTION_MARKERS("Selection Markers", true, null),
-    HOST("Host", false, null),
-    GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype", false, null),
+    SELECTION_MARKERS("Selection Markers", true, FieldInputType.MULTI_TEXT),
+    HOST("Host", false, FieldInputType.TEXT),
+    GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype", false, FieldInputType.TEXTAREA),
     CIRCULAR("Circular", false, FieldInputType.BOOLEAN),
-    PROMOTERS("Promoters", false, null),
-    REPLICATES_IN("Replicates In", false, null),
-    ORIGIN_OF_REPLICATION("Origin of Replication", false, null),
-    HOMOZYGOSITY("Homozygosity", false, null),
-    ECOTYPE("Ecotype", false, null),
-    HARVEST_DATE("Harvest Date", false, null),
-    GENERATION("Generation", false, null),
+    PROMOTERS("Promoters", false, FieldInputType.TEXT),
+    REPLICATES_IN("Replicates In", false, FieldInputType.TEXT),
+    ORIGIN_OF_REPLICATION("Origin of Replication", false, FieldInputType.TEXT),
+    HOMOZYGOSITY("Homozygosity", false, FieldInputType.LONG_TEXT),
+    ECOTYPE("Ecotype", false, FieldInputType.LONG_TEXT),
+    HARVEST_DATE("Harvest Date", false, FieldInputType.DATE),
+    GENERATION("Generation", false, FieldInputType.SELECT),
     SENT_TO_ABRC("Sent to ABRC?", false, FieldInputType.BOOLEAN),
-    PLANT_TYPE("Plant Type", false, null),
+    PLANT_TYPE("Plant Type", false, FieldInputType.SELECT),
     PARENTS("Parents", false, null),
     EXISTING_PART_NUMBER("Existing Part Number", false, null),
-    ORGANISM("Organism", false, null),
-    FULL_NAME("Full Name", false, null),
-    GENE_NAME("Gene Name", false, null),
-    UPLOADED_FROM("Uploaded From", false, null);
+    ORGANISM("Organism", false, FieldInputType.LONG_TEXT),
+    FULL_NAME("Full Name", false, FieldInputType.LONG_TEXT),
+    GENE_NAME("Gene Name", false, FieldInputType.LONG_TEXT),
+    UPLOADED_FROM("Uploaded From", false, FieldInputType.LONG_TEXT);
 
-    private final String label;
+    private final String display;
     private final boolean required;
     private final FieldInputType fieldType;
 
-    EntryFieldLabel(String label, boolean required, FieldInputType type) {
-        this.label = label;
+    EntryFieldLabel(String display, boolean required, FieldInputType type) {
+        this.display = display;
         this.required = required;
         this.fieldType = type;
     }
@@ -69,7 +73,7 @@ public enum EntryFieldLabel implements IDataTransferModel {
      * This is a subset of the field labels for other entry types
      */
     public static List<EntryFieldLabel> getPartLabels() {
-        List<EntryFieldLabel> labels = new ArrayList<>();
+        List<EntryFieldLabel> labels = new LinkedList<>();
         labels.add(NAME);
         labels.add(ALIAS);
         labels.add(PI);
@@ -82,15 +86,17 @@ public enum EntryFieldLabel implements IDataTransferModel {
         labels.add(SUMMARY);
         labels.add(REFERENCES);
         labels.add(IP);
+        labels.add(NOTES);
+        labels.add(LINKS);
 
         return labels;
     }
 
     /**
-     * @return List of entry field labels
+     * @return List of labels specifically for entries of type <code>PLASMID</code>
      */
     public static List<EntryFieldLabel> getPlasmidLabels() {
-        List<EntryFieldLabel> labels = new ArrayList<>(getPartLabels());
+        List<EntryFieldLabel> labels = new LinkedList<>(getPartLabels());
         labels.add(BACKBONE);
         labels.add(CIRCULAR);
         labels.add(ORIGIN_OF_REPLICATION);
@@ -101,8 +107,11 @@ public enum EntryFieldLabel implements IDataTransferModel {
         return labels;
     }
 
+    /**
+     * @return List of labels specifically for entries of type <code>STRAIN</code>
+     */
     public static List<EntryFieldLabel> getStrainLabels() {
-        List<EntryFieldLabel> labels = new ArrayList<>(getPartLabels());
+        List<EntryFieldLabel> labels = new LinkedList<>(getPartLabels());
         labels.add(SELECTION_MARKERS);
         labels.add(GENOTYPE_OR_PHENOTYPE);
         labels.add(HOST);
@@ -110,8 +119,11 @@ public enum EntryFieldLabel implements IDataTransferModel {
         return labels;
     }
 
+    /**
+     * @return List of labels specifically for entries of type <code>SEED</code>
+     */
     public static List<EntryFieldLabel> getSeedLabels() {
-        List<EntryFieldLabel> labels = new ArrayList<>(getPartLabels());
+        List<EntryFieldLabel> labels = new LinkedList<>(getPartLabels());
         labels.add(SENT_TO_ABRC);
         labels.add(PLANT_TYPE);
         labels.add(GENERATION);
@@ -123,8 +135,11 @@ public enum EntryFieldLabel implements IDataTransferModel {
         return labels;
     }
 
+    /**
+     * @return List of labels specifically for entries of type <code>PROTEIN</code>
+     */
     public static List<EntryFieldLabel> getProteinFields() {
-        List<EntryFieldLabel> labels = new ArrayList<>(getPartLabels());
+        List<EntryFieldLabel> labels = new LinkedList<>(getPartLabels());
         labels.add(ORGANISM);
         labels.add(FULL_NAME);
         labels.add(GENE_NAME);
@@ -134,7 +149,7 @@ public enum EntryFieldLabel implements IDataTransferModel {
 
     public static EntryFieldLabel fromString(String label) {
         for (EntryFieldLabel field : EntryFieldLabel.values()) {
-            if (field.label.equalsIgnoreCase(label))
+            if (field.display.equalsIgnoreCase(label))
                 return field;
         }
         return null;
@@ -143,23 +158,21 @@ public enum EntryFieldLabel implements IDataTransferModel {
     public static List<CustomField> getDefaultOptions(EntryFieldLabel label) {
         List<CustomField> options = new ArrayList<>();
         switch (label) {
-            case STATUS:
+            case STATUS -> {
                 options.add(new CustomField("Complete"));
                 options.add(new CustomField("In Progress"));
                 options.add(new CustomField("Abandoned"));
                 options.add(new CustomField("Planned"));
-                break;
-
-            case PLANT_TYPE:
+            }
+            case PLANT_TYPE -> {
                 options.add(new CustomField("EMS", "EMS"));
                 options.add(new CustomField("OVER_EXPRESSION", "OVER_EXPRESSION"));
                 options.add(new CustomField("RNAI", "RNAi"));
                 options.add(new CustomField("REPORTER", "Reporter"));
                 options.add(new CustomField("T_DNA", "T-DNA"));
                 options.add(new CustomField("OTHER", "Other"));
-                break;
-
-            case GENERATION:
+            }
+            case GENERATION -> {
                 options.add(new CustomField("UNKNOWN"));
                 options.add(new CustomField("F1"));
                 options.add(new CustomField("F2"));
@@ -173,13 +186,12 @@ public enum EntryFieldLabel implements IDataTransferModel {
                 options.add(new CustomField("T3"));
                 options.add(new CustomField("T4"));
                 options.add(new CustomField("T5"));
-                break;
-
-            case BIO_SAFETY_LEVEL:
+            }
+            case BIO_SAFETY_LEVEL -> {
                 options.add(new CustomField("1", "Level 1"));
                 options.add(new CustomField("2", "Level 2"));
                 options.add(new CustomField("-1", "Restricted"));
-                break;
+            }
         }
 
         return options;
@@ -190,8 +202,8 @@ public enum EntryFieldLabel implements IDataTransferModel {
         return this.name();
     }
 
-    public String getLabel() {
-        return this.label;
+    public String getDisplay() {
+        return this.display;
     }
 
     public boolean isRequired() {

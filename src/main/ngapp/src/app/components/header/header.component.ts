@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Router} from "@angular/router";
 import {UserService} from "../../services/user.service";
 import {User} from "../../models/User";
+import {EntryService} from "../../services/entry.service";
 
 @Component({
     selector: 'app-header',
@@ -11,9 +12,14 @@ import {User} from "../../models/User";
 export class HeaderComponent implements OnInit {
 
     loggedInUser: User;
+    types: string[];
 
-    constructor(private userService: UserService, private router: Router) {
+    constructor(private userService: UserService, private entryService: EntryService, private router: Router) {
         this.loggedInUser = this.userService.getUser();
+        this.types = this.entryService.getEntryTypes();
+        this.router.routeReuseStrategy.shouldReuseRoute = () => {
+            return false;
+        };
     }
 
     ngOnInit(): void {
@@ -34,6 +40,10 @@ export class HeaderComponent implements OnInit {
 
     goToUpload(): void {
         this.router.navigate((['/upload']));
+    }
+
+    goToCreateEntry(type: string = 'part'): void {
+        this.router.navigate((['/create', type.toLowerCase()]));
     }
 
     logout(): void {

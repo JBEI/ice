@@ -7,13 +7,13 @@ import java.util.List;
 
 /**
  * @author Hector Plahar
+ * todo : duplicate of EntryFieldLabel get***Labels
  */
 public class EntryFields {
 
     public static List<EntryFieldLabel> getCommonFields() {
         List<EntryFieldLabel> list = new ArrayList<>();
         list.add(EntryFieldLabel.PI);
-        list.add(EntryFieldLabel.PI_EMAIL);
         list.add(EntryFieldLabel.FUNDING_SOURCE);
         list.add(EntryFieldLabel.IP);
         list.add(EntryFieldLabel.BIO_SAFETY_LEVEL);
@@ -23,10 +23,9 @@ public class EntryFields {
         list.add(EntryFieldLabel.SUMMARY);
         list.add(EntryFieldLabel.NOTES);
         list.add(EntryFieldLabel.REFERENCES);
-        list.add(EntryFieldLabel.LINKS);
+//        list.add(EntryFieldLabel.LINKS);
         list.add(EntryFieldLabel.STATUS);
         list.add(EntryFieldLabel.CREATOR);
-        list.add(EntryFieldLabel.CREATOR_EMAIL);
         return list;
     }
 

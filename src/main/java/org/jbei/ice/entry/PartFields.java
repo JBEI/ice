@@ -3,19 +3,25 @@ package org.jbei.ice.entry;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.dto.entry.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 /**
  * Entry fields for a specific entry
+ *
+ * @author Hector Plahar
  */
 public class PartFields {
 
     private final EntryType type;
     private final String userId;
 
+    /**
+     * @param userId unique identifier of user making request
+     * @param type   type of entry
+     */
     public PartFields(String userId, EntryType type) {
         if (type == null)
             throw new IllegalArgumentException("Illegal null entry type");
@@ -25,7 +31,7 @@ public class PartFields {
     }
 
     /**
-     * Determines which entry type fields to return and retrieves the appropriate fields
+     * Determines which entry type fields to return
      *
      * @return List of {@link EntryField}
      */
@@ -56,32 +62,45 @@ public class PartFields {
                 break;
         }
 
+        // retrieve the entry fields for the retrieved labels
         return getFieldsForLabels(labels);
     }
 
+    /**
+     * Retrieve associated {@link EntryField}s for the referenced labels
+     *
+     * @param labels list of {@link EntryFieldLabel}s that are to be used for retrieval
+     * @return list of fields
+     */
     private List<EntryField> getFieldsForLabels(List<EntryFieldLabel> labels) {
-        List<EntryField> fields = new ArrayList<>();
-
-        //
+        List<EntryField> fields = new LinkedList<>();
         Set<EntryFieldLabel> existingCustomFields = new HashSet<>();
-        PartDefaults partDefaults = new PartDefaults(this.userId);
 
-        // get custom fields
+        // retrieve custom fields created on this instance of ICE
         CustomFields customFields = new CustomFields();
         List<CustomEntryField> customEntryFields = customFields.get(this.type).getData();
+
+        // iterate through the list of custom entries
         for (CustomEntryField customEntryField : customEntryFields) {
 
-            // keep track of existing field customizations to avoid duplicating it when retrieving
-            // regular fields
-            if (customEntryField.getFieldType() == FieldType.EXISTING) {
-                existingCustomFields.add(customEntryField.getExistingField());
+            EntryField field = new EntryField();
+
+            switch (customEntryField.getFieldType()) {
+
+                // keep track of existing field customizations to avoid duplicating it when retrieving
+                // regular fields
+                case EXISTING -> {
+                    existingCustomFields.add(customEntryField.getExistingField());
+                    field.setFieldInputType(customEntryField.getExistingField().getFieldType());
+                }
+
+                case MULTI_CHOICE, MULTI_CHOICE_PLUS -> field.setFieldInputType(FieldInputType.SELECT);
             }
 
-            EntryField field = new EntryField();
+            // create and add entry field
             field.setRequired(customEntryField.isRequired());
             field.setEntryType(this.type);
             field.setCustom(true);
-
             field.setId(customEntryField.getId());
             field.setValue(customEntryField.getValue());
             field.setLabel(customEntryField.getLabel());
@@ -89,23 +108,30 @@ public class PartFields {
             fields.add(field);
         }
 
-        // get regular fields
+        // default values for entries
+        PartDefaults partDefaults = new PartDefaults(this.userId);
+
+        // get regular fields using list of labels
         for (EntryFieldLabel label : labels) {
-            // skip any that have been modified via custom fields
+            // skip any that have been modified via custom fields since it is already account for
             if (existingCustomFields.contains(label))
                 continue;
 
+            // create and add entry field
             EntryField field = new EntryField();
-            field.setLabel(label.getLabel());
+            field.setLabel(label.getDisplay());
             field.setEntryType(this.type);
             field.setFieldInputType(label.getFieldType());
+
+            // get the user set default value for field label
             String defaultValue = partDefaults.getForLabel(label);
             if (!StringUtils.isEmpty(defaultValue))
                 field.setValue(defaultValue);
 
             field.setRequired(label.isRequired());
-            field.getOptions().addAll(EntryFieldLabel.getDefaultOptions(label));
 
+            // retrieve options (should be restricted to only type SELECT)
+            field.getOptions().addAll(EntryFieldLabel.getDefaultOptions(label));
             fields.add(field);
         }
 

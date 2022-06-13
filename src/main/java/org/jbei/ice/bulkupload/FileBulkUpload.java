@@ -74,7 +74,7 @@ public class FileBulkUpload implements Closeable {
         for (EntryFieldLabel defaultHeader : defaultHeaders) {
             CustomEntryField entryField = new CustomEntryField();
             entryField.setRequired(defaultHeader.isRequired());
-            entryField.setLabel(defaultHeader.getLabel());
+            entryField.setLabel(defaultHeader.getDisplay());
             headers.add(entryField);
         }
 
@@ -85,7 +85,7 @@ public class FileBulkUpload implements Closeable {
         for (EntryFieldLabel fileHeader : BulkCSVUploadHeaders.getFileHeaders()) {
             CustomEntryField entryField = new CustomEntryField();
             entryField.setRequired(fileHeader.isRequired());
-            entryField.setLabel(fileHeader.getLabel());
+            entryField.setLabel(fileHeader.getDisplay());
             headers.add(entryField);
         }
 

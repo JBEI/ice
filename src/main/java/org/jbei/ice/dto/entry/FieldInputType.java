@@ -7,5 +7,12 @@ package org.jbei.ice.dto.entry;
  */
 public enum FieldInputType {
     BOOLEAN,
-    TEXT
+    TEXT,
+    MULTI_TEXT,
+    LONG_TEXT,
+    TEXTAREA,
+    DATE,
+    FILE,
+    SELECT,
+    USER_WITH_EMAIL     // todo : better naming
 }

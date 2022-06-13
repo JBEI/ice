@@ -1,9 +1,13 @@
-<div class=" d-flex justify-content-between">
+<div class="d-flex justify-content-between">
     <div>
-        <button class="btn btn-primary">
-            <span class="small"><i class="bi bi-plus-square-dotted"></i> Add single entry</span>
-        </button>
-
+        <div ngbDropdown class="d-inline-block">
+            <button class="btn btn-primary" ngbDropdownToggle>
+                <span><i class="bi bi-plus-square-dotted"></i> Add single entry</span>
+            </button>
+            <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                <button ngbDropdownItem (click)="goToCreateEntry(type)" *ngFor="let type of types">{{type}}</button>
+            </div>
+        </div>
         &nbsp;
 
         <button class="btn btn-primary" (click)="goToUpload()">

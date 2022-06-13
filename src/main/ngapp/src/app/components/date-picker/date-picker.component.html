@@ -1,0 +1,9 @@
+<div class="input-group input-group-sm" [ngClass]="{'w-50': halfWidth}">
+    <input class="form-control" [maxDate]="maxDate" [minDate]="minDate"
+           [ngClass]="{'is-invalid': validDate}" [(ngModel)]="selectedDate"
+           id="infectionDate" (dateSelect)="dateSelected($event)" (blur)="dateSelected()"
+           placeholder="mm/dd/yyyy" name="dp" ngbDatepicker #d="ngbDatepicker">
+    <span class="input-group-text" (click)="d.toggle()" type="button">
+        <i class="bi bi-calendar-date"></i>
+    </span>
+</div>
