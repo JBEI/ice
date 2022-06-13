@@ -2,7 +2,7 @@
     <div>
         <div ngbDropdown class="d-inline-block">
             <button class="btn btn-primary" ngbDropdownToggle>
-                <span><i class="bi bi-plus-square-dotted"></i> Add single entry</span>
+                <span><i class="bi bi-plus-square-dotted"></i> Add entry</span>
             </button>
             <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
                 <button ngbDropdownItem (click)="goToCreateEntry(type)" *ngFor="let type of types">{{type}}</button>
