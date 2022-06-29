@@ -28,31 +28,7 @@ public class ModelToInfoFactory {
         if (type == null)
             throw new IllegalArgumentException("Invalid entry type: " + entry.getRecordType());
 
-        PartData partData = new PartData(type);
-        PartData part = getCommon(partData, entry);
-
-        switch (type) {
-            case PLASMID:
-                part.setPlasmidData(plasmidInfo(entry));
-                break;
-
-            case STRAIN:
-                part.setStrainData(strainInfo(entry));
-                break;
-
-            case SEED:
-                part.setSeedData(seedInfo(entry));
-                break;
-
-            case PROTEIN:
-                part.setProteinData(proteinInfo(entry));
-                break;
-
-            default:
-            case PART:
-                return part;
-        }
-        return part;
+        return new PartData(type);
     }
 
     public static ArrayList<AttachmentInfo> getAttachments(List<Attachment> attachments, boolean canEdit) {
@@ -73,68 +49,6 @@ public class ModelToInfoFactory {
         return infos;
     }
 
-    private static SeedData seedInfo(Entry entry) {
-        SeedData data = new SeedData();
-
-        // seed specific
-        ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-
-        if (seed.getPlantType() != null && seed.getPlantType() != PlantType.NULL) {
-            PlantType type = PlantType.fromString(seed.getPlantType().name());
-            data.setPlantType(type);
-        }
-
-        if (seed.getGeneration() != null && seed.getGeneration() != Generation.UNKNOWN) {
-            Generation generation = Generation.fromString(seed.getGeneration().name());
-            data.setGeneration(generation);
-        }
-        data.setHomozygosity(seed.getHomozygosity());
-        data.setEcotype(seed.getEcotype());
-        data.setSeedParents(seed.getParents());
-        if (seed.getHarvestDate() != null) {
-            DateFormat format = new SimpleDateFormat("MM/dd/YYYY");
-            String dateFormat = format.format(seed.getHarvestDate());
-            data.setHarvestDate(dateFormat);
-        }
-        boolean isSent = !(seed.isSentToABRC() == null || !seed.isSentToABRC());
-        data.setSentToAbrc(isSent);
-        return data;
-    }
-
-    private static StrainData strainInfo(Entry entry) {
-        StrainData data = new StrainData();
-
-        // strain specific
-        Strain strain = (Strain) entry;
-        data.setGenotypePhenotype(strain.getGenotypePhenotype());
-        data.setHost(strain.getHost());
-        return data;
-    }
-
-    private static PlasmidData plasmidInfo(Entry entry) {
-        PlasmidData data = new PlasmidData();
-        Plasmid plasmid = (Plasmid) entry;
-
-        // plasmid specific fields
-        data.setBackbone(plasmid.getBackbone());
-        data.setCircular(plasmid.getCircular());
-        data.setOriginOfReplication(plasmid.getOriginOfReplication());
-        data.setPromoters(plasmid.getPromoters());
-        data.setReplicatesIn(plasmid.getReplicatesIn());
-        return data;
-    }
-
-    private static ProteinData proteinInfo(Entry entry) {
-        ProteinData data = new ProteinData();
-
-        // protein specific
-        Protein protein = (Protein) entry;
-        data.setOrganism(protein.getOrganism());
-        data.setFullName(protein.getFullName());
-        data.setGeneName(protein.getGeneName());
-        data.setUploadedFrom(protein.getUploadedFrom());
-        return data;
-    }
 
     public static PartData getCommon(PartData info, Entry entry) {
         info.setId(entry.getId());
@@ -351,7 +265,7 @@ public class ModelToInfoFactory {
                 seedData.setEcotype(seed.getEcotype());
                 seedData.setSeedParents(seed.getParents());
                 if (seed.getHarvestDate() != null) {
-                    DateFormat format = new SimpleDateFormat("MM/dd/YYYY");
+                    DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
                     String dateFormat = format.format(seed.getHarvestDate());
                     seedData.setHarvestDate(dateFormat);
                 }
@@ -386,5 +300,116 @@ public class ModelToInfoFactory {
         }
 
         return part;
+    }
+
+    public static void entryToInfo(Entry entry, EntryField entryField) {
+        if (entryField.isCustom())
+            return;
+
+        EntryFieldLabel label = EntryFieldLabel.fromString(entryField.getLabel());
+        if (label == null)
+            throw new IllegalArgumentException("Cannot find label for field");
+
+        switch (label) {
+            case PI -> entryField.setValue(entry.getPrincipalInvestigator());
+            case CREATOR -> entryField.setValue(entry.getCreator());
+            case CREATOR_EMAIL -> entryField.setValue(entry.getCreatorEmail());
+            case FUNDING_SOURCE -> entryField.setValue(entry.getFundingSource());
+            case IP -> entryField.setValue(entry.getIntellectualProperty());
+            case BIO_SAFETY_LEVEL -> entryField.setValue(entry.getBioSafetyLevel().toString());
+            case NAME -> entryField.setValue(entry.getName());
+            case ALIAS -> entryField.setValue(entry.getAlias());
+            case PI_EMAIL -> entryField.setValue(entry.getPrincipalInvestigatorEmail());
+            case KEYWORDS -> entryField.setValue(entry.getKeywords());
+            case SUMMARY -> entryField.setValue(entry.getShortDescription());
+            case STATUS -> entryField.setValue(entry.getStatus());
+//            case EXTERNAL_URL -> entryField.setValue();
+            case NOTES -> entryField.setValue(entry.getLongDescription());
+            case SELECTION_MARKERS -> entryField.setValue(entry.getSelectionMarkersAsString());
+
+            case ORIGIN_OF_REPLICATION, CIRCULAR, BACKBONE, PROMOTERS, REPLICATES_IN ->
+                setPlasmidField(entry, label, entryField);
+            case GENOTYPE_OR_PHENOTYPE, HOST -> setStrainField(entry, label, entryField);
+            case PLANT_TYPE, GENERATION, HOMOZYGOSITY, ECOTYPE, PARENTS, HARVEST_DATE, SENT_TO_ABRC ->
+                setSeedFields(entry, label, entryField);
+            case ORGANISM, FULL_NAME, GENE_NAME, UPLOADED_FROM -> setProteinFields(entry, label, entryField);
+        }
+    }
+
+    private static void setPlasmidField(Entry entry, EntryFieldLabel label, EntryField entryField) {
+        if (EntryType.nameToType(entry.getRecordType()) != EntryType.PLASMID)
+            return;
+
+        Plasmid plasmid = (Plasmid) entry;
+        switch (label) {
+            case ORIGIN_OF_REPLICATION -> entryField.setValue(plasmid.getOriginOfReplication());
+            case BACKBONE -> entryField.setValue(plasmid.getBackbone());
+            case CIRCULAR -> entryField.setValue(Boolean.toString(plasmid.getCircular()));
+            case PROMOTERS -> entryField.setValue(plasmid.getPromoters());
+            case REPLICATES_IN -> entryField.setValue(plasmid.getReplicatesIn());
+        }
+    }
+
+    private static void setStrainField(Entry entry, EntryFieldLabel label, EntryField entryField) {
+        if (EntryType.nameToType(entry.getRecordType()) != EntryType.STRAIN)
+            return;
+
+        // strain specific
+        Strain strain = (Strain) entry;
+        switch (label) {
+            case GENOTYPE_OR_PHENOTYPE -> entryField.setValue(strain.getGenotypePhenotype());
+            case HOST -> entryField.setValue(strain.getHost());
+        }
+    }
+
+    private static void setSeedFields(Entry entry, EntryFieldLabel label, EntryField entryField) {
+        if (EntryType.nameToType(entry.getRecordType()) != EntryType.STRAIN)
+            return;
+
+        // seed specific
+        ArabidopsisSeed seed = (ArabidopsisSeed) entry;
+        switch (label) {
+            case PLANT_TYPE -> {
+                if (seed.getPlantType() != null && seed.getPlantType() != PlantType.NULL) {
+                    entryField.setValue(seed.getPlantType().name());
+                }
+            }
+
+            case GENERATION -> {
+                if (seed.getGeneration() != null && seed.getGeneration() != Generation.UNKNOWN) {
+                    entryField.setValue(seed.getGeneration().name());
+                }
+            }
+
+            case HOMOZYGOSITY -> entryField.setValue(seed.getHomozygosity());
+            case ECOTYPE -> entryField.setValue(seed.getEcotype());
+            case PARENTS -> entryField.setValue(seed.getParents());
+            case HARVEST_DATE -> {
+                if (seed.getHarvestDate() != null) {
+                    DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+                    String dateFormat = format.format(seed.getHarvestDate());
+                    entryField.setValue(dateFormat);
+                }
+            }
+            case SENT_TO_ABRC -> {
+                boolean isSent = !(seed.isSentToABRC() == null || !seed.isSentToABRC());
+                entryField.setValue(Boolean.toString(isSent));
+            }
+        }
+    }
+
+    private static void setProteinFields(Entry entry, EntryFieldLabel label, EntryField entryField) {
+        if (EntryType.nameToType(entry.getRecordType()) != EntryType.PROTEIN)
+            return;
+
+        // protein specific
+        Protein protein = (Protein) entry;
+
+        switch (label) {
+            case ORGANISM -> entryField.setValue(protein.getOrganism());
+            case FULL_NAME -> entryField.setValue(protein.getFullName());
+            case GENE_NAME -> entryField.setValue(protein.getGeneName());
+            case UPLOADED_FROM -> entryField.setValue(protein.getUploadedFrom());
+        }
     }
 }

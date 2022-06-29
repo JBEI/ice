@@ -14,11 +14,13 @@ public class EntryField implements IDataTransferModel {
 
     private long id;
     private EntryType entryType;
-    private String label;
+    private String label;   // display label
     private boolean required;
     private boolean custom;
     private String value;
     private FieldInputType fieldInputType;
+    private String field;
+    private String subField;
 
     private final List<CustomField> options = new ArrayList<>();
 
@@ -80,5 +82,21 @@ public class EntryField implements IDataTransferModel {
 
     public void setFieldInputType(FieldInputType fieldInputType) {
         this.fieldInputType = fieldInputType;
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
+    }
+
+    public String getSubField() {
+        return subField;
+    }
+
+    public void setSubField(String subField) {
+        this.subField = subField;
     }
 }

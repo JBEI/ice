@@ -24,6 +24,7 @@ import {ProfileComponent} from './components/profile/profile/profile.component';
 import {CreateNewEntryComponent} from './components/entry/create-new-entry/create-new-entry.component';
 import {EntryFieldsResolver} from "./components/entry/entry-fields.resolver";
 import {DatePickerComponent} from "./components/date-picker/date-picker.component";
+import {TextFieldComponent} from './components/entry/widgets/text-field/text-field.component';
 
 // register Handsontable's modules
 registerAllModules();
@@ -44,7 +45,8 @@ registerAllModules();
         PartsTableComponent,
         ProfileComponent,
         CreateNewEntryComponent,
-        DatePickerComponent
+        DatePickerComponent,
+        TextFieldComponent
     ],
     imports: [
         BrowserModule,

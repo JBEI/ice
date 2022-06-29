@@ -122,6 +122,8 @@ public class PartFields {
             field.setLabel(label.getDisplay());
             field.setEntryType(this.type);
             field.setFieldInputType(label.getFieldType());
+            field.setField(label.getField());
+            field.setSubField(label.getSubField());
 
             // get the user set default value for field label
             String defaultValue = partDefaults.getForLabel(label);

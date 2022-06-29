@@ -115,7 +115,7 @@ public class InfoToModelFactory {
             seed.setHomozygosity(seedData.getHomozygosity());
 
         if (StringUtils.isNotEmpty(seedData.getHarvestDate())) {
-            DateFormat format = new SimpleDateFormat("MM/dd/YYYY");
+            DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
             try {
                 Date date = format.parse(seedData.getHarvestDate());
                 seed.setHarvestDate(date);
@@ -201,8 +201,7 @@ public class InfoToModelFactory {
                 break;
         }
 
-        entry = setCommon(entry, data);
-        return entry;
+        return setCommon(entry, data);
     }
 
     private static Entry setCommon(Entry entry, PartData info) {

@@ -17,55 +17,59 @@ import java.util.List;
  */
 public enum EntryFieldLabel implements IDataTransferModel {
 
-    PI("Principal Investigator", true, FieldInputType.USER_WITH_EMAIL),
-    PI_EMAIL("Principal Investigator Email", false, null),
-    PART_NUMBER("Part Number", false, null),
-    FUNDING_SOURCE("Funding Source", false, FieldInputType.LONG_TEXT),
-    IP("Intellectual Property", false, FieldInputType.TEXTAREA),
-    BIO_SAFETY_LEVEL("BioSafety Level", true, FieldInputType.SELECT),
-    NAME("Name", true, FieldInputType.TEXT),
-    ALIAS("Alias", false, FieldInputType.TEXT),
-    KEYWORDS("Keywords", false, FieldInputType.LONG_TEXT),
-    BACKBONE("Backbone", false, FieldInputType.TEXT),
-    SUMMARY("Summary", true, FieldInputType.TEXTAREA),
-    NOTES("Notes", false, FieldInputType.TEXTAREA),
-    REFERENCES("References", false, FieldInputType.LONG_TEXT),
-    EXTERNAL_URL("External URL", false, FieldInputType.MULTI_TEXT),
-    LINKS("Links", false, FieldInputType.TEXT),
-    STATUS("Status", true, FieldInputType.SELECT),
-    CREATOR("Creator", true, FieldInputType.USER_WITH_EMAIL),
-    CREATOR_EMAIL("Creator Email", true, null),
-    SEQ_FILENAME("Sequence File", false, null),
-    ATT_FILENAME("Attachment File", false, null),
-    SEQ_TRACE_FILES("Sequence Trace File(s)", false, null),
-    SELECTION_MARKERS("Selection Markers", true, FieldInputType.MULTI_TEXT),
-    HOST("Host", false, FieldInputType.TEXT),
-    GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype", false, FieldInputType.TEXTAREA),
-    CIRCULAR("Circular", false, FieldInputType.BOOLEAN),
-    PROMOTERS("Promoters", false, FieldInputType.TEXT),
-    REPLICATES_IN("Replicates In", false, FieldInputType.TEXT),
-    ORIGIN_OF_REPLICATION("Origin of Replication", false, FieldInputType.TEXT),
-    HOMOZYGOSITY("Homozygosity", false, FieldInputType.LONG_TEXT),
-    ECOTYPE("Ecotype", false, FieldInputType.LONG_TEXT),
-    HARVEST_DATE("Harvest Date", false, FieldInputType.DATE),
-    GENERATION("Generation", false, FieldInputType.SELECT),
-    SENT_TO_ABRC("Sent to ABRC?", false, FieldInputType.BOOLEAN),
-    PLANT_TYPE("Plant Type", false, FieldInputType.SELECT),
-    PARENTS("Parents", false, null),
-    EXISTING_PART_NUMBER("Existing Part Number", false, null),
-    ORGANISM("Organism", false, FieldInputType.LONG_TEXT),
-    FULL_NAME("Full Name", false, FieldInputType.LONG_TEXT),
-    GENE_NAME("Gene Name", false, FieldInputType.LONG_TEXT),
-    UPLOADED_FROM("Uploaded From", false, FieldInputType.LONG_TEXT);
+    PI("Principal Investigator", true, FieldInputType.USER_WITH_EMAIL, "principalInvestigator", ""),
+    PI_EMAIL("Principal Investigator Email", false, null, "", ""),
+    PART_NUMBER("Part Number", false, null, "partId", ""),
+    FUNDING_SOURCE("Funding Source", false, FieldInputType.LONG_TEXT, "", ""),
+    IP("Intellectual Property", false, FieldInputType.TEXTAREA, "", ""),
+    BIO_SAFETY_LEVEL("BioSafety Level", true, FieldInputType.SELECT, "", ""),
+    NAME("Name", true, FieldInputType.TEXT, "name", ""),
+    ALIAS("Alias", false, FieldInputType.TEXT, "alias", ""),
+    KEYWORDS("Keywords", false, FieldInputType.LONG_TEXT, "keywords", ""),
+    BACKBONE("Backbone", false, FieldInputType.TEXT, "", ""),
+    SUMMARY("Summary", true, FieldInputType.TEXTAREA, "shortDescription", ""),
+    NOTES("Notes", false, FieldInputType.TEXTAREA, "longDescription", ""),
+    REFERENCES("References", false, FieldInputType.LONG_TEXT, "", ""),
+    EXTERNAL_URL("External URL", false, FieldInputType.MULTI_TEXT, "", ""),
+    LINKS("Links", false, FieldInputType.TEXT, "", ""),
+    STATUS("Status", true, FieldInputType.SELECT, "status", ""),
+    CREATOR("Creator", true, FieldInputType.USER_WITH_EMAIL, "creator", ""),
+    CREATOR_EMAIL("Creator Email", true, null, "", ""),
+    SEQ_FILENAME("Sequence File", false, null, "", ""),
+    ATT_FILENAME("Attachment File", false, null, "", ""),
+    SEQ_TRACE_FILES("Sequence Trace File(s)", false, null, "", ""),
+    SELECTION_MARKERS("Selection Markers", true, FieldInputType.MULTI_TEXT, "", ""),
+    HOST("Host", false, FieldInputType.TEXT, "", ""),
+    GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype", false, FieldInputType.TEXTAREA, "", ""),
+    CIRCULAR("Circular", false, FieldInputType.BOOLEAN, "", ""),
+    PROMOTERS("Promoters", false, FieldInputType.TEXT, "promoters", "plasmidData"),
+    REPLICATES_IN("Replicates In", false, FieldInputType.TEXT, "", ""),
+    ORIGIN_OF_REPLICATION("Origin of Replication", false, FieldInputType.TEXT, "", ""),
+    HOMOZYGOSITY("Homozygosity", false, FieldInputType.LONG_TEXT, "", ""),
+    ECOTYPE("Ecotype", false, FieldInputType.LONG_TEXT, "", ""),
+    HARVEST_DATE("Harvest Date", false, FieldInputType.DATE, "", ""),
+    GENERATION("Generation", false, FieldInputType.SELECT, "", ""),
+    SENT_TO_ABRC("Sent to ABRC?", false, FieldInputType.BOOLEAN, "", ""),
+    PLANT_TYPE("Plant Type", false, FieldInputType.SELECT, "", ""),
+    PARENTS("Parents", false, null, "", ""),
+    EXISTING_PART_NUMBER("Existing Part Number", false, null, "", ""),
+    ORGANISM("Organism", false, FieldInputType.LONG_TEXT, "", ""),
+    FULL_NAME("Full Name", false, FieldInputType.LONG_TEXT, "", ""),
+    GENE_NAME("Gene Name", false, FieldInputType.LONG_TEXT, "", ""),
+    UPLOADED_FROM("Uploaded From", false, FieldInputType.LONG_TEXT, "", "");
 
     private final String display;
     private final boolean required;
     private final FieldInputType fieldType;
+    private final String field;
+    private final String subField;
 
-    EntryFieldLabel(String display, boolean required, FieldInputType type) {
+    EntryFieldLabel(String display, boolean required, FieldInputType type, String field, String subField) {
         this.display = display;
         this.required = required;
         this.fieldType = type;
+        this.field = field;
+        this.subField = subField;
     }
 
     /**
@@ -212,5 +216,13 @@ public enum EntryFieldLabel implements IDataTransferModel {
 
     public FieldInputType getFieldType() {
         return fieldType;
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    public String getSubField() {
+        return subField;
     }
 }

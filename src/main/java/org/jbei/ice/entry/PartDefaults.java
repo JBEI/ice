@@ -18,10 +18,12 @@ public class PartDefaults {
 
     private final String userId;
     private final AccountDAO accountDAO;
+    private final PreferencesController preferencesController;
 
     public PartDefaults(String userId) {
         this.userId = userId;
         this.accountDAO = DAOFactory.getAccountDAO();
+        this.preferencesController = new PreferencesController();
     }
 
     /**
@@ -68,17 +70,14 @@ public class PartDefaults {
     }
 
     public String getForLabel(EntryFieldLabel label) {
-        switch (label) {
-            default:
-                return "";
+        return switch (label) {
+            default -> "";
+            case PI ->
+                // pi defaults
+                preferencesController.getPreferenceValue(userId, PreferenceKey.PRINCIPAL_INVESTIGATOR.name());
+            case FUNDING_SOURCE ->
+                preferencesController.getPreferenceValue(userId, PreferenceKey.FUNDING_SOURCE.name());
+        };
 
-            case PI:
-                break;
-
-            case FUNDING_SOURCE:
-                break;
-        }
-
-        return "";
     }
 }

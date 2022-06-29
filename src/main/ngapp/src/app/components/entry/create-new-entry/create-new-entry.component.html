@@ -47,8 +47,13 @@
                                         <!--                                                   placeholder="Optional Email">-->
                                         <!--                                        </div>-->
 
-                                        <input class="form-control form-control-sm w-50"
-                                               *ngIf="field.fieldInputType === 'TEXT' || field.fieldInputType === 'USER_WITH_EMAIL' || !field.fieldInputType">
+                                        <div *ngIf="field.fieldInputType === 'TEXT'
+                                                || field.fieldInputType === 'USER_WITH_EMAIL'
+                                                || !field.fieldInputType">
+
+                                            <input class="form-control form-control-sm w-50" [(ngModel)]="field.value"
+                                                   (focusout)="textInputFocusOut(field)" maxlength="127">
+                                        </div>
 
                                         <input class="form-control form-control-sm w-75"
                                                *ngIf="field.fieldInputType === 'LONG_TEXT'">
@@ -76,8 +81,15 @@
                                         <div class="fw-bold">Sequence Information</div>
                                         <div class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
                                             <i style="font-size: 18px" class="bi bi-info-lg"></i>
-                                            <span ng-if="activePart.type!=='PROTEIN'" class="ng-scope">Supported file formats are Genbank, Fasta and SBOL</span>
+                                            <span>Supported file formats are Genbank, Fasta and SBOL</span>
                                         </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col">
+                                        {{newPart | json}}
                                     </div>
                                 </div>
 

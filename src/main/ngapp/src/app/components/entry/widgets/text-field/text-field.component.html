@@ -1,0 +1,25 @@
+<div class="row p-1">
+    <div class="col-3 offset-1">
+        <span class="text-muted">{{field.label}}</span>
+    </div>
+
+    <div class="col-8">
+
+        <div class="field-value" *ngIf="inEditMode">
+            {{field.value}} <i class="bi bi-pencil" (click)="switchEditMode()"></i>
+        </div>
+
+        <div *ngIf="!inEditMode" class="d-flex">
+            <input class="form-control form-control-sm w-50" [(ngModel)]="field.value" name="field-value"
+                   (focusout)="textInputFocusOut(field)" maxlength="127">
+
+            <button class="btn btn-sm" (click)="switchEditMode()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+
+            <button class="btn btn-sm" (click)="switchEditMode()">
+                <i class="bi bi-check-lg"></i>
+            </button>
+        </div>
+    </div>
+</div>

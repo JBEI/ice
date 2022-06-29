@@ -66,6 +66,7 @@ public class PartData implements IDataTransferModel {
     private PlasmidData plasmidData;
     private SeedData seedData;
     private ProteinData proteinData;
+    private final List<EntryField> fields;
 
     public PartData(EntryType type) {
         this.type = type;
@@ -75,6 +76,7 @@ public class PartData implements IDataTransferModel {
         customFields = new ArrayList<>();
         status = "";
         bioSafetyLevel = 1;
+        this.fields = new ArrayList<>();
     }
 
     public String getRecordId() {
@@ -468,5 +470,9 @@ public class PartData implements IDataTransferModel {
 
     public void setSequenceFileName(String sequenceFileName) {
         this.sequenceFileName = sequenceFileName;
+    }
+
+    public List<EntryField> getFields() {
+        return fields;
     }
 }

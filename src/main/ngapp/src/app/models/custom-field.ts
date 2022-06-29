@@ -13,4 +13,6 @@ export class CustomField {
     disabled: boolean;
     value: string;
     fieldInputType: string;
+    field: string;
+    subField: string;
 }

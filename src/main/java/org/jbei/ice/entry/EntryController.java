@@ -136,7 +136,7 @@ public class EntryController extends HasEntry {
         statistics.setEntryId(entryId);
         statistics.setCommentCount(commentDAO.getCommentCount(entry));
         int sequenceCount = DAOFactory.getTraceSequenceDAO().getCountByEntry(entry) +
-                DAOFactory.getShotgunSequenceDAO().getShotgunSequenceCount(entry);
+            DAOFactory.getShotgunSequenceDAO().getShotgunSequenceCount(entry);
         statistics.setSequenceCount(sequenceCount);
         int sampleCount = DAOFactory.getSampleDAO().getSampleCount(entry);
         statistics.setSampleCount(sampleCount);
@@ -262,10 +262,47 @@ public class EntryController extends HasEntry {
         }
 
         PartData partData = ModelToInfoFactory.getInfo(entry);
+        EntryType entryType = EntryType.nameToType(entry.getRecordType());
 
         // get custom data
         CustomFields fields = new CustomFields();
-        partData.getCustomEntryFields().addAll(fields.getCustomFieldValuesForPart(entry.getId()));
+        List<CustomEntryField> customValues = fields.getCustomFieldValuesForPart(entry.getId());
+        Set<EntryFieldLabel> existingCustomFields = new HashSet<>(); // to keep track of existing
+        for (CustomEntryField customEntryField : customValues) {
+            // convert to entry field
+            EntryField field = new EntryField();
+
+            switch (customEntryField.getFieldType()) {
+                // keep track of existing field customizations to avoid duplicating it when retrieving
+                // regular fields
+                case EXISTING -> {
+                    existingCustomFields.add(customEntryField.getExistingField());
+                    field.setFieldInputType(customEntryField.getExistingField().getFieldType());
+                }
+
+                case MULTI_CHOICE, MULTI_CHOICE_PLUS -> field.setFieldInputType(FieldInputType.SELECT);
+            }
+
+            // create and add entry field
+            field.setRequired(customEntryField.isRequired());
+            field.setEntryType(entryType);
+            field.setCustom(true);
+            field.setId(customEntryField.getId());
+            field.setValue(customEntryField.getValue());
+            field.setLabel(customEntryField.getLabel());
+            field.getOptions().addAll(customEntryField.getOptions());
+            partData.getFields().add(field);
+        }
+
+        // get fields data
+        PartFields partFields = new PartFields(userId, entryType);
+        for (EntryField entryField : partFields.get()) {        // note: this also includes custom fields
+            if (entryField.isCustom() || existingCustomFields.contains(EntryFieldLabel.fromString(entryField.getLabel())))
+                continue;
+
+            ModelToInfoFactory.entryToInfo(entry, entryField);
+            partData.getFields().add(entryField);
+        }
 
         // retrieve sequence information
         boolean hasSequence = sequenceDAO.hasSequence(entry.getId());

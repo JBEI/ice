@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {Entry} from "../../../models/entry";
 import {ActivatedRoute} from "@angular/router";
 import {HttpService} from "../../../services/http.service";
+import {Part} from "../../../models/Part";
 
 @Component({
     selector: 'app-entry-detail',
@@ -10,7 +10,7 @@ import {HttpService} from "../../../services/http.service";
 })
 export class EntryDetailComponent implements OnInit {
 
-    entry: Entry;
+    entry: Part;
 
     constructor(private http: HttpService, private route: ActivatedRoute) {
     }

@@ -104,6 +104,24 @@ public class Entries extends HasEntry {
         return entry.getId();
     }
 
+    /**
+     * Update the specified entry using information contained in the field
+     */
+    public void updateFieldValue(long partId, EntryField entryField) {
+        Entry existing = dao.get(partId);
+        if (existing == null)
+            throw new IllegalArgumentException("Could not retrieve entry with id " + partId);
+
+        EntryFieldLabel field = EntryFieldLabel.fromString(entryField.getField());
+        if (field == null)
+            throw new IllegalArgumentException("Invalid entry field label");
+
+        authorization.expectWrite(userId, existing);
+        String[] values = new String[]{entryField.getValue()};
+        InfoToModelFactory.infoToEntryForField(existing, values, field);
+        dao.update(existing);
+    }
+
     public void updateField(String partId, String fieldLabel, List<String> values) {
         EntryFieldLabel field = EntryFieldLabel.fromString(fieldLabel);
         if (field == null) {
@@ -148,7 +166,7 @@ public class Entries extends HasEntry {
 
                 // try again with label and type
                 Optional<CustomEntryFieldModel> optional = dao.getLabelForType(customEntryField.getEntryType(), customEntryField.getLabel());
-                if (!optional.isPresent()) {
+                if (optional.isEmpty()) {
                     Logger.error("Could not retrieve custom field with id " + customEntryField.getId());
                     continue;
                 }

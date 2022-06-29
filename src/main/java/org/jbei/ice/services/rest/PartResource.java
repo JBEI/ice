@@ -246,8 +246,8 @@ public class PartResource extends RestResource {
     @DELETE
     @Path("/{id}/experiments/{eid}")
     public Response deletePartExperiment(
-            @PathParam("id") final String partId,
-            @PathParam("eid") final long experimentId) {
+        @PathParam("id") final String partId,
+        @PathParam("eid") final long experimentId) {
         try {
             String userId = requireUserId();
             log(userId, "deleting experiment " + experimentId + " for entry " + partId);
@@ -355,11 +355,11 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/history")
     public Response getHistory(
-            @PathParam("id") long partId,
-            @QueryParam("limit") int limit,
-            @QueryParam("offset") int offset,
-            @QueryParam("asc") boolean asc,
-            @QueryParam("sort") String sort) {
+        @PathParam("id") long partId,
+        @QueryParam("limit") int limit,
+        @QueryParam("offset") int offset,
+        @QueryParam("asc") boolean asc,
+        @QueryParam("sort") String sort) {
         String userId = requireUserId();
         EntryHistory entryHistory = new EntryHistory(userId, partId);
         return super.respond(entryHistory.get(limit, offset, asc, sort));
@@ -416,10 +416,10 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/shotgunsequences")
     public ArrayList<ShotgunSequenceDTO> getShotgunSequences(
-            @Context final UriInfo info,
-            @PathParam("id") final long partId,
-            @DefaultValue("100") @QueryParam("limit") int limit,
-            @DefaultValue("0") @QueryParam("start") int start) {
+        @Context final UriInfo info,
+        @PathParam("id") final long partId,
+        @DefaultValue("100") @QueryParam("limit") int limit,
+        @DefaultValue("0") @QueryParam("start") int start) {
         getUserId();
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
         final EntryDAO entryDAO = DAOFactory.getEntryDAO();
@@ -662,6 +662,18 @@ public class PartResource extends RestResource {
         }
     }
 
+    @PUT
+    @Path("/{id}/fields")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateEntryField(@PathParam("id") final long partId,
+                                     EntryField field) {
+        final String userId = requireUserId();
+        Entries entries = new Entries(userId);
+        entries.updateFieldValue(partId, field);
+        return super.respond(true);
+    }
+
     /**
      * Updates the specified part field. Should probably be a "PATCH"
      */
@@ -769,9 +781,9 @@ public class PartResource extends RestResource {
     @Path("/custom")
     @Produces(MediaType.APPLICATION_JSON)
     public Response customExport(
-            @QueryParam("sequenceFormat") String sequenceFormat,
-            @DefaultValue("true") @QueryParam("onePerFolder") boolean onePerFolder,
-            EntrySelection selection) {
+        @QueryParam("sequenceFormat") String sequenceFormat,
+        @DefaultValue("true") @QueryParam("onePerFolder") boolean onePerFolder,
+        EntrySelection selection) {
         String userId = super.requireUserId();
         SequenceFormat format = SequenceFormat.fromString(sequenceFormat.toUpperCase());
         CustomExportTask task = new CustomExportTask(userId, selection, format, onePerFolder);
