@@ -271,7 +271,7 @@ public class SequenceUtil {
         }
 
         String potentialFileId = sequence.getSequenceUser();
-        if (!StringUtils.isBlank(potentialFileId)) {
+        if (!StringUtils.isBlank(potentialFileId) && !potentialFileId.contains(" ")) {
             ConfigurationSettings configurationSettings = new ConfigurationSettings();
             String dataDirectoryString = configurationSettings.getPropertyValue(ConfigurationKey.DATA_DIRECTORY);
             Path dataSequencePath = Paths.get(dataDirectoryString, PartSequence.SEQUENCE_FOLDER_NAME, potentialFileId);

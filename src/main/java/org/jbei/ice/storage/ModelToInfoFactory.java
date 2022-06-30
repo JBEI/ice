@@ -92,7 +92,7 @@ public class ModelToInfoFactory {
         data.setEcotype(seed.getEcotype());
         data.setSeedParents(seed.getParents());
         if (seed.getHarvestDate() != null) {
-            DateFormat format = new SimpleDateFormat("MM/dd/YYYY");
+            DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
             String dateFormat = format.format(seed.getHarvestDate());
             data.setHarvestDate(dateFormat);
         }
@@ -352,7 +352,7 @@ public class ModelToInfoFactory {
                 seedData.setEcotype(seed.getEcotype());
                 seedData.setSeedParents(seed.getParents());
                 if (seed.getHarvestDate() != null) {
-                    DateFormat format = new SimpleDateFormat("MM/dd/YYYY");
+                    DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
                     String dateFormat = format.format(seed.getHarvestDate());
                     seedData.setHarvestDate(dateFormat);
                 }
