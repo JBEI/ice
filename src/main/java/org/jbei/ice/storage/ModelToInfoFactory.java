@@ -49,6 +49,68 @@ public class ModelToInfoFactory {
         return infos;
     }
 
+    private static SeedData seedInfo(Entry entry) {
+        SeedData data = new SeedData();
+
+        // seed specific
+        ArabidopsisSeed seed = (ArabidopsisSeed) entry;
+
+        if (seed.getPlantType() != null && seed.getPlantType() != PlantType.NULL) {
+            PlantType type = PlantType.fromString(seed.getPlantType().name());
+            data.setPlantType(type);
+        }
+
+        if (seed.getGeneration() != null && seed.getGeneration() != Generation.UNKNOWN) {
+            Generation generation = Generation.fromString(seed.getGeneration().name());
+            data.setGeneration(generation);
+        }
+        data.setHomozygosity(seed.getHomozygosity());
+        data.setEcotype(seed.getEcotype());
+        data.setSeedParents(seed.getParents());
+        if (seed.getHarvestDate() != null) {
+            DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+            String dateFormat = format.format(seed.getHarvestDate());
+            data.setHarvestDate(dateFormat);
+        }
+        boolean isSent = !(seed.isSentToABRC() == null || !seed.isSentToABRC());
+        data.setSentToAbrc(isSent);
+        return data;
+    }
+
+    private static StrainData strainInfo(Entry entry) {
+        StrainData data = new StrainData();
+
+        // strain specific
+        Strain strain = (Strain) entry;
+        data.setGenotypePhenotype(strain.getGenotypePhenotype());
+        data.setHost(strain.getHost());
+        return data;
+    }
+
+    private static PlasmidData plasmidInfo(Entry entry) {
+        PlasmidData data = new PlasmidData();
+        Plasmid plasmid = (Plasmid) entry;
+
+        // plasmid specific fields
+        data.setBackbone(plasmid.getBackbone());
+        data.setCircular(plasmid.getCircular());
+        data.setOriginOfReplication(plasmid.getOriginOfReplication());
+        data.setPromoters(plasmid.getPromoters());
+        data.setReplicatesIn(plasmid.getReplicatesIn());
+        return data;
+    }
+
+    private static ProteinData proteinInfo(Entry entry) {
+        ProteinData data = new ProteinData();
+
+        // protein specific
+        Protein protein = (Protein) entry;
+        data.setOrganism(protein.getOrganism());
+        data.setFullName(protein.getFullName());
+        data.setGeneName(protein.getGeneName());
+        data.setUploadedFrom(protein.getUploadedFrom());
+        return data;
+    }
 
     public static PartData getCommon(PartData info, Entry entry) {
         info.setId(entry.getId());
@@ -171,6 +233,7 @@ public class ModelToInfoFactory {
     }
 
 
+
     public static PartData createTableView(long entryId, List<String> fields) {
         Set<String> fieldsToProcess;
         if (fields == null)
@@ -185,7 +248,7 @@ public class ModelToInfoFactory {
         fieldsToProcess.add("short_description");
 
         // minimum set of values
-        Entry entry = org.jbei.ice.storage.DAOFactory.getEntryDAO().get(entryId);
+        Entry entry = DAOFactory.getEntryDAO().get(entryId);
         EntryType type = EntryType.nameToType(entry.getRecordType());
         PartData view = new PartData(type);
         view.setId(entry.getId());
@@ -198,14 +261,14 @@ public class ModelToInfoFactory {
         view.setShortDescription(entry.getShortDescription());
 
         // has sample
-        view.setHasSample(org.jbei.ice.storage.DAOFactory.getSampleDAO().hasSample(entry));
+        view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
 
         // has sequence
         Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
         if (visibility == Visibility.REMOTE) {
             view.setHasSequence(entry.getLongDescriptionType().equalsIgnoreCase("sequence"));
         } else {
-            SequenceDAO sequenceDAO = org.jbei.ice.storage.DAOFactory.getSequenceDAO();
+            SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
             view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
             view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
         }
