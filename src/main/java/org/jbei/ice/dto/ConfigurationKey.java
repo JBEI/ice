@@ -13,7 +13,7 @@ public enum ConfigurationKey implements IDataTransferModel {
 
     APPLICATION_VERSION("5.9.4"),
     TEMPORARY_DIRECTORY("/tmp"),
-    DATA_DIRECTORY("data"),
+    DATA_DIRECTORY(System.getenv("ICE_DATA_HOME")),
 
     BULK_UPLOAD_APPROVER_EMAIL(""), //TODO this should be a role
     ADMIN_EMAIL(""),
