@@ -80,7 +80,7 @@ public class AuthenticationInterceptor implements ContainerRequestFilter, Reader
                     return HmacSignatureFactory.decodeKey(encoded.toString());
                 }
             } catch (final Throwable t) {
-                Logger.error("Failed to load rest-auth key " + keyId);
+                Logger.error("Failed to load rest-auth key " + keyId, t);
             }
             return null;
         }
