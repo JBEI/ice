@@ -15,12 +15,12 @@ RUN sed -i.bak -E \
         -e 's|</security-constraint>|</security-constraint>-->|;' \
         /tmp/src/main/webapp/WEB-INF/web.xml \
     && rm /tmp/src/main/webapp/WEB-INF/web.xml.bak \
-    && cp /tmp/docker/hibernate.cfg.xml /tmp/src/main/resources/hibernate.cfg.xml \
+    && cp /tmp/docker/logback.xml /tmp/src/main/resources/logback.xml \
     && mvn -DskipTests=true package
 
 # -----
 
-FROM tomcat:9-jdk16
+FROM tomcat:9-jdk17
 
 RUN apt-get clean \
     && apt-get update \
@@ -33,8 +33,5 @@ RUN apt-get clean \
         -e '\|^</Context>$|i <Resources cachingAllowed="true" cacheMaxSize="100000" />' \
         /usr/local/tomcat/conf/context.xml \
     && rm /usr/local/tomcat/conf/context.xml.bak
-
-# Override CATALINA_OPTS environment to change from default db connection
-ENV CATALINA_OPTS="-Dice.db.url=jdbc:postgresql://postgres/ice -Dice.db.user=iceuser -Dice.db.pass=icepass"
 
 COPY --from=maven /tmp/target/ice-*.war /usr/local/tomcat/webapps/ROOT.war
