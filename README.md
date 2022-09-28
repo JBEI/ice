@@ -20,7 +20,7 @@ To install in a production environment, please [consult our manual](http://ice.j
 ### Development
 To set up a development environment or local machine installation make sure you have the following dependencies installed
 
-* [Open JDK 15](https://openjdk.java.net/projects/jdk/15/)
+* [Open JDK 16](https://openjdk.java.net/projects/jdk/16/)
 * [Maven 3](https://maven.apache.org/download.cgi)
 * [Git](https://git-scm.com/downloads)
 
@@ -38,8 +38,8 @@ Command line installation steps (linux environment):
 * Start the embedded undertow server 
         
         java -cp "./target/ice-{version-number}-classes.jar:./target/ice-{version-number}/WEB-INF/lib/*" DevelopmentServer
-        
-  Where "ice-{version-number}" is the version of ICE that was cloned. e.g. "ice-5.6.0"
+
+  Where "ice-{version-number}" is the version of ICE that was cloned. e.g. "ice-5.10.3"
 
 * Access the application at [http://localhost:8080](http://localhost:8080) and login using username and password "Administrator"
 
