@@ -22,7 +22,7 @@ public class CustomEntryFieldValueModel implements DataModel {
     @JoinColumn(name = "custom_entry_field_id", nullable = false)
     private CustomEntryFieldModel field;
 
-    @Column(name = "value")
+    @Column(name = "\"value\"")
     private String value;
 
     @Override
