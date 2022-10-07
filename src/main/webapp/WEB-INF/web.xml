@@ -17,7 +17,7 @@
     <display-name>ice</display-name>
 
     <listener>
-        <listener-class>org.jbei.org.jbei.ice.servlet.IceServletContextListener</listener-class>
+        <listener-class>org.jbei.ice.servlet.IceServletContextListener</listener-class>
     </listener>
 
     <!-- jersey rest service -->
