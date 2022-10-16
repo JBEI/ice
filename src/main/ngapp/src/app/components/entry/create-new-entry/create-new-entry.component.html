@@ -11,7 +11,7 @@
                     <app-header></app-header>
                 </div>
 
-                <div class="container-fluid">
+                <div class="container">
 
                     <div class="row">
                         <div class="col p-4">
@@ -22,82 +22,49 @@
                     <div class="row">
                         <div class="col">
 
-                            <div class="container-fluid" style="width: 75vw">
+                            <div class="container" style="width: 75vw">
                                 <div class="row p-1" *ngFor="let field of fields">
 
-                                    <div class="col-3 offset-1 d-flex">
-                                        <label [for]="field.label">{{field.label}}
-                                            <span class="text-danger" *ngIf="field.required"
-                                                  style="font-size: larger">*</span>
-                                        </label>
-                                    </div>
+                                    <ng-container *ngIf="field.fieldInputType === 'TEXT' || !field.fieldInputType
+                                    || field.fieldInputType === 'LONG_TEXT'">
+                                        <app-text-field [field]="field"
+                                                        [longText]="field.fieldInputType === 'LONG_TEXT'"></app-text-field>
+                                    </ng-container>
 
-                                    <div class="col-8" [id]="field.label">
-                                        <select class="form-select form-select-sm w-50" id="inputGroupSelect01"
-                                                *ngIf="field.fieldInputType === 'SELECT'">
-                                            <option selected>Choose...</option>
-                                            <option value="1" *ngFor="let option of field.options">
-                                                {{option.name}}
-                                            </option>
-                                        </select>
 
-                                        <!--                                        <div class="input-group" *ngIf="field.fieldInputType === 'USER_WITH_EMAIL'">-->
-                                        <!--                                            <input type="text" class="form-control form-control-sm" aria-label="Name">-->
-                                        <!--                                            <input type="text" class="form-control form-control-sm" aria-label="Email"-->
-                                        <!--                                                   placeholder="Optional Email">-->
-                                        <!--                                        </div>-->
+                                    <ng-container *ngIf="field.fieldInputType === 'SELECT'">
+                                        <app-select-field [field]="field"></app-select-field>
+                                    </ng-container>
 
-                                        <div *ngIf="field.fieldInputType === 'TEXT'
-                                                || field.fieldInputType === 'USER_WITH_EMAIL'
-                                                || !field.fieldInputType">
 
-                                            <input class="form-control form-control-sm w-50" [(ngModel)]="field.value"
-                                                   (focusout)="textInputFocusOut(field)" maxlength="127">
-                                        </div>
+                                    <ng-container *ngIf="field.fieldInputType === 'DATE'">
+                                        <app-date-picker></app-date-picker>
+                                    </ng-container>
 
-                                        <input class="form-control form-control-sm w-75"
-                                               *ngIf="field.fieldInputType === 'LONG_TEXT'">
 
-                                        <textarea style="height: 70px;" class="form-control form-control-sm"
-                                                  *ngIf="field.fieldInputType === 'TEXTAREA'"></textarea>
+                                    <ng-container *ngIf="field.fieldInputType === 'USER_WITH_EMAIL'">
+                                        <app-user-with-email-field [field]="field"></app-user-with-email-field>
+                                    </ng-container>
 
-                                        <i class="bi bi-toggle2-off" style="font-size: x-large"
-                                           *ngIf="field.fieldInputType === 'BOOLEAN'"></i>
 
-                                        <div *ngIf="field.fieldInputType === 'MULTI_TEXT'" class="d-flex">
-                                            <input class="form-control form-control-sm w-50"> <i
-                                            class="bi bi-plus text-success" style="font-size: x-large"></i>
-                                        </div>
+                                    <ng-container *ngIf="field.fieldInputType === 'TEXTAREA'">
+                                        <app-textarea-field [field]="field"></app-textarea-field>
+                                    </ng-container>
 
-                                        <div *ngIf="field.fieldInputType === 'DATE'">
-                                            <app-date-picker></app-date-picker>
-                                        </div>
-                                    </div>
+
+                                    <ng-container *ngIf="field.fieldInputType === 'BOOLEAN'">
+                                        <app-boolean-field [field]="field"></app-boolean-field>
+                                    </ng-container>
+
+
+                                    <ng-container *ngIf="field.fieldInputType === 'MULTI_TEXT'">
+                                        <app-multi-text-field [field]="field"></app-multi-text-field>
+                                    </ng-container>
 
                                 </div>
 
-                                <div class="row mt-4">
-                                    <div class="col">
-                                        <div class="fw-bold">Sequence Information</div>
-                                        <div class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
-                                            <i style="font-size: 18px" class="bi bi-info-lg"></i>
-                                            <span>Supported file formats are Genbank, Fasta and SBOL</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                <app-sequence-visualization></app-sequence-visualization>
 
-
-                                <div class="row">
-                                    <div class="col">
-                                        {{newPart | json}}
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col">
-                                        <pre>{{fields | json}}</pre>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

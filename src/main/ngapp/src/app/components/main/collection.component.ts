@@ -9,6 +9,8 @@ import {Result} from "../../models/result";
 import {Entry} from "../../models/entry";
 import {Paging} from "../../models/paging";
 import {Folder} from "../../models/folder";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {CreateNewFolderModalComponent} from "../modal/create-new-folder-modal/create-new-folder-modal.component";
 
 @Component({
     selector: 'app-collection',
@@ -27,11 +29,16 @@ export class CollectionComponent implements OnInit {
     paging: Paging;
     entries: Entry[];
 
+    newFolder: Folder;
+
     constructor(private menuService: CollectionMenuService, private userService: UserService,
-                private router: Router, private http: HttpService, private activatedRoute: ActivatedRoute) {
+                private router: Router, private http: HttpService, private activatedRoute: ActivatedRoute,
+                private modalService: NgbModal) {
         this.collections = this.menuService.menuOptions;
         this.user = this.userService.getUser();
         this.paging = new Paging('created');
+        this.newFolder = new Folder();
+        this.newFolder.creationTime = new Date().getTime();
     }
 
     ngOnInit(): void {
@@ -91,5 +98,20 @@ export class CollectionComponent implements OnInit {
     collectionSelected(option: CollectionMenuOption): void {
         this.selectedOption = option;
         this.selectedFolderId = undefined;
+    }
+
+    showCreateNewFolderModal(): void {
+        const modalRef = this.modalService.open(CreateNewFolderModalComponent);
+        modalRef.result.then((result) => {
+            console.log(result);
+            this.getSubFolders(this.selectedOption);
+        });
+        // this.http.post('folders', this.newFolder).subscribe((result: Folder) => {
+        //     this.getSubFolders(this.selectedOption);
+        //     this.newFolder.showCreateNew = false;
+        //     this.newFolder.folderName = '';
+        // }, error => {
+        //
+        // });
     }
 }

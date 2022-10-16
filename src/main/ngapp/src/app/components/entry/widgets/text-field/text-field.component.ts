@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {CustomField} from "../../../../models/custom-field";
+import {Part} from "../../../../models/Part";
 
 @Component({
     selector: 'app-text-field',
@@ -9,6 +10,7 @@ import {CustomField} from "../../../../models/custom-field";
 export class TextFieldComponent implements OnInit {
 
     @Input() field: CustomField;
+    @Input() longText: Boolean;
     @Output() fieldChange: EventEmitter<any> = new EventEmitter<any>();
 
     inEditMode: boolean = false;
@@ -24,6 +26,8 @@ export class TextFieldComponent implements OnInit {
     }
 
     textInputFocusOut(field: CustomField): void {
+        field.active = false;
+
         if (!field.value || !field.value.trim())
             return;
 
@@ -37,6 +41,12 @@ export class TextFieldComponent implements OnInit {
         // } else {
         //     this.updateField(field);
         // }
+
+    }
+
+    textInputFocusIn(field: CustomField): void {
+        field.active = true;
+
     }
 
 }

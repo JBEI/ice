@@ -58,6 +58,8 @@ export class CreateNewEntryComponent implements OnInit {
     }
 
     textInputFocusOut(field: CustomField): void {
+        field.active = false;
+
         if (!field.value || !field.value.trim())
             return;
 
@@ -71,5 +73,10 @@ export class CreateNewEntryComponent implements OnInit {
         } else {
             this.updateField(field);
         }
+    }
+
+    textInputFocusIn(field: CustomField): void {
+        field.active = true;
+
     }
 }

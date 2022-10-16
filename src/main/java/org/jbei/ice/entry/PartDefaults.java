@@ -19,16 +19,19 @@ public class PartDefaults {
     private final String userId;
     private final AccountDAO accountDAO;
     private final PreferencesController preferencesController;
+    private final AccountModel account;
 
     public PartDefaults(String userId) {
         this.userId = userId;
         this.accountDAO = DAOFactory.getAccountDAO();
         this.preferencesController = new PreferencesController();
+        this.account = this.accountDAO.getByEmail(userId);
     }
 
     /**
      * Retrieves and sets the default values for the entry. Some of these values (e.g. PI, and Funding Source)
-     * are set by individual users as part of their personal preferences
+     * are set by individual users as part of their personal preferences. Others are inherent. e,g, the owner
+     * and creator fields
      *
      * @param type entry type
      * @return PartData object with the retrieve part defaults
@@ -57,7 +60,6 @@ public class PartDefaults {
         }
 
         // owner and creator details
-        AccountModel account = this.accountDAO.getByEmail(userId);
         if (account != null) {
             partData.setOwner(account.getFullName());
             partData.setOwnerEmail(account.getEmail());
@@ -72,6 +74,9 @@ public class PartDefaults {
     public String getForLabel(EntryFieldLabel label) {
         return switch (label) {
             default -> "";
+
+            case CREATOR -> account.getFullName();
+            case CREATOR_EMAIL -> account.getEmail();
             case PI ->
                 // pi defaults
                 preferencesController.getPreferenceValue(userId, PreferenceKey.PRINCIPAL_INVESTIGATOR.name());
