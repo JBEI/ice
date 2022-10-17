@@ -15,4 +15,7 @@ export class CustomField {
     fieldInputType: string;
     field: string;
     subField: string;
+
+    // ui helpers
+    active: boolean;
 }

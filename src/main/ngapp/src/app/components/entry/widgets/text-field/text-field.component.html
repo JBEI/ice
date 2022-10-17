@@ -1,6 +1,8 @@
-<div class="row p-1">
+<div class="row">
     <div class="col-3 offset-1">
-        <span class="text-muted">{{field.label}}</span>
+        <span [ngClass]="{'fw-bold': field.active}">{{field.label}}
+            <span class="text-danger" *ngIf="field.required" style="font-size: larger">*</span>
+        </span>
     </div>
 
     <div class="col-8">
@@ -10,10 +12,12 @@
         </div>
 
         <div *ngIf="!inEditMode" class="d-flex">
-            <input class="form-control form-control-sm w-50" [(ngModel)]="field.value" name="field-value"
-                   (focusout)="textInputFocusOut(field)" maxlength="127">
+            <input class="form-control form-control-sm" [(ngModel)]="field.value"
+                   (focusout)="textInputFocusOut(field)" name="field-value"
+                   [ngClass]="{'w-75': longText, ' w-50': !longText}"
+                   (focusin)="textInputFocusIn(field)" maxlength="127">
 
-            <button class="btn btn-sm" (click)="switchEditMode()">
+            <button class="btn btn-sm border ms-1" (click)="switchEditMode()">
                 <i class="bi bi-x-lg"></i>
             </button>
 

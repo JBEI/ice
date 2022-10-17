@@ -113,7 +113,7 @@ public class PartFields {
 
         // get regular fields using list of labels
         for (EntryFieldLabel label : labels) {
-            // skip any that have been modified via custom fields since it is already account for
+            // skip any that have been modified via custom fields since it is already accounted for
             if (existingCustomFields.contains(label))
                 continue;
 

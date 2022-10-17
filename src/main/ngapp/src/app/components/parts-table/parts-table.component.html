@@ -1,8 +1,8 @@
-<div *ngIf="!parts" class="text-black-50 font-italic p-4">
+<div *ngIf="!parts || !parts.length" class="text-black-50 fst-italic p-3 font-12em">
     No available parts
 </div>
 
-<div *ngIf="parts">
+<div *ngIf="parts && parts.length">
     <table class="table border-bottom table-hover font-95em" [ngClass]="{'opacity-25':paging.processing}">
         <thead style="color: #344050; font-size: 0.80em" class="text-uppercase text-muted">
         <tr>
@@ -27,9 +27,9 @@
                 </i>
             </td>
             <td class="font-90em text-uppercase text-black-50 font-weight-bold">
-                <i class="bi bi-trash text-danger" *ngIf="part.visible=='DELETED'"></i>
+                <i class="bi bi-trash text-danger" *ngIf="part.visible==='DELETED'"></i>
                 {{part.type}}
-                <i class="bi bi-cloud" *ngIf="part.visible=='REMOTE'" style="color: #c9e6f2"></i>
+                <i class="bi bi-cloud" *ngIf="part.visible==='REMOTE'" style="color: #c9e6f2"></i>
             </td>
             <td style="width: 120px">
                 <a [href]="'entry/' + part.id">{{part.partId}}</a>
@@ -55,10 +55,10 @@
             <!--            </td>-->
             <td style="vertical-align: middle; width:100px; white-space:nowrap">
                 <i class="bi bi-circle-fill" [ngClass]="{
-                'text-success':part.status.toUpperCase()=='COMPLETE',
-                'text-secondary': part.status.toUpperCase()=='In Progress'.toUpperCase(),
-                'text-danger': part.status.toUpperCase()=='Abandoned'.toUpperCase(),
-                'text-info': part.status.toUpperCase()=='Planned'.toUpperCase()}"></i>
+                'text-success':part.status.toUpperCase()==='COMPLETE',
+                'text-secondary': part.status.toUpperCase()==='In Progress'.toUpperCase(),
+                'text-danger': part.status.toUpperCase()==='Abandoned'.toUpperCase(),
+                'text-info': part.status.toUpperCase()==='Planned'.toUpperCase()}"></i>
                 <span class="text-muted"> {{part.status}}</span>
             </td>
 
@@ -94,16 +94,16 @@
         <ngb-pagination [collectionSize]="paging.available" [pageSize]="paging.limit" [(page)]="paging.currentPage"
                         [boundaryLinks]="true" [maxSize]="5" (pageChange)="pageChange($event)" size="sm">
             <ng-template ngbPaginationFirst><i
-                    class="fa fa-fw fa-angle-double-left"></i> First
+                class="fa fa-fw fa-angle-double-left"></i> First
             </ng-template>
             <ng-template ngbPaginationPrevious><i
-                    class="fa fa-fw fa-angle-left"></i>Prev
+                class="fa fa-fw fa-angle-left"></i>Prev
             </ng-template>
             <!--                            <ng-template ngbPaginationNumber let-p><button class="btn btn-sm btn-white">{{p}}</button></ng-template>-->
             <ng-template ngbPaginationNext>Next<i
-                    class="fa fa-fw fa-angle-right"></i></ng-template>
+                class="fa fa-fw fa-angle-right"></i></ng-template>
             <ng-template ngbPaginationLast>Last<i
-                    class="fa fa-fw fa-angle-double-right"></i>
+                class="fa fa-fw fa-angle-double-right"></i>
             </ng-template>
         </ngb-pagination>
 

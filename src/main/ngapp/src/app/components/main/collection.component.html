@@ -48,14 +48,16 @@
                                             <div class="row">
                                                 <div class="col px-4">
 
-
                                                     <div class="d-flex">
 
                                                         <!--                        <div class="border btn btn-white mb-1 me-2 px-2">-->
-                                                        <div
-                                                                class="border btn btn-white me-2 mb-1 text-black-50 py-0 shadow-sm">
-                                                            <i class="bi bi-plus" style="font-size: 2.7em"></i>
-                                                            <div class="small">Add</div>
+                                                        <div (click)="showCreateNewFolderModal()"
+                                                             class="border btn btn-white me-2 mb-1 text-black-50 py-0 px-1 shadow-sm">
+                                                            <i class="bi bi-plus" style="font-size: 2.8em"></i>
+                                                            <div class="small text-nowrap"
+                                                                 style="margin-top: -10px">
+                                                                Folder
+                                                            </div>
                                                         </div>
 
                                                         <div class="text-nowrap overflow-hidden" style="width: 100vw">
@@ -70,7 +72,7 @@
                                                                 <div class="border-top mt-2 pt-2 text-muted">
                                                                     {{folder.count | number}} entries
                                                                     <div
-                                                                            class="mt-1">{{folder.creationTime | date}}</div>
+                                                                        class="mt-1">{{folder.creationTime | date}}</div>
                                                                     <!--                                                                                                        <pre>{{folder | json}}</pre>-->
                                                                 </div>
                                                             </div>
@@ -85,8 +87,8 @@
                                                     <div class="d-flex justify-content-between">
                                                         <div>
                                                             <button class="btn btn-white btn-sm"><i
-                                                                    class="bi bi-funnel"></i> Filter &nbsp;<span
-                                                                    class="small fw-bold border-start ps-2 py-1">0</span>
+                                                                class="bi bi-funnel"></i> Filter &nbsp;<span
+                                                                class="small fw-bold border-start ps-2 py-1">0</span>
                                                             </button>
                                                             <button class="btn btn-sm ms-3"><i class="bi bi-search"></i>
                                                             </button>
@@ -110,19 +112,18 @@
                                                             </div>
 
                                                             <button type="button" class="btn btn-sm btn-white ms-3"><i
-                                                                    class="bi bi-download"></i>
+                                                                class="bi bi-download"></i>
                                                                 Export
                                                             </button>
 
                                                         </div>
                                                     </div>
 
-                                                    <div class="bg-white rounded mt-4">
-                                                    </div>
+                                                    <br>
 
                                                     <div class="bg-white p-3 rounded-bottom">
                                                         <app-parts-table
-                                                                [collection]="selectedOption.name"></app-parts-table>
+                                                            [collection]="selectedOption.name"></app-parts-table>
                                                     </div>
 
                                                 </div>

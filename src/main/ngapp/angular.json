@@ -123,9 +123,8 @@
       }
     }
   },
+  "defaultProject": "ice",
   "cli": {
-      "schematicCollections": [
-          "@angular-eslint/schematics"
-      ]
+    "defaultCollection": "@angular-eslint/schematics"
   }
 }

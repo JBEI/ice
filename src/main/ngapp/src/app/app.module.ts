@@ -25,6 +25,17 @@ import {CreateNewEntryComponent} from './components/entry/create-new-entry/creat
 import {EntryFieldsResolver} from "./components/entry/entry-fields.resolver";
 import {DatePickerComponent} from "./components/date-picker/date-picker.component";
 import {TextFieldComponent} from './components/entry/widgets/text-field/text-field.component';
+import {
+    CreateNewFolderModalComponent
+} from './components/modal/create-new-folder-modal/create-new-folder-modal.component';
+import {
+    SequenceVisualizationComponent
+} from './components/entry/widgets/sequence-visualization/sequence-visualization.component';
+import { SelectFieldComponent } from './components/entry/widgets/select-field/select-field.component';
+import { UserWithEmailFieldComponent } from './components/entry/widgets/user-with-email-field/user-with-email-field.component';
+import { MultiTextFieldComponent } from './components/entry/widgets/multi-text-field/multi-text-field.component';
+import { TextareaFieldComponent } from './components/entry/widgets/textarea-field/textarea-field.component';
+import { BooleanFieldComponent } from './components/entry/widgets/boolean-field/boolean-field.component';
 
 // register Handsontable's modules
 registerAllModules();
@@ -46,7 +57,14 @@ registerAllModules();
         ProfileComponent,
         CreateNewEntryComponent,
         DatePickerComponent,
-        TextFieldComponent
+        TextFieldComponent,
+        CreateNewFolderModalComponent,
+        SequenceVisualizationComponent,
+        SelectFieldComponent,
+        UserWithEmailFieldComponent,
+        MultiTextFieldComponent,
+        TextareaFieldComponent,
+        BooleanFieldComponent
     ],
     imports: [
         BrowserModule,
