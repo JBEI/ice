@@ -18,3 +18,13 @@ table a:hover {
     background-color: #0b5ed7;
     border-color: #0a58ca;
 }
+
+.folder:hover {
+    background-color: white;
+}
+
+.folder {
+    background-color: #f8f9fa;
+    width: 140px;
+    border: 1px solid #4b4a4a;
+}

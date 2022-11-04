@@ -265,6 +265,7 @@ public class ModelToInfoFactory {
 
         // has sequence
         Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
+        view.setVisibility(visibility);
         if (visibility == Visibility.REMOTE) {
             view.setHasSequence(entry.getLongDescriptionType().equalsIgnoreCase("sequence"));
         } else {

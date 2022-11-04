@@ -13,6 +13,7 @@ export class FolderComponent implements OnInit {
 
     paging: Paging = new Paging('created');
     folderDetails: FolderDetails;
+    collectionName: string;
 
     constructor(private http: HttpService, private activatedRoute: ActivatedRoute) {
     }
@@ -23,8 +24,10 @@ export class FolderComponent implements OnInit {
 
             // retrieve folder details
             this.getFolderEntries(folderId);
-
         });
+
+        // get the folder name
+        this.collectionName = this.activatedRoute.parent.snapshot.params.name;
     }
 
     getFolderEntries(folderId: number): void {

@@ -31,11 +31,14 @@ import {
 import {
     SequenceVisualizationComponent
 } from './components/entry/widgets/sequence-visualization/sequence-visualization.component';
-import { SelectFieldComponent } from './components/entry/widgets/select-field/select-field.component';
-import { UserWithEmailFieldComponent } from './components/entry/widgets/user-with-email-field/user-with-email-field.component';
-import { MultiTextFieldComponent } from './components/entry/widgets/multi-text-field/multi-text-field.component';
-import { TextareaFieldComponent } from './components/entry/widgets/textarea-field/textarea-field.component';
-import { BooleanFieldComponent } from './components/entry/widgets/boolean-field/boolean-field.component';
+import {SelectFieldComponent} from './components/entry/widgets/select-field/select-field.component';
+import {
+    UserWithEmailFieldComponent
+} from './components/entry/widgets/user-with-email-field/user-with-email-field.component';
+import {MultiTextFieldComponent} from './components/entry/widgets/multi-text-field/multi-text-field.component';
+import {TextareaFieldComponent} from './components/entry/widgets/textarea-field/textarea-field.component';
+import {BooleanFieldComponent} from './components/entry/widgets/boolean-field/boolean-field.component';
+import {FolderActionsComponent} from './components/folder-actions/folder-actions.component';
 
 // register Handsontable's modules
 registerAllModules();
@@ -64,7 +67,8 @@ registerAllModules();
         UserWithEmailFieldComponent,
         MultiTextFieldComponent,
         TextareaFieldComponent,
-        BooleanFieldComponent
+        BooleanFieldComponent,
+        FolderActionsComponent
     ],
     imports: [
         BrowserModule,

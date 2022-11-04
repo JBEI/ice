@@ -4,6 +4,7 @@ import {Paging} from "../../models/paging";
 import {HttpService} from "../../services/http.service";
 import {FolderDetails} from "../../models/folder-details";
 import {Result} from "../../models/result";
+import {PartSelectionService} from "../../services/part-selection.service";
 
 @Component({
     selector: 'app-parts-table',
@@ -12,11 +13,11 @@ import {Result} from "../../models/result";
 })
 export class PartsTableComponent implements OnInit {
 
-    selectedParts: number[];
-    allSelected: boolean;
-
     @Input() parts: Part[];
     paging: Paging = new Paging('created');
+    pageCount: number;
+    pageNumber: number;
+    pagingOptions = [15, 30, 50];
 
     @Output() retrieveParts: EventEmitter<any> = new EventEmitter<any>();
     @Output() partsChange: EventEmitter<any> = new EventEmitter<any>();
@@ -31,7 +32,14 @@ export class PartsTableComponent implements OnInit {
     @Input() folderId: number;
     @Input() collection: string;
 
+    PAGING_LIMIT_KEY = 'ice.paging.limit';
+
+    // detect changes to the routing for folder and collection
+    // this is used to clear selection
+
     ngOnChanges(changes: SimpleChanges) {
+        console.log("changes", changes);
+
         if (changes.collection) {
             // check if there is a change from a previous value
             if (!changes.collection.previousValue)
@@ -45,11 +53,12 @@ export class PartsTableComponent implements OnInit {
         }
     }
 
-    constructor(private http: HttpService) {
+    constructor(private http: HttpService, public selection: PartSelectionService) {
     }
 
     ngOnInit(): void {
-        this.selectedParts = [];
+        const storedLimit = localStorage.getItem(this.PAGING_LIMIT_KEY);
+        this.paging.limit = storedLimit ? Number.parseInt(storedLimit) : 15;
         this.getParts();
     }
 
@@ -67,6 +76,7 @@ export class PartsTableComponent implements OnInit {
             this.parts = result.entries;
             this.paging.processing = false;
             this.paging.available = result.count;
+            this.setDisplayCounts();
         });
     }
 
@@ -79,27 +89,32 @@ export class PartsTableComponent implements OnInit {
 
             this.paging.available = result.resultCount;
             this.parts = result.data;
+            this.setDisplayCounts();
         }, error => {
             this.paging.processing = false;
         });
     }
 
-    isSelected(part: Part): boolean {
-        if (this.allSelected)
-            return true;
+    setDisplayCounts(): void {
+        localStorage.setItem(this.PAGING_LIMIT_KEY, this.paging.limit.toString());
+        this.pageNumber = ((this.paging.currentPage - 1) * this.paging.limit) + 1;
+        this.pageCount = (this.paging.currentPage * this.paging.limit) > this.paging.available ? this.paging.available : (this.paging.currentPage * this.paging.limit);
+    }
 
-        return this.selectedParts.indexOf(part.id) !== -1;
+    sort(sortField: string): void {
+        this.paging.sort = sortField;
+        this.paging.offset = 0;
+        this.paging.asc = !this.paging.asc;
+
+        this.getParts();
+    }
+
+    isSelected(part: Part): boolean {
+        return this.selection.isSelected(part);
     }
 
     select(part: Part): void {
-        if (!part.id)
-            return;
-
-        const index = this.selectedParts.indexOf(part.id);
-        if (index !== -1)
-            this.selectedParts.splice(index, 1);
-        else
-            this.selectedParts.push(part.id);
+        this.selection.select(part);
     }
 
     pageCounts(currentPage, resultCount, maxPageCount = 15): string {
