@@ -9,6 +9,7 @@ import {AuthGuard} from "./guards/auth.guard";
 import {FolderComponent} from "./components/collection/folder/folder.component";
 import {ProfileComponent} from "./components/profile/profile/profile.component";
 import {CreateNewEntryComponent} from "./components/entry/create-new-entry/create-new-entry.component";
+import {ConfigureComponent} from "./components/configure-component/configure.component";
 
 const routes: Routes = [
     {path: '', redirectTo: '/collection/personal', pathMatch: 'full'},
@@ -19,6 +20,7 @@ const routes: Routes = [
         }]
     },
     {path: 'upload', component: UploadComponent},
+    {path: 'configure', component: ConfigureComponent},
     {path: 'entry/:id', component: EntryDetailComponent, resolve: {entry: EntryResolver}},
     {path: 'login', component: LoginComponent},
     {path: 'profile/:id', component: ProfileComponent},

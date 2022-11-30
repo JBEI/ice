@@ -1,0 +1,80 @@
+<div class="min-vh-100 d-flex align-items-center">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-5 mx-auto p-5 border shadow-sm bg-white rounded">
+                <b>Data Storage Folder</b><br>
+                <input class="form-control-sm form-control mt-2" [(ngModel)]="storage.folder">
+
+                <br><br>
+
+                <b>Select and configure database</b>
+                <div class=" btn-toolbar btn-group btn-group-sm mt-2 border" role="group"
+                     aria-label="Basic radio toggle button group">
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off"
+                           [checked]="storage.type === dbOptions[0]" [value]="dbOptions[0]" [(ngModel)]="storage.type">
+                    <label class="btn btn-light" for="btnradio1">H2DB</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"
+                           [checked]="storage.type === dbOptions[1]" [value]="dbOptions[1]" [(ngModel)]="storage.type">
+                    <label class="btn btn-light" for="btnradio2">MySQL</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off"
+                           [checked]="storage.type === dbOptions[2]" [value]="dbOptions[2]" [(ngModel)]="storage.type">
+                    <label class="btn btn-light" for="btnradio3">PostgreSQL</label>
+                </div>
+
+                <br>
+
+                <div class="alert alert-warning" role="alert" *ngIf="storage.type === dbOptions[0]">
+                    <i class="bi bi-exclamation-triangle-fill"></i> &nbsp;<b>Warning</b>
+                    <br><br>
+                    We do not recommend using h2 database in a production environment.
+                    MySQL or PostgreSQL is recommended instead and more thoroughly tested for use with ICE.
+                    <br><br>
+                    Proceed at your own risk.
+                </div>
+
+                <div *ngIf="storage.type === dbOptions[2]">
+
+                    <b class="small text-muted">Connection URL and Port</b>
+                    <input class="form-control form-control-sm w-75" placeholder="127.0.0.1:5432"
+                           [(ngModel)]="storage.connectionUrl">
+                    <br>
+
+                    <b class="small text-muted">Database Name</b>
+                    <input class="form-control form-control-sm w-75" type="text" [(ngModel)]="storage.databaseName">
+                    <br>
+
+                    <b class="small text-muted">Database User</b>
+                    <input class="form-control form-control-sm w-75" [(ngModel)]="storage.databaseUser">
+                    <br>
+
+                    <b class="small text-muted">Database Password</b>
+                    <input class="form-control form-control-sm w-75" [type]="'password'"
+                           [(ngModel)]="storage.databasePassword">
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-lg-5 mx-auto">
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-light">
+                        <i class="bi bi-chevron-left"></i> Prev
+                    </button>
+
+                    <div>
+                        <button class="btn btn-light me-2">
+                            Skip
+                        </button>
+                        <button class="btn btn-primary">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

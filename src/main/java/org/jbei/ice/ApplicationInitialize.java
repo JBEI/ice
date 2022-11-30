@@ -129,7 +129,7 @@ public class ApplicationInitialize {
 
         Logger.info("Loading server properties from " + serverPropertiesPath);
 
-        // get type of data base
+        // get type of database
         String dbTypeString = properties.getProperty("connectionType");
         DbType type;
         if (StringUtils.isBlank(dbTypeString)) {

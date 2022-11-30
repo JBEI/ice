@@ -28,23 +28,20 @@
                                                     <div class="d-flex justify-content-between">
                                                         <h2 class="text-secondary">
                                                             {{selectedOption.display}}
-                                                            <!--                                                            <span *ngIf="selectedFolderId">-->
-                                                            <!--                                                                <i class="bi bi-chevron-right small"></i> {{selectedFolder.folderName}}-->
-                                                            <!--                                                            </span>-->
                                                         </h2>
                                                         <div>
-                                                            <!--                                                            <button type="button" class="btn btn-white"-->
-                                                            <!--                                                                    [disabled]="!selectedFolderId|| !selectedFolder.canEdit">-->
-                                                            <!--                                                                <i class="bi bi-people-fill"></i> Share-->
-                                                            <!--                                                            </button>-->
-
-                                                            <button class="btn btn-primary ms-2">
-                                                                <i class="bi bi-upload"></i>
-                                                                Upload
+                                                            <button type="button"
+                                                                    class="btn btn-white border text-muted"
+                                                                    [disabled]="!selectedFolderId">
+                                                                <i class="bi bi-people-fill"></i> Share
                                                             </button>
-                                                            <button type="button" class="btn btn-white ms-3"><i
-                                                                class="bi bi-download"></i>
-                                                                Export
+
+                                                            <button class="btn btn-primary ms-3">
+                                                                <i class="bi bi-upload"></i> Upload
+                                                            </button>
+
+                                                            <button type="button" class="btn btn-white ms-3 border">
+                                                                <i class="bi bi-download"></i> Export
                                                             </button>
                                                         </div>
                                                     </div>
@@ -61,13 +58,13 @@
                                                         <div (click)="showCreateNewFolderModal()"
                                                              class="border btn btn-white me-2 mb-1 text-black-50 py-0 px-1 shadow-sm">
                                                             <i class="bi bi-plus" style="font-size: 2.8em"></i>
-                                                            <div class="small text-nowrap"
-                                                                 style="margin-top: -10px">
+                                                            <div class="small text-nowrap" style="margin-top: -10px">
                                                                 Folder
                                                             </div>
                                                         </div>
 
-                                                        <div class="text-nowrap overflow-scroll" style="width: 100vw">
+                                                        <div class="text-nowrap"
+                                                             style="width: 100vw; overflow-y: hidden">
 
                                                             <div *ngFor="let folder of this.folders"
                                                                  class="small rounded-1 p-2 me-2 shadow-sm border d-inline-block text-truncate folder">

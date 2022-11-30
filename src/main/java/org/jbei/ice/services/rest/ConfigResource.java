@@ -4,6 +4,7 @@ import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.config.ConfigurationSettings;
 import org.jbei.ice.dto.Setting;
 import org.jbei.ice.logging.Logger;
+import org.jbei.ice.storage.StorageConfiguration;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -46,9 +47,19 @@ public class ConfigResource extends RestResource {
     @GET
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)
-    public Setting getVersion(@Context final UriInfo uriInfo) {
+    public Response getVersion(@Context final UriInfo uriInfo) {
         final String url = uriInfo.getBaseUri().getAuthority();
-        return controller.getSystemVersion(url);
+        return super.respond(controller.getSystemVersion(url));
+    }
+
+    @GET
+    @Path("/storage")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getStorageConfiguration(@Context final UriInfo uriInfo) {
+        final String url = uriInfo.getBaseUri().getAuthority();
+        String userId = requireUserId();
+        StorageConfiguration storageConfiguration = new StorageConfiguration(userId);
+        return super.respond(storageConfiguration.get());
     }
 
     /**

@@ -39,6 +39,7 @@ import {MultiTextFieldComponent} from './components/entry/widgets/multi-text-fie
 import {TextareaFieldComponent} from './components/entry/widgets/textarea-field/textarea-field.component';
 import {BooleanFieldComponent} from './components/entry/widgets/boolean-field/boolean-field.component';
 import {FolderActionsComponent} from './components/folder-actions/folder-actions.component';
+import {ConfigureComponent} from './components/configure-component/configure.component';
 
 // register Handsontable's modules
 registerAllModules();
@@ -68,7 +69,8 @@ registerAllModules();
         MultiTextFieldComponent,
         TextareaFieldComponent,
         BooleanFieldComponent,
-        FolderActionsComponent
+        FolderActionsComponent,
+        ConfigureComponent
     ],
     imports: [
         BrowserModule,
