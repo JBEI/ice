@@ -20,8 +20,6 @@ export class CreateNewEntryComponent implements OnInit {
     constructor(private route: ActivatedRoute, private http: HttpService, private entryService: EntryService,
                 private router: Router) {
         this.newPart = new Part();
-        // todo : remove
-        this.newPart.id = 151198;
     }
 
     /**

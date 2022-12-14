@@ -5,8 +5,8 @@
     </div>
 
     <div class="col-8">
-        <select class="form-select form-select-sm w-50" id="inputGroupSelect01"
-                *ngIf="field.fieldInputType === 'SELECT'">
+        <select class="form-select form-select-sm w-50" id="inputGroupSelect01" (focusout)="textInputFocusOut(field)"
+                (focusin)="textInputFocusIn(field)" *ngIf="field.fieldInputType === 'SELECT'">
             <option selected>Choose...</option>
             <option value="1" *ngFor="let option of field.options">
                 {{option.name}}

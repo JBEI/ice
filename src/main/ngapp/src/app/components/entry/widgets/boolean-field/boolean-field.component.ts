@@ -16,4 +16,13 @@ export class BooleanFieldComponent implements OnInit {
     ngOnInit(): void {
     }
 
+    toggleField(): void {
+        if (!this.field)
+            return;
+
+        if (this.field.value === 'true')
+            this.field.value = 'false';
+        else
+            this.field.value = 'true';
+    }
 }

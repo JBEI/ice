@@ -1,6 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {CustomField} from "../../../../models/custom-field";
-import {Part} from "../../../../models/Part";
 
 @Component({
     selector: 'app-text-field',
@@ -27,26 +26,9 @@ export class TextFieldComponent implements OnInit {
 
     textInputFocusOut(field: CustomField): void {
         field.active = false;
-
-        if (!field.value || !field.value.trim())
-            return;
-
-        console.log(field.value);
-        // if (!this.newPart.id) {
-        //     this.createPartData().subscribe((result: Part) => {
-        //         console.log(result);
-        //         this.newPart = result;
-        //         this.updateField(field);
-        //     });
-        // } else {
-        //     this.updateField(field);
-        // }
-
     }
 
     textInputFocusIn(field: CustomField): void {
         field.active = true;
-
     }
-
 }

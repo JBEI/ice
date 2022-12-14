@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {NgbCalendar, NgbDate, NgbDateParserFormatter, NgbDateStruct} from "@ng-bootstrap/ng-bootstrap";
 import {DateParserFormatterService} from "../../services/date-parser-formatter.service";
 import {DateUtilsService} from "../../services/date-utils.service";
+import {CustomField} from "../../models/custom-field";
 
 @Component({
     selector: 'app-date-picker',
@@ -17,6 +18,7 @@ export class DatePickerComponent implements OnInit {
     @Input() validDate: boolean;
     @Input() halfWidth: boolean = true;
     @Input() value: number;  // optional input. set if we are displaying existing record
+    @Input() field: CustomField;
 
     selectedDate: NgbDateStruct;
 

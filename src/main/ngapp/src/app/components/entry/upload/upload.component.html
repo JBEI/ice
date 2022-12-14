@@ -1,12 +1,30 @@
-<div class="bg-white">
-    <hot-table
-            [data]="dataset"
-            [colHeaders]="true"
-            [rowHeaders]="true"
-            height="auto"
-            licenseKey="non-commercial-and-evaluation">
+<div class="container-fluid">
+    <div class="row">
+        <div class="bg-white">
+            <div class="px-0 col d-flex">
 
-        <hot-column [readOnly]="true" [title]="field.label" *ngFor="let field of fields"></hot-column>
+                <div class="border-end bg-white" style="flex:0 0 250px">
+                    <app-main-sidebar-menu></app-main-sidebar-menu>
+                </div>
 
-    </hot-table>
+                <div class="flex-grow-1">
+                    <div class="bg-white border-bottom p-3">
+                        <app-header></app-header>
+                    </div>
+
+
+                    <!--            <hot-table-->
+                    <!--                [data]="dataset"-->
+                    <!--                [colHeaders]="true"-->
+                    <!--                [rowHeaders]="true"-->
+                    <!--                height="auto"-->
+                    <!--                licenseKey="non-commercial-and-evaluation">-->
+
+                    <!--                <hot-column [readOnly]="true" [title]="field.label" *ngFor="let field of fields"></hot-column>-->
+
+                    <!--            </hot-table>-->
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

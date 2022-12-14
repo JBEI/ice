@@ -8,7 +8,9 @@
 
     <div class="col-8" [id]="field.label">
 
-        <i class="bi bi-toggle2-off" style="font-size: x-large"></i>
+        <i class="bi  cursor-pointer" style="font-size: x-large" (click)="toggleField()"
+           [ngClass]="{'bi-toggle2-on text-success': field.value === 'true', 'bi-toggle2-off': field.value === 'false'
+           || !field.value}"></i>
 
     </div>
 
