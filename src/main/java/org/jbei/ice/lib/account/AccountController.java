@@ -191,6 +191,11 @@ public class AccountController {
             return null;
         }
 
+        if (email.endsWith("@qq.com")) {
+            Logger.error("Rejecting account registration with email: " + email);
+            return null;
+        }
+
         // generate salt and encrypt password before storing
         final String salt = Utils.generateSaltForUserAccount();
         final String newPassword = Utils.generateUUID().substring(24);
