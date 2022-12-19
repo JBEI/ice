@@ -40,6 +40,7 @@ import {TextareaFieldComponent} from './components/entry/widgets/textarea-field/
 import {BooleanFieldComponent} from './components/entry/widgets/boolean-field/boolean-field.component';
 import {FolderActionsComponent} from './components/folder-actions/folder-actions.component';
 import {ConfigureComponent} from './components/configure-component/configure.component';
+import {ShareFolderModalComponent} from './components/modal/share-folder-modal/share-folder-modal.component';
 
 // register Handsontable's modules
 registerAllModules();
@@ -70,7 +71,8 @@ registerAllModules();
         TextareaFieldComponent,
         BooleanFieldComponent,
         FolderActionsComponent,
-        ConfigureComponent
+        ConfigureComponent,
+        ShareFolderModalComponent
     ],
     imports: [
         BrowserModule,

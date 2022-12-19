@@ -3,6 +3,8 @@ import {HttpService} from "../../../services/http.service";
 import {Paging} from "../../../models/paging";
 import {ActivatedRoute} from "@angular/router";
 import {FolderDetails} from "../../../models/folder-details";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {ShareFolderModalComponent} from "../../modal/share-folder-modal/share-folder-modal.component";
 
 @Component({
     selector: 'app-folder',
@@ -15,7 +17,7 @@ export class FolderComponent implements OnInit {
     folderDetails: FolderDetails;
     collectionName: string;
 
-    constructor(private http: HttpService, private activatedRoute: ActivatedRoute) {
+    constructor(private http: HttpService, private activatedRoute: ActivatedRoute, private modalService: NgbModal) {
     }
 
     ngOnInit(): void {
@@ -35,6 +37,14 @@ export class FolderComponent implements OnInit {
         this.http.get('folders/' + folderId + '/entries', this.paging).subscribe((result: FolderDetails) => {
             this.folderDetails = result;
             this.paging.processing = false;
+        });
+    }
+
+    shareFolder(): void {
+        const modalRef = this.modalService.open(ShareFolderModalComponent);
+        modalRef.componentInstance.folder = this.folderDetails;
+        modalRef.result.then((result) => {
+
         });
     }
 }

@@ -1,0 +1,21 @@
+<div class="modal-header">
+    <h3 class="modal-title">Share "{{folder.folderName}}"</h3>
+    <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()">
+    </button>
+</div>
+
+<div class="modal-body bg-light">
+    <span class="fw-bold fst-italic text-muted cursor-pointer" (click)="folderPermissionsOnly = !folderPermissionsOnly">
+        <i class="bi" [ngClass]="{'bi-check-square': folderPermissionsOnly, 'bi-square': !folderPermissionsOnly}"></i> &nbsp;Folder permissions only
+    </span>
+
+    <div>
+        <input class="">
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary font-95em" (click)="activeModal.close()">
+        Done
+    </button>
+</div>
