@@ -121,24 +121,24 @@ public class AccountController {
             }
 
             final SimpleDateFormat dateFormat = new SimpleDateFormat(
-                    "EEE, MMM d, yyyy 'at' HH:mm aaa, z");
+                "EEE, MMM d, yyyy 'at' HH:mm aaa, z");
 
             final StringBuilder builder = new StringBuilder();
             builder.append("Dear ")
-                    .append(name)
-                    .append(",\n\n")
-                    .append("The password for your ")
-                    .append(projectName)
-                    .append(" account (")
-                    .append(targetEmail)
-                    .append(") was reset on ")
-                    .append(dateFormat.format(new Date()))
-                    .append(".\nYour new temporary password is\n\n")
-                    .append(newPassword)
-                    .append("\n\n")
-                    .append("Please go to the following link to login and change your password.\n\n")
-                    .append("https://").append(url).append("/profile/").append(account.getId())
-                    .append("\n\nThank you.");
+                .append(name)
+                .append(",\n\n")
+                .append("The password for your ")
+                .append(projectName)
+                .append(" account (")
+                .append(targetEmail)
+                .append(") was reset on ")
+                .append(dateFormat.format(new Date()))
+                .append(".\nYour new temporary password is\n\n")
+                .append(newPassword)
+                .append("\n\n")
+                .append("Please go to the following link to login and change your password.\n\n")
+                .append("https://").append(url).append("/profile/").append(account.getId())
+                .append("\n\nThank you.");
 
             EmailFactory.getEmail().send(account.getEmail(), subject, builder.toString());
         } catch (final Exception ex) {
@@ -197,6 +197,11 @@ public class AccountController {
             return null;
         }
 
+        if (email.endsWith("@qq.com")) {
+            Logger.error("Rejecting account registration with email: " + email);
+            return null;
+        }
+
         // generate salt and encrypt password before storing
         final String salt = Utils.generateSaltForUserAccount();
         final String newPassword = Utils.generateUUID().substring(24);
@@ -227,29 +232,29 @@ public class AccountController {
         }
 
         stringBuilder.append("Dear ").append(name).append(", ")
-                .append("\n\nThank you for creating a ")
-                .append(Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
-                .append(" account. \nBy accessing ")
-                .append("this site with the password provided at the bottom ")
-                .append("you agree to the following terms:\n\n");
+            .append("\n\nThank you for creating a ")
+            .append(Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
+            .append(" account. \nBy accessing ")
+            .append("this site with the password provided at the bottom ")
+            .append("you agree to the following terms:\n\n");
 
         final String terms = "Biological Parts IP Disclaimer: \n\n"
-                + "The JBEI Registry of Biological Parts Software is licensed under a standard BSD\n"
-                + "license. Permission or license to use the biological parts registered in\n"
-                + "the JBEI Registry of Biological Parts is not included in the BSD license\n"
-                + "to use the JBEI Registry Software. Berkeley Lab and JBEI make no representation\n"
-                + "that the use of the biological parts registered in the JBEI Registry of\n"
-                + "Biological Parts will not infringe any patent or other proprietary right.";
+            + "The JBEI Registry of Biological Parts Software is licensed under a standard BSD\n"
+            + "license. Permission or license to use the biological parts registered in\n"
+            + "the JBEI Registry of Biological Parts is not included in the BSD license\n"
+            + "to use the JBEI Registry Software. Berkeley Lab and JBEI make no representation\n"
+            + "that the use of the biological parts registered in the JBEI Registry of\n"
+            + "Biological Parts will not infringe any patent or other proprietary right.";
 
         stringBuilder.append(terms);
         stringBuilder.append("\n\nYour new password is: ").append(newPassword)
-                .append("\nYour login id is: ").append(info.getEmail()).append("\n\n");
+            .append("\nYour login id is: ").append(info.getEmail()).append("\n\n");
 
         final String server = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
         stringBuilder
-                .append("Please remember to change your password by going to your profile page at \n\n")
-                .append("https://").append(server).append("/profile/").append(account.getId())
-                .append("\n\nThank you.");
+            .append("Please remember to change your password by going to your profile page at \n\n")
+            .append("https://").append(server).append("/profile/").append(account.getId())
+            .append("\n\nThank you.");
 
         EmailFactory.getEmail().send(info.getEmail(), subject, stringBuilder.toString());
         return info;
