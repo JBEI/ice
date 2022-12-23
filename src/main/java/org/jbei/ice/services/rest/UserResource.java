@@ -1,5 +1,8 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.account.Account;
 import org.jbei.ice.account.AccountController;
@@ -23,9 +26,6 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.utils.UtilityException;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**

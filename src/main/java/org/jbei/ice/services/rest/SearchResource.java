@@ -1,5 +1,8 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.dto.entry.AutoCompleteFieldValues;
 import org.jbei.ice.dto.entry.EntryType;
@@ -11,9 +14,6 @@ import org.jbei.ice.search.SearchIndexes;
 import org.jbei.ice.search.WebSearch;
 import org.jbei.ice.shared.ColumnField;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.List;
 

@@ -1,12 +1,11 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.logging.Logger;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 
 /**
  * Exception mapper for mapping exceptions to {@link Response}s

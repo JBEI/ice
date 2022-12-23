@@ -1,5 +1,8 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.access.PermissionException;
@@ -9,9 +12,6 @@ import org.jbei.ice.entry.sequence.Features;
 import org.jbei.ice.entry.sequence.Sequences;
 import org.jbei.ice.logging.Logger;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.List;
 

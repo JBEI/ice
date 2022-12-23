@@ -1,10 +1,10 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import org.jbei.ice.dto.entry.CustomField;
 import org.jbei.ice.dto.entry.CustomFields;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
 import java.util.ArrayList;
 import java.util.List;
 

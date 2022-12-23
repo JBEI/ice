@@ -1,5 +1,8 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.access.RemoteAccess;
@@ -14,9 +17,6 @@ import org.jbei.ice.entry.EntrySelection;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.net.*;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**

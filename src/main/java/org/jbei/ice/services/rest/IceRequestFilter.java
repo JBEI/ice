@@ -1,10 +1,9 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.ext.Provider;
 import org.jbei.ice.storage.hibernate.HibernateConfiguration;
-
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.ext.Provider;
 
 /**
  * Request filter which begins transaction for request. This is the main filter

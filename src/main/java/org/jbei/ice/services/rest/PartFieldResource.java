@@ -1,12 +1,11 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jbei.ice.dto.entry.CustomEntryField;
 import org.jbei.ice.dto.entry.CustomFields;
 import org.jbei.ice.dto.entry.EntryType;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * Resource for interaction with part field objects/resources

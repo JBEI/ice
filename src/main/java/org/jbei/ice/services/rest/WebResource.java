@@ -1,5 +1,8 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.FeaturedDNASequence;
 import org.jbei.ice.dto.Setting;
@@ -18,9 +21,6 @@ import org.jbei.ice.search.WebSearch;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.ConfigurationModel;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.util.List;
 

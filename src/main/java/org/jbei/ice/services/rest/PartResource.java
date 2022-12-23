@@ -3,6 +3,10 @@ package org.jbei.ice.services.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -40,8 +44,6 @@ import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.ShotgunSequence;
 import org.jbei.ice.utils.Utils;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -416,7 +418,6 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/shotgunsequences")
     public ArrayList<ShotgunSequenceDTO> getShotgunSequences(
-        @Context final UriInfo info,
         @PathParam("id") final long partId,
         @DefaultValue("100") @QueryParam("limit") int limit,
         @DefaultValue("0") @QueryParam("start") int start) {
@@ -487,8 +488,7 @@ public class PartResource extends RestResource {
 
     @DELETE
     @Path("/{id}/traces/{traceId}")
-    public Response deleteTrace(@Context final UriInfo info,
-                                @PathParam("id") final long partId,
+    public Response deleteTrace(@PathParam("id") final long partId,
                                 @PathParam("traceId") final long traceId) {
         final String userId = getUserId();
         TraceSequences traceSequences = new TraceSequences();
@@ -500,8 +500,7 @@ public class PartResource extends RestResource {
 
     @DELETE
     @Path("/{id}/shotgunsequences/{shotgunId}")
-    public Response deleteShotgunSequence(@Context final UriInfo info,
-                                          @PathParam("id") final long partId,
+    public Response deleteShotgunSequence(@PathParam("id") final long partId,
                                           @PathParam("shotgunId") final long shotgunId) {
         final String userId = getUserId();
         Shotgun shotgun = new Shotgun(userId);
@@ -534,7 +533,7 @@ public class PartResource extends RestResource {
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples/{sampleId}")
-    public Response deleteSample(@Context UriInfo info, @PathParam("id") long partId,
+    public Response deleteSample(@PathParam("id") long partId,
                                  @PathParam("sampleId") long sampleId) {
         String userId = requireUserId();
         log(userId, "deleting sample " + sampleId + " for part " + partId);

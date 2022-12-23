@@ -1,12 +1,12 @@
 package org.jbei.ice.servlet;
 
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 import org.jbei.ice.ApplicationInitialize;
 import org.jbei.ice.executor.IceExecutorService;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import java.nio.file.Path;
 
 /**

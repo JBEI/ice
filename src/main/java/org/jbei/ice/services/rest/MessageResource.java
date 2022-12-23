@@ -1,12 +1,11 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jbei.ice.dto.message.MessageInfo;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.message.Messages;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * Rest resource for handling messages in ICE

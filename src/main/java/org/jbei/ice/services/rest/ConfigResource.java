@@ -1,16 +1,16 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.config.ConfigurationSettings;
 import org.jbei.ice.dto.Setting;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.StorageConfiguration;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.util.ArrayList;
 
 /**
@@ -55,8 +55,7 @@ public class ConfigResource extends RestResource {
     @GET
     @Path("/storage")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getStorageConfiguration(@Context final UriInfo uriInfo) {
-        final String url = uriInfo.getBaseUri().getAuthority();
+    public Response getStorageConfiguration() {
         String userId = requireUserId();
         StorageConfiguration storageConfiguration = new StorageConfiguration(userId);
         return super.respond(storageConfiguration.get());

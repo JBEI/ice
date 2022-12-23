@@ -1,5 +1,8 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jbei.ice.dto.common.Results;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.folder.collection.Collection;
@@ -9,9 +12,6 @@ import org.jbei.ice.folder.collection.Collections;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.shared.ColumnField;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**

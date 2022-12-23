@@ -1,5 +1,8 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.account.Account;
 import org.jbei.ice.account.AccountController;
@@ -7,10 +10,6 @@ import org.jbei.ice.account.UserSessions;
 import org.jbei.ice.dto.web.RegistryPartner;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.net.WebPartners;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * API for access tokens (also session id for the user interface)

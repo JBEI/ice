@@ -1,18 +1,17 @@
 package org.jbei.ice.services.rest;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.access.TokenVerification;
 import org.jbei.ice.account.UserSessions;
 import org.jbei.ice.dto.web.RegistryPartner;
 import org.jbei.ice.logging.Logger;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 
 /**
  * Parent class for all rest resource objects.
@@ -50,9 +49,6 @@ public class RestResource {
 
     @HeaderParam(value = REMOTE_USER_ID)
     protected String remoteUserId;
-
-    @HeaderParam(value = "Authorization")
-    protected String hmacHeader;
 
     @QueryParam(value = "sid")
     protected String querySessionId;
