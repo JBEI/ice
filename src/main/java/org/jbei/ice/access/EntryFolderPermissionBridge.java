@@ -1,8 +1,6 @@
 package org.jbei.ice.access;
 
 import org.apache.lucene.document.Document;
-import org.hibernate.search.bridge.FieldBridge;
-import org.hibernate.search.bridge.LuceneOptions;
 import org.jbei.ice.storage.model.Folder;
 import org.jbei.ice.storage.model.Permission;
 

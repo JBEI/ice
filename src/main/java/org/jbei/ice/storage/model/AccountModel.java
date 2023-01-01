@@ -1,11 +1,10 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.*;
 import org.jbei.ice.account.Account;
 import org.jbei.ice.account.AccountType;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -45,7 +44,6 @@ public class AccountModel implements DataModel {
 
     @Column(name = "description", nullable = false)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String description;
 
     @Column(name = "ip", length = 20, nullable = false)

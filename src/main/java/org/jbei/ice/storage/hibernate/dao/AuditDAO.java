@@ -6,9 +6,10 @@ import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Audit;
 import org.jbei.ice.storage.model.Entry;
 
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaDelete;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+
 import java.util.List;
 
 /**

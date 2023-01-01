@@ -1,10 +1,9 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.dto.search.SearchBoostField;
 import org.jbei.ice.storage.DataModel;
-
-import javax.persistence.*;
 
 /**
  * Entity for storing user preferences. It serves a dual role in terms of storing the default user values

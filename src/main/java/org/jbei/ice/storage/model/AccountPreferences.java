@@ -4,7 +4,7 @@ import org.hibernate.annotations.Type;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IDataTransferModel;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * Store preferences for a user for an {@link AccountModel} object.
@@ -23,12 +23,10 @@ public class AccountPreferences implements DataModel {
 
     @Column(name = "preferences")
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String preferences;
 
     @Column(name = "restriction_enzymes")
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String restrictionEnzymes;
 
     @ManyToOne(fetch = FetchType.EAGER)

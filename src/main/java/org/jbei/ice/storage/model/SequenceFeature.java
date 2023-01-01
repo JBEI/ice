@@ -1,10 +1,9 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.dto.DNAFeature;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -106,12 +105,10 @@ public class SequenceFeature implements DataModel {
         this.id = id;
     }
 
-    @XmlTransient
     public long getId() {
         return id;
     }
 
-    @XmlTransient
     public org.jbei.ice.storage.model.Sequence getSequence() {
         return sequence;
     }

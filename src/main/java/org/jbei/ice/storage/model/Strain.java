@@ -1,16 +1,14 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.Store;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.entry.StrainData;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Table;
 
 /**
  * Store Strain specific fields.
@@ -29,12 +27,12 @@ import javax.persistence.Table;
 @Table(name = "strains")
 public class Strain extends Entry {
 
-    @Column(name = "host", length = 255)
-    @Field(store = Store.YES)
+    @Column(name = "host")
+    @GenericField
     private String host;
 
-    @Column(name = "genotype_phenotype", length = 255)
-    @Field
+    @Column(name = "genotype_phenotype")
+    @GenericField
     private String genotypePhenotype;
 
     public Strain() {

@@ -1,5 +1,7 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.HibernateException;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
@@ -8,8 +10,6 @@ import org.jbei.ice.storage.model.CustomEntryFieldModel;
 import org.jbei.ice.storage.model.CustomEntryFieldValueModel;
 import org.jbei.ice.storage.model.Entry;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.util.List;
 
 public class CustomEntryFieldValueDAO extends HibernateRepository<CustomEntryFieldValueModel> {

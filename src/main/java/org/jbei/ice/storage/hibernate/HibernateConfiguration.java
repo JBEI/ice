@@ -122,7 +122,9 @@ public class HibernateConfiguration {
         configuration.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
         configuration.setProperty("hibernate.connection.username", "sa");
         configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-        configuration.setProperty("hibernate.search.default.indexBase", dbPath + "/data/lucene-data");
+
+        // todo : retrieve from data config directory
+        configuration.setProperty("hibernate.search.backend.directory.root", dbPath + "/data/lucene-data");
     }
 
     private static void configureInMemoryDb(Configuration configuration) {
@@ -195,7 +197,7 @@ public class HibernateConfiguration {
     public static void close() {
         if (sessionFactory != null && !sessionFactory.isClosed()) {
             Logger.info("Closing session factory");
-            sessionFactory.getCurrentSession().disconnect();
+            sessionFactory.getCurrentSession().close();
             sessionFactory.close();
         }
     }

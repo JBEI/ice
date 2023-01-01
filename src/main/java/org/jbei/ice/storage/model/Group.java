@@ -1,10 +1,10 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.dto.group.GroupType;
 import org.jbei.ice.dto.group.UserGroup;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;

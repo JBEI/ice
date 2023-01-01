@@ -1,5 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import jakarta.persistence.criteria.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.jbei.ice.dto.common.PageParameters;
@@ -12,7 +13,6 @@ import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.*;
 
-import javax.persistence.criteria.*;
 import java.util.*;
 
 /**

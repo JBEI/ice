@@ -1,10 +1,10 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.dto.sample.SampleRequestStatus;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IDataTransferModel;
 
-import javax.persistence.*;
 import java.util.Date;
 
 @Entity

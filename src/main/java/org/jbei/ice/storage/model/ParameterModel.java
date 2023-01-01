@@ -1,11 +1,8 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.search.annotations.ContainedIn;
-import org.hibernate.search.annotations.Field;
+import jakarta.persistence.*;
 import org.jbei.ice.dto.entry.CustomField;
 import org.jbei.ice.storage.DataModel;
-
-import javax.persistence.*;
 
 /**
  * Stores key-value information for {@link org.jbei.ice.storage.model.Entry}.
@@ -28,7 +25,6 @@ public class ParameterModel implements DataModel {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "parameters_id")
     private long id;
 
-    @ContainedIn
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false, unique = false)
     private org.jbei.ice.storage.model.Entry entry;
@@ -40,7 +36,6 @@ public class ParameterModel implements DataModel {
     private String key;
 
     @Column(name = "\"value\"", length = 4095, nullable = false)
-    @Field
     private String value;
 
     public ParameterModel() {

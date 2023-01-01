@@ -1,5 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import jakarta.persistence.criteria.*;
 import org.hibernate.HibernateException;
 import org.jbei.ice.dto.entry.AutoCompleteField;
 import org.jbei.ice.dto.entry.EntryType;
@@ -11,7 +12,6 @@ import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.*;
 
-import javax.persistence.criteria.*;
 import java.util.*;
 
 /**

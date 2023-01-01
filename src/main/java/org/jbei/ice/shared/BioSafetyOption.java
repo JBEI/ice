@@ -25,7 +25,7 @@ public enum BioSafetyOption implements IDataTransferModel {
     }
 
     public int getIntValue() {
-        return Integer.valueOf(this.value);
+        return Integer.parseInt(this.value);
     }
 
     public static boolean isValidOption(Integer integer) {

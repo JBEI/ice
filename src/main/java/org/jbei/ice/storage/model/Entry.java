@@ -1,21 +1,16 @@
 package org.jbei.ice.storage.model;
 
-import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
-import org.apache.lucene.analysis.pattern.PatternReplaceFilterFactory;
-import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
-import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.Index;
-import org.hibernate.search.annotations.*;
+import jakarta.persistence.*;
+import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.Sortable;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.*;
 import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.entry.Visibility;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.ModelToInfoFactory;
-import org.jbei.ice.storage.hibernate.filter.EntryHasFilterFactory;
-import org.jbei.ice.storage.hibernate.filter.EntrySecurityFilterFactory;
 import org.jbei.ice.utils.Utils;
 
-import javax.persistence.*;
 import java.util.*;
 
 /**
@@ -69,19 +64,19 @@ import java.util.*;
  */
 @Entity
 @Indexed(index = "Entry")
-@FullTextFilterDefs({
-        @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class, cache = FilterCacheModeType.INSTANCE_ONLY),
-        @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class, cache = FilterCacheModeType.INSTANCE_ONLY)
-})
-@AnalyzerDef(name = "customanalyzer",
-        tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
-        filters = {
-                @TokenFilterDef(factory = LowerCaseFilterFactory.class),
-                @TokenFilterDef(factory = PatternReplaceFilterFactory.class, params = {
-                        @org.hibernate.search.annotations.Parameter(name = "pattern", value = "[_-]"),
-                        @org.hibernate.search.annotations.Parameter(name = "replacement", value = " ")
-                })
-        })
+//@FullTextFilterDefs({
+//    @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class, cache = FilterCacheModeType.INSTANCE_ONLY),
+//    @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class, cache = FilterCacheModeType.INSTANCE_ONLY)
+//})
+//@AnalyzerDef(name = "customanalyzer",
+//    tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+//    filters = {
+//        @TokenFilterDef(factory = LowerCaseFilterFactory.class),
+//        @TokenFilterDef(factory = PatternReplaceFilterFactory.class, params = {
+//            @org.hibernate.search.annotations.Parameter(name = "pattern", value = "[_-]"),
+//            @org.hibernate.search.annotations.Parameter(name = "replacement", value = " ")
+//        })
+//    })
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -93,152 +88,142 @@ public class Entry implements DataModel {
     private long id;
 
     @Column(name = "record_id", length = 36, nullable = false, unique = true)
-    @Field(store = Store.YES, analyze = Analyze.NO)
+    @KeywordField
     private String recordId;
 
     @Column(name = "version_id", length = 36, nullable = false)
     private String versionId;
 
     @Column(name = "record_type", length = 127, nullable = false)
-    @Field(store = Store.YES, analyze = Analyze.NO)
-    @SortableField(forField = "recordType")
+    @KeywordField(name = "type", sortable = Sortable.YES, projectable = Projectable.YES)
     private String recordType;
 
     @Column(name = "owner", length = 127)
-    @Field(store = Store.YES)
+    @GenericField
     private String owner;
 
     @Column(name = "owner_email", length = 127)
-    @Field(store = Store.YES, analyze = Analyze.NO)
+    @KeywordField
     private String ownerEmail;
 
     @Column(name = "creator", length = 127)
-    @Field(store = Store.YES)
+    @GenericField
     private String creator;
 
     @Column(name = "creator_email", length = 127)
-    @Field(store = Store.YES, analyze = Analyze.NO)
+    @KeywordField
     private String creatorEmail;
 
     @Column(name = "alias", length = 127)
-    @Field(store = Store.YES)
+    @FullTextField(projectable = Projectable.YES)  // store value in index
     private String alias;
 
     @Column(name = "name", length = 127)
-    @Field(store = Store.YES)
+    @FullTextField(projectable = Projectable.YES)  // store value in index
     private String name;
 
     @Column(name = "part_number", length = 127)
-    @Fields({
-            @Field(store = Store.YES),
-            @Field(name = "partNumber_forSort", analyze = Analyze.NO, store = Store.YES)
-    })
-    @Analyzer(definition = "customanalyzer")
+    @KeywordField(name = "partNumber_sort", projectable = Projectable.YES, sortable = Sortable.YES)
     private String partNumber;
 
     @Column(name = "keywords", length = 127)
-    @Field
+    @FullTextField
     private String keywords;
 
     @Column(name = "status", length = 127)
+    @KeywordField(sortable = Sortable.YES, projectable = Projectable.YES)
     private String status;
 
     @Column(name = "visibility")
-    @Field(analyze = Analyze.NO)
+    @GenericField
     private Integer visibility = Visibility.OK.getValue();
 
     @Column(name = "short_description")
-    @Field
+    @FullTextField
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String shortDescription;
 
     @Column(name = "long_description")
-    @Field
+    @FullTextField
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String longDescription;
 
     @Column(name = "long_description_type", length = 31, nullable = false)
     private String longDescriptionType;
 
     @Column(name = "literature_references")
-    @Field
+    @FullTextField
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String references;
 
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
-    @Field(index = Index.YES, analyze = Analyze.NO, store = Store.YES)
-    @DateBridge(resolution = Resolution.DAY)
-    @SortableField(forField = "creationTime")
+    @GenericField
+    @KeywordField(name = "created_sort", sortable = Sortable.YES, projectable = Projectable.YES)
     private Date creationTime;
 
     @Column(name = "modification_time")
     @Temporal(TemporalType.TIMESTAMP)
-    @Field(index = Index.YES, analyze = Analyze.NO, store = Store.YES)
-    @DateBridge(resolution = Resolution.DAY)
+    @GenericField
     private Date modificationTime;
 
     @Column(name = "bio_safety_level")
-    @Field(analyze = Analyze.NO)
+    @GenericField
     private Integer bioSafetyLevel;
 
     @Column(name = "intellectual_property")
-    @Field
+    @FullTextField
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String intellectualProperty;
 
     @Column(name = "funding_source", length = 512)
-    @Field
+    @FullTextField
     private String fundingSource;
 
     @Column(name = "principal_investigator", length = 512)
-    @Field
+    @KeywordField
     private String principalInvestigator;
 
     @Column(name = "principal_investigator_email", length = 127)
-    @Field(store = Store.YES, analyze = Analyze.NO)
+    @KeywordField
     private String principalInvestigatorEmail;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
-    @IndexedEmbedded(depth = 1)
+    @IndexedEmbedded(includeDepth = 1)
     private final Set<SelectionMarker> selectionMarkers = new LinkedHashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
-    @IndexedEmbedded(depth = 1)
+    @IndexedEmbedded(includeDepth = 1)
     private final Set<org.jbei.ice.storage.model.Link> links = new LinkedHashSet<>();
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
-    @IndexedEmbedded(depth = 1)
+    @IndexedEmbedded(includeDepth = 1)
     private final List<ParameterModel> parameters = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, mappedBy = "entry",
-            orphanRemoval = true, fetch = FetchType.LAZY)
-    @IndexedEmbedded(depth = 1)
+        orphanRemoval = true, fetch = FetchType.LAZY)
+    @IndexedEmbedded(includeDepth = 1)
     private final Set<Permission> permissions = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents", fetch = FetchType.LAZY)
-    @IndexedEmbedded(depth = 1)
+    @IndexedEmbedded(includeDepth = 1)
     private final Set<Folder> folders = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
     @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "entry_id", nullable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
+        inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
     private final Set<Entry> linkedEntries = new HashSet<>();
 
     @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "entry")
-    @IndexedEmbedded(depth = 1)
+    @IndexedEmbedded(includeDepth = 1)
     private final Set<Sample> samples = new HashSet<>();
 
     @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "entry")
-    @IndexedEmbedded(depth = 1)
+    @IndexedEmbedded(includeDepth = 1)
     private final Set<Attachment> attachments = new HashSet<>();
 
     @OneToOne(orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "entry")
-    @IndexedEmbedded(depth = 1)
+    @IndexedEmbedded(includeDepth = 1)
     private Sequence sequence;
 
     public Entry() {

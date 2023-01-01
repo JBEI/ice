@@ -1,11 +1,11 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.jbei.ice.experiment.Study;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;

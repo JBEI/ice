@@ -1,11 +1,11 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.search.annotations.Analyze;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.jbei.ice.dto.entry.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,17 +26,17 @@ import java.util.Date;
  * @author Timothy Ham, Hector Plahar
  */
 @Entity
-@Indexed
+@Indexed(index = "seed")
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "arabidopsis_seed")
 public class ArabidopsisSeed extends Entry {
 
     @Column(name = "homozygosity", nullable = false)
-    @Field
+    @GenericField
     private String homozygosity;
 
     @Column(name = "ecotype", nullable = false)
-    @Field
+    @GenericField
     private String ecotype;
 
     @Column(name = "harvest_date")
@@ -44,17 +44,17 @@ public class ArabidopsisSeed extends Entry {
     private Date harvestDate;
 
     @Column(name = "parents", nullable = false)
-    @Field
+    @GenericField
     private String parents;
 
     @Column(name = "generation", nullable = false)
     @Enumerated(EnumType.STRING)
-    @Field(analyze = Analyze.NO)
+    @GenericField
     private Generation generation;
 
     @Column(name = "plant_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    @Field(analyze = Analyze.NO)
+    @GenericField
     private PlantType plantType;
 
     @Column(name = "sentToABRC")

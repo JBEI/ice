@@ -1,5 +1,8 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Root;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -7,10 +10,6 @@ import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Folder;
 import org.jbei.ice.storage.model.Permission;
 import org.jbei.ice.storage.model.RemoteAccessModel;
-
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
 
 /**
  * @author Hector Plahar

@@ -1,13 +1,12 @@
 package org.jbei.ice.storage.hibernate;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IRepository;
-
-import javax.persistence.criteria.CriteriaBuilder;
 
 /**
  * Parent abstract class for Hibernate Persistence
@@ -36,7 +35,7 @@ public abstract class HibernateRepository<T extends DataModel> implements IRepos
      */
     public void delete(T object) {
         try {
-            currentSession().delete(object);
+            currentSession().remove(object);
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);
@@ -51,7 +50,7 @@ public abstract class HibernateRepository<T extends DataModel> implements IRepos
      */
     public T update(T object) {
         try {
-            currentSession().update(object);
+            currentSession().merge(object);
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);
@@ -67,7 +66,7 @@ public abstract class HibernateRepository<T extends DataModel> implements IRepos
      */
     public T create(T model) {
         try {
-            currentSession().save(model);
+            currentSession().persist(model);
             return model;
         } catch (HibernateException e) {
             Logger.error(e);

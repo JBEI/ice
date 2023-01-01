@@ -1,9 +1,8 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.dto.entry.CustomEntryField;
 import org.jbei.ice.storage.DataModel;
-
-import javax.persistence.*;
 
 @Entity
 @Table(name = "custom_entry_field_value_model")

@@ -1,15 +1,11 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.ContainedIn;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.FieldBridge;
 import org.jbei.ice.dto.entry.AttachmentInfo;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.hibernate.bridge.EntryBooleanPropertiesBridge;
 import org.jbei.ice.storage.hibernate.dao.AttachmentDAO;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * Store information about attachments.
@@ -29,7 +25,6 @@ public class Attachment implements DataModel {
 
     @Column(name = "description", nullable = false)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String description;
 
     /**
@@ -44,13 +39,13 @@ public class Attachment implements DataModel {
     @Column(name = "file_id", length = 36, nullable = false)
     private String fileId;
 
-    @ContainedIn
+    //    @ContainedIn
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
-    @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
-            @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasAttachment")
-    }))
-    private org.jbei.ice.storage.model.Entry entry;
+//    @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
+//            @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasAttachment")
+//    }))
+    private Entry entry;
 
     public Attachment() {
     }

@@ -1,10 +1,9 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.*;
 import org.jbei.ice.dto.entry.TraceSequenceAlignmentInfo;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -45,12 +44,10 @@ public class TraceSequenceAlignment implements DataModel {
 
     @Column(name = "query_alignment", nullable = false)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String queryAlignment;
 
     @Column(name = "subject_alignment", nullable = false)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String subjectAlignment;
 
     @Column(name = "sequence_hash", length = 40)

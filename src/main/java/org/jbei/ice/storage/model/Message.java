@@ -1,12 +1,14 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.*;
+import jakarta.persistence.*;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 import org.jbei.ice.dto.message.MessageInfo;
 import org.jbei.ice.message.MessageStatus;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,29 +31,28 @@ public class Message implements DataModel {
     private long id;
 
     @Column(name = "from_user", length = 127)
-    @Field(store = Store.YES, analyze = Analyze.NO)
+    @KeywordField
     private String fromEmail;
 
     @ManyToMany
     @JoinTable(name = "message_destination_accounts",
-            joinColumns = {@JoinColumn(name = "message_id")},
-            inverseJoinColumns = {@JoinColumn(name = "account_id")})
+        joinColumns = {@JoinColumn(name = "message_id")},
+        inverseJoinColumns = {@JoinColumn(name = "account_id")})
     private Set<AccountModel> destinationAccounts = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "message_destination_groups",
-            joinColumns = {@JoinColumn(name = "message_id")},
-            inverseJoinColumns = {@JoinColumn(name = "group_id")})
-    private Set<org.jbei.ice.storage.model.Group> destinationGroups = new HashSet<>();
+        joinColumns = {@JoinColumn(name = "message_id")},
+        inverseJoinColumns = {@JoinColumn(name = "group_id")})
+    private Set<Group> destinationGroups = new HashSet<>();
 
     @Column(name = "message")
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
-    @Field
+    @FullTextField
     private String message;
 
     @Column(name = "title", length = 100)
-    @Field
+    @FullTextField
     private String title;
 
     @Column(name = "sent")
@@ -60,14 +61,17 @@ public class Message implements DataModel {
 
     @Column(name = "read")
     @Temporal(value = TemporalType.TIMESTAMP)
-    @DateBridge(resolution = Resolution.DAY)
+    @GenericField
+//    @DateBridge(resolution = Resolution.DAY)
     private Date dateRead;
 
     @Column(name = "is_read", nullable = false)
+    @GenericField
     private boolean isRead;
 
     @Column(name = "status")
     @Enumerated(value = EnumType.STRING)
+    @GenericField
     private MessageStatus status = MessageStatus.INBOX;
 
     @OneToOne(fetch = FetchType.LAZY)

@@ -1,12 +1,9 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.search.annotations.ContainedIn;
-import org.hibernate.search.annotations.Field;
+import jakarta.persistence.*;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IDataTransferModel;
-
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Represents a selection marker for entry.
@@ -23,10 +20,10 @@ public class SelectionMarker implements DataModel {
     private long id;
 
     @Column(name = "name", length = 50, nullable = false)
-    @Field
+    @GenericField
     private String name;
 
-    @ContainedIn
+    //    @ContainedIn
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
     private org.jbei.ice.storage.model.Entry entry;
@@ -39,7 +36,6 @@ public class SelectionMarker implements DataModel {
         this.entry = entry;
     }
 
-    @XmlTransient
     public long getId() {
         return id;
     }
@@ -56,7 +52,6 @@ public class SelectionMarker implements DataModel {
         this.name = name;
     }
 
-    @XmlTransient
     public org.jbei.ice.storage.model.Entry getEntry() {
         return entry;
     }

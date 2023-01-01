@@ -5,8 +5,9 @@ import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.ApiKey;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+
 import java.util.List;
 import java.util.Optional;
 

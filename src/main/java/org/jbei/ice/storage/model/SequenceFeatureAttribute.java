@@ -1,9 +1,8 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.dto.DNAFeatureNote;
 import org.jbei.ice.storage.DataModel;
-
-import javax.persistence.*;
 
 /**
  * Store genbank style attributes.

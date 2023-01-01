@@ -20,7 +20,7 @@ import org.jbei.ice.dto.web.RegistryPartner;
 public class PermissionResource extends RestResource {
 
     /**
-     * Add a remote access from a partner in the web of registries
+     * Add remote access from a partner in the web of registries
      */
     @POST
     @Path("/remote")

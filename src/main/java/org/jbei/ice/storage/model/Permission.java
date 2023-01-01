@@ -1,13 +1,8 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.search.annotations.Analyze;
-import org.hibernate.search.annotations.ClassBridge;
-import org.hibernate.search.annotations.ContainedIn;
-import org.jbei.ice.access.PermissionEntryBridge;
+import jakarta.persistence.*;
 import org.jbei.ice.dto.access.AccessPermission;
 import org.jbei.ice.storage.DataModel;
-
-import javax.persistence.*;
 
 /**
  * Permission object for storing permissions related to either folders or entries
@@ -17,7 +12,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "PERMISSION")
-@ClassBridge(name = "permission", analyze = Analyze.NO, impl = PermissionEntryBridge.class)
+//@ClassBridge(name = "permission", analyze = Analyze.NO, impl = PermissionEntryBridge.class)
 @SequenceGenerator(name = "permission_id", sequenceName = "permission_id_seq", allocationSize = 1)
 public class Permission implements DataModel {
 
@@ -41,12 +36,12 @@ public class Permission implements DataModel {
 
     @ManyToOne
     @JoinColumn(name = "entry_id")
-    @ContainedIn
+//    @ContainedIn
     private org.jbei.ice.storage.model.Entry entry;
 
     @ManyToOne
     @JoinColumn(name = "folder_id")
-    @ContainedIn
+//    @ContainedIn
     private org.jbei.ice.storage.model.Folder folder;
 
     @ManyToOne

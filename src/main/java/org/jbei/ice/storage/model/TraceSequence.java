@@ -1,10 +1,9 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.*;
 import org.jbei.ice.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -36,7 +35,6 @@ public class TraceSequence implements DataModel {
 
     @Column(name = "sequence", nullable = false)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String sequence;
 
     @Column(name = "creation_time", nullable = false)

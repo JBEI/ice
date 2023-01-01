@@ -1,9 +1,8 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.search.annotations.Indexed;
+import jakarta.persistence.*;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.jbei.ice.dto.entry.EntryType;
-
-import javax.persistence.*;
 
 /**
  * Store Part specific fields.

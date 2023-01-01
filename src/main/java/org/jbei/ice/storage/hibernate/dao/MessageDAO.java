@@ -1,5 +1,7 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
@@ -10,8 +12,6 @@ import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Group;
 import org.jbei.ice.storage.model.Message;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

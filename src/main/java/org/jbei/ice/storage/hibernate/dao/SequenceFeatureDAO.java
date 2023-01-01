@@ -1,5 +1,8 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.HibernateException;
 import org.jbei.ice.dto.entry.Visibility;
 import org.jbei.ice.logging.Logger;
@@ -7,9 +10,6 @@ import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.*;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
 import java.util.Arrays;
 import java.util.List;
 

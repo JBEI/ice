@@ -1,10 +1,10 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.manuscript.Manuscript;
 import org.jbei.ice.manuscript.ManuscriptStatus;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.Date;
 
 /**

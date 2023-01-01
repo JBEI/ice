@@ -2,15 +2,20 @@ package org.jbei.ice.storage.hibernate.search;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.search.*;
+import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Sort;
 import org.hibernate.Session;
-import org.hibernate.search.FullTextQuery;
-import org.hibernate.search.FullTextSession;
-import org.hibernate.search.Search;
-import org.hibernate.search.engine.ProjectionConstants;
-import org.hibernate.search.query.dsl.QueryBuilder;
-import org.hibernate.search.query.dsl.TermContext;
-import org.jbei.ice.account.AccountController;
+import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
+import org.hibernate.search.engine.search.predicate.dsl.PhrasePredicateFieldStep;
+import org.hibernate.search.engine.search.sort.SearchSort;
+import org.hibernate.search.engine.search.sort.dsl.ScoreSortOptionsStep;
+import org.hibernate.search.engine.search.sort.dsl.SortOrder;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.scope.SearchScope;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.entry.Visibility;
@@ -18,8 +23,6 @@ import org.jbei.ice.dto.search.FieldFilter;
 import org.jbei.ice.dto.search.SearchQuery;
 import org.jbei.ice.dto.search.SearchResult;
 import org.jbei.ice.dto.search.SearchResults;
-import org.jbei.ice.folder.Folders;
-import org.jbei.ice.group.GroupController;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.search.QueryType;
 import org.jbei.ice.search.filter.SearchFieldFactory;
@@ -75,46 +78,48 @@ public class HibernateSearch {
 
         cleanedQuery = cleanedQuery.endsWith("'") ? cleanedQuery.substring(0, cleanedQuery.length() - 1) : cleanedQuery;
         cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0,
-                cleanedQuery.length() - 1) : cleanedQuery);
+            cleanedQuery.length() - 1) : cleanedQuery);
         return cleanedQuery;
     }
 
-    public SearchResults executeSearchNoTerms(String userId, HashMap<String, SearchResult> blastResults, SearchQuery searchQuery) {
+    public SearchResults executeSearchNoTerms(String userId, HashMap<String, SearchResult> blastResults,
+                                              SearchQuery searchQuery) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null || entryTypes.isEmpty()) {
             entryTypes = new ArrayList<>(Arrays.asList(EntryType.values()));
         }
 
         Session session = HibernateConfiguration.getCurrentSession();
-        int resultCount;
-        FullTextSession fullTextSession = Search.getFullTextSession(session);
-        BooleanQuery.Builder builder = new BooleanQuery.Builder();
-        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
+        SearchSession searchSession = Search.session(session);
+        SearchScope<Entry> scope = searchSession.scope(Entry.class);
 
-        ArrayList<Query> except = new ArrayList<>();
+        // phrase query
+        PhrasePredicateFieldStep<?> step = scope.predicate().phrase();
+        BooleanPredicateClausesStep<?> boolStep = scope.predicate().bool();
+
+        step.fields("a", "b"); // tODO
+
+
+//        List<Entry> entries = searchSession.search(scope)
+//            .where(scope.predicate().match());
+//            .field("field").matching("search").toPredicate())
+//            .fetchHits(20);
+
+
+        // type for matches should not include those that are not specified
         for (EntryType type : EntryType.values()) {
             if (entryTypes.contains(type))
                 continue;
-
-            except.add(qb.keyword().onField("recordType").matching(type.getName()).createQuery());
+            boolStep.mustNot(scope.predicate().match().field("type").matching(type.getName()));
         }
 
-        // add terms for record types
-        Query[] queries = new Query[]{};
-        Query recordTypeQuery = qb.all().except(except.toArray(queries)).createQuery();
-        builder.add(recordTypeQuery, BooleanClause.Occur.FILTER);
+        // visibility for matches must be "OK"
+        boolStep.must(scope.predicate().match().field("visibility").matching(Visibility.OK.getValue()));
 
-        // visibility
-        Query visibilityQuery = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
-        builder.add(visibilityQuery, BooleanClause.Occur.FILTER);
-
-        // bio safety level
+        // must match bioSafety level if specified
         BioSafetyOption option = searchQuery.getBioSafetyOption();
         if (option != null) {
-            TermContext bslContext = qb.keyword();
-            Query biosafetyQuery =
-                    bslContext.onField("bioSafetyLevel").ignoreFieldBridge().matching(option.getIntValue()).createQuery();
-            builder.add(biosafetyQuery, BooleanClause.Occur.FILTER);
+            boolStep.must(scope.predicate().match().field("bioSafetyLevel").matching(option.getIntValue()));
         }
 
         // check filter filters
@@ -124,59 +129,42 @@ public class HibernateSearch {
                 if (StringUtils.isEmpty(searchField))
                     continue;
 
-                Query filterQuery = qb.keyword().onField(searchField).matching(fieldFilter.getFilter()).createQuery();
-                builder.add(filterQuery, BooleanClause.Occur.MUST);
+                boolStep.must(scope.predicate().match().field(searchField).matching(fieldFilter.getFilter()));
             }
         }
 
         // check if there is a blast results
-        createBlastFilterQuery(fullTextSession, blastResults, builder);
-
-        // wrap Lucene query in a org.hibernate.Query
-        FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(builder.build(), Entry.class);
+        createBlastFilterQuery(blastResults, scope, boolStep);
 
         // get sorting values
-        Sort sort = getSort(searchQuery.getParameters().isSortAscending(), searchQuery.getParameters().getSortField());
-        fullTextQuery.setSort(sort);
-        fullTextQuery.setProjection(ProjectionConstants.ID, "owner");
+        SearchSort searchSort = getSort(scope, searchQuery.getParameters().isSortAscending(), searchQuery.getParameters().getSortField());
+        org.hibernate.search.engine.search.query.SearchResult<Entry> queryResults = searchSession.search(Entry.class)
+            .where(boolStep.toPredicate())
+            .sort(searchSort)
+            .fetch(searchQuery.getParameters().getStart(), searchQuery.getParameters().getRetrieveCount());
+
+
+//        fullTextQuery.setProjection(ProjectionConstants.ID, "owner");
 
         // enable security filter if needed
-        checkEnableSecurityFilter(userId, fullTextQuery);
+//        checkEnableSecurityFilter(userId, fullTextQuery);
 
         // enable has attachment/sequence/sample (if needed)
-        checkEnableHasAttribute(fullTextQuery, searchQuery.getParameters());
-
-        // set paging params
-        fullTextQuery.setFirstResult(searchQuery.getParameters().getStart());
-        fullTextQuery.setMaxResults(searchQuery.getParameters().getRetrieveCount());
-
-        resultCount = fullTextQuery.getResultSize();
-        List<?> result = fullTextQuery.list();
+//        checkEnableHasAttribute(fullTextQuery, searchQuery.getParameters());
 
         LinkedList<SearchResult> searchResults = new LinkedList<>();
 
-        // since we are using projection, result is an arraylist of objects
-        for (Object object : result) {
-            Object[] objects = (Object[]) object;
-            long entryId = (Long) objects[0];
-            SearchResult searchResult;
-            if (blastResults != null) {
-                searchResult = blastResults.get(Long.toString(entryId));
-                if (searchResult == null) // this should not really happen since we already filter
-                    continue;
-            } else {
-                searchResult = new SearchResult();
-                searchResult.setScore(1f);
-                PartData info = ModelToInfoFactory.createTableView(entryId, null);
-                info.setOwner((String) objects[1]);
-                searchResult.setEntryInfo(info);
-            }
+        for (Entry entry : queryResults.hits()) {
+            SearchResult searchResult = new SearchResult();
+            PartData info = entry.toDataTransferObject();
+            searchResult.setEntryInfo(info);
 
             searchResult.setMaxScore(1f);
             searchResults.add(searchResult);
         }
 
         SearchResults results = new SearchResults();
+        long resultCount = queryResults.total().hitCount();
         results.setResultCount(resultCount);
         results.setResults(searchResults);
 
@@ -222,7 +210,7 @@ public class HibernateSearch {
         if (searchQuery.getBioSafetyOption() != null) {
             TermContext levelContext = qb.keyword();
             Query biosafetyQuery = levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
-                    .matching(searchQuery.getBioSafetyOption().getValue()).createQuery();
+                .matching(searchQuery.getBioSafetyOption().getValue()).createQuery();
             builder.add(biosafetyQuery, BooleanClause.Occur.MUST);
         }
 
@@ -244,7 +232,7 @@ public class HibernateSearch {
         SearchResult[] searchResults = new SearchResult[count];
         int limit = Math.min((start + count), blastResults.size());
         LinkedList<SearchResult> list = new LinkedList<>(Arrays.asList(blastResults.values().toArray(searchResults))
-                .subList(start, limit));
+            .subList(start, limit));
 
         SearchResults results = new SearchResults();
         results.setResultCount(blastResults.size());
@@ -252,16 +240,11 @@ public class HibernateSearch {
         return results;
     }
 
-    @SuppressWarnings("unchecked")
     public SearchResults executeSearch(String userId, HashMap<String, QueryType> terms,
-                                       SearchQuery searchQuery,
-                                       HashMap<String, SearchResult> blastResults) {
+                                       SearchQuery searchQuery, HashMap<String, SearchResult> blastResults) {
         Session session = HibernateConfiguration.getCurrentSession();
-        int resultCount;
-        FullTextSession fullTextSession = Search.getFullTextSession(session);
-        BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
-        // get classes for search
+        // get class types or search
         HashSet<String> fields = new HashSet<>(SearchFieldFactory.entryFields(searchQuery.getEntryTypes()));
         Class<?>[] classes = SearchFieldFactory.classesForTypes(searchQuery.getEntryTypes());
 
@@ -342,13 +325,11 @@ public class HibernateSearch {
         return results;
     }
 
-    private void generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
-                                        BooleanQuery.Builder builder, String term, QueryType type,
-                                        BioSafetyOption option) {
-        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
+    private void generateQueriesForType(HashSet<String> fields, String term, QueryType type, BioSafetyOption option) {
+        SearchSession searchSession = Search.session(HibernateConfiguration.getCurrentSession());
+
         if (!StringUtils.isEmpty(term)) {
             // generate term queries for each search term
-            Query query;
             String[] queryFields = fields.toArray(new String[0]);
             if (type == QueryType.PHRASE) {
                 // phrase types are for quotes so slop is omitted
@@ -369,115 +350,105 @@ public class HibernateSearch {
             // visibility (using must not because "must for visibility ok" adds it as the query and affects the match
             // the security filter takes care of other values not to be included such as "transferred" and "deleted"
             Query visibilityQuery = qb.keyword().onField("visibility")
-                    .matching(Visibility.DRAFT.getValue()).createQuery();
+                .matching(Visibility.DRAFT.getValue()).createQuery();
             builder.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
 
             Query visibilityQuery2 = qb.keyword().onField("visibility")
-                    .matching(Visibility.DELETED.getValue()).createQuery();
+                .matching(Visibility.DELETED.getValue()).createQuery();
             builder.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
 
             Query visibilityQuery3 = qb.keyword().onField("visibility")
-                    .matching(Visibility.PERMANENTLY_DELETED.getValue()).createQuery();
+                .matching(Visibility.PERMANENTLY_DELETED.getValue()).createQuery();
             builder.add(visibilityQuery3, BooleanClause.Occur.MUST_NOT);
 
             // bio-safety level
             if (option != null) {
                 TermContext levelContext = qb.keyword();
                 Query biosafetyQuery = levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
-                        .matching(option.getValue()).createQuery();
+                    .matching(option.getValue()).createQuery();
                 builder.add(biosafetyQuery, BooleanClause.Occur.MUST);
             }
         }
     }
 
-    private Sort getSort(boolean asc, ColumnField sortField) {
+    private SearchSort getSort(SearchScope<Entry> scope, boolean asc, ColumnField sortField) {
         if (sortField == null)
             sortField = ColumnField.CREATED;
+
+        ScoreSortOptionsStep<?> sortStep;
 
         switch (sortField) {
             case RELEVANCE:
             default:
-                return new Sort(new SortField(SortField.FIELD_SCORE.getField(), SortField.FIELD_SCORE.getType(), asc));
+                return scope.sort().score().order(asc ? SortOrder.ASC : SortOrder.DESC).toSort();
 
             case TYPE:
-                return new Sort(new SortField("recordType", SortField.Type.STRING, asc));
-
-            case PART_ID:
-                return new Sort(new SortField("partNumber_forSort", SortField.Type.STRING, asc));
-
-            case CREATED:
-                return new Sort(new SortField("creationTime", SortField.Type.INT, asc));
+                return scope.sort().field("type").order(asc ? SortOrder.ASC : SortOrder.DESC).toSort();
         }
     }
 
-    // empty blast results indicates valid results
-    private void createBlastFilterQuery(FullTextSession fullTextSession,
-                                        final HashMap<String, SearchResult> blastResults,
-                                        BooleanQuery.Builder builder) {
+    /**
+     * Filter results based on blast results. Query should be a bool
+     *
+     * @param blastResults results from blast search. empty indicates valid "no results"
+     */
+    private void createBlastFilterQuery(Map<String, SearchResult> blastResults,
+                                        SearchScope<Entry> scope,
+                                        BooleanPredicateClausesStep<?> boolClause) {
         // null blast results indicates no blast query
         if (blastResults == null)
             return;
 
         // enable blast filter
-        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
-        Query query = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
-        builder.add(query, BooleanClause.Occur.FILTER);
         for (String id : blastResults.keySet()) {
-            Query filterQuery = qb.keyword().onField("id").matching(id).createQuery();
-            builder.add(filterQuery, BooleanClause.Occur.FILTER);
+            boolClause.must(scope.predicate().match().field("id").matching(id));
         }
     }
 
-    /**
-     * Enables the security filter if the account does not have administrative privileges
-     *
-     * @param userId        identifier for account which is checked for administrative privs
-     * @param fullTextQuery search fulltextquery for which filter is enabled
-     */
-    private void checkEnableSecurityFilter(String userId, FullTextQuery fullTextQuery) {
-        Set<String> groupUUIDs = new HashSet<>();
-        Set<String> folderIds = new HashSet<>();
+//    private void checkEnableSecurityFilter(String userId, FullTextQuery fullTextQuery) {
+//        Set<String> groupUUIDs = new HashSet<>();
+//        Set<String> folderIds = new HashSet<>();
+//
+//        if (StringUtils.isEmpty(userId)) {
+//            groupUUIDs.add(GroupController.PUBLIC_GROUP_UUID);
+//        } else {
+//            AccountController accountController = new AccountController();
+//            if (accountController.isAdministrator(userId)) {
+//                return;
+//            }
+//            groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(userId);
+//            folderIds = new Folders(userId).getCanReadFolderIds();
+//        }
+//
+//        fullTextQuery.enableFullTextFilter("security")
+//            .setParameter("account", userId)
+//            .setParameter("folderIds", folderIds)
+//            .setParameter("groupUUids", groupUUIDs);
+//    }
 
-        if (StringUtils.isEmpty(userId)) {
-            groupUUIDs.add(GroupController.PUBLIC_GROUP_UUID);
-        } else {
-            AccountController accountController = new AccountController();
-            if (accountController.isAdministrator(userId)) {
-                return;
-            }
-            groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(userId);
-            folderIds = new Folders(userId).getCanReadFolderIds();
-        }
-
-        fullTextQuery.enableFullTextFilter("security")
-                .setParameter("account", userId)
-                .setParameter("folderIds", folderIds)
-                .setParameter("groupUUids", groupUUIDs);
-    }
-
-    private void checkEnableHasAttribute(FullTextQuery fullTextQuery, SearchQuery.Parameters parameters) {
-        if (parameters == null)
-            return;
-
-        ArrayList<String> terms = new ArrayList<>(3);
-
-        if (parameters.getHasSample()) {
-            terms.add("hasSample");
-        }
-
-        if (parameters.getHasAttachment()) {
-            terms.add("hasAttachment");
-        }
-
-        if (parameters.getHasSequence()) {
-            terms.add("hasSequence");
-        }
-
-        if (terms.isEmpty())
-            return;
-
-        fullTextQuery.enableFullTextFilter("boolean").setParameter("field", terms);
-    }
+//    private void checkEnableHasAttribute(FullTextQuery fullTextQuery, SearchQuery.Parameters parameters) {
+//        if (parameters == null)
+//            return;
+//
+//        ArrayList<String> terms = new ArrayList<>(3);
+//
+//        if (parameters.getHasSample()) {
+//            terms.add("hasSample");
+//        }
+//
+//        if (parameters.getHasAttachment()) {
+//            terms.add("hasAttachment");
+//        }
+//
+//        if (parameters.getHasSequence()) {
+//            terms.add("hasSequence");
+//        }
+//
+//        if (terms.isEmpty())
+//            return;
+//
+//        fullTextQuery.enableFullTextFilter("boolean").setParameter("field", terms);
+//    }
 
     private static class SingletonHolder {
         private static final HibernateSearch INSTANCE = new HibernateSearch();

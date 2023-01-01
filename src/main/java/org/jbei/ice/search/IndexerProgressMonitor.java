@@ -1,13 +1,13 @@
 package org.jbei.ice.search;
 
-import org.hibernate.search.batchindexing.MassIndexerProgressMonitor;
+import org.hibernate.search.mapper.pojo.massindexing.MassIndexingMonitor;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Hector Plahar
  */
-public class IndexerProgressMonitor implements MassIndexerProgressMonitor {
+public class IndexerProgressMonitor implements MassIndexingMonitor {
 
     private static final IndexerProgressMonitor INSTANCE = new IndexerProgressMonitor();
     private final AtomicLong documentsDoneCounter = new AtomicLong();
@@ -20,44 +20,36 @@ public class IndexerProgressMonitor implements MassIndexerProgressMonitor {
         return INSTANCE;
     }
 
-    @Override
     /**
      * {@inheritDoc}
      */
-    public void documentsBuilt(int number) {
-    }
-
     @Override
-    /**
-     * {@inheritDoc}
-     */
-    public void entitiesLoaded(int size) {
-        // ignore
-    }
-
-    @Override
-    /**
-     * {@inheritDoc}
-     */
     public void addToTotalCount(long count) {
         totalCounter.addAndGet(count);
     }
 
     @Override
+    public void indexingCompleted() {
+        documentsDoneCounter.set(0L);
+        totalCounter.set(0L);
+    }
+
     /**
      * {@inheritDoc}
      */
-    public void indexingCompleted() {
-        documentsDoneCounter.set(0l);
-        totalCounter.set(0l);
+    @Override
+    public void documentsAdded(long increment) {
+        documentsDoneCounter.getAndAdd(increment);
     }
 
     @Override
-    /**
-     * {@inheritDoc}
-     */
-    public void documentsAdded(long increment) {
-        documentsDoneCounter.getAndAdd(increment);
+    public void documentsBuilt(long increment) {
+
+    }
+
+    @Override
+    public void entitiesLoaded(long increment) {
+
     }
 
     public void indexingInterrupted() {

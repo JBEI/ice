@@ -1,15 +1,14 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.entry.ProteinData;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Table;
 
 /**
  * Store Protein specific fields.
@@ -22,19 +21,19 @@ import javax.persistence.Table;
 public class Protein extends Entry {
 
     @Column(name = "organism")
-    @Field
+    @GenericField
     private String organism;
 
     @Column(name = "fullName")
-    @Field
+    @GenericField
     private String fullName;
 
     @Column(name = "geneName")
-    @Field
+    @GenericField
     private String geneName;
 
     @Column(name = "uploadedFrom")
-    @Field
+    @GenericField
     private String uploadedFrom;
 
     public Protein() {

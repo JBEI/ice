@@ -5,7 +5,8 @@ import org.jbei.ice.dto.History;
 import org.jbei.ice.dto.entry.EntryFieldLabel;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
 import java.util.Date;
 
 /**

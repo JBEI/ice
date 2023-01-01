@@ -1,11 +1,9 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.*;
 import org.jbei.ice.dto.DNAFeature;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.utils.SequenceUtils;
-
-import javax.persistence.*;
 
 /**
  * Represents a unique sequence annotation known to this instance of gd-ice.
@@ -37,7 +35,6 @@ public class Feature implements DataModel {
 
     @Column(name = "sequence", nullable = false)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String sequence;
 
     @Column(name = "genbank_type", length = 127)

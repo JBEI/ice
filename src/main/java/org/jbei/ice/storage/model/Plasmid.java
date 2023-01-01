@@ -1,15 +1,14 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.entry.PlasmidData;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Table;
 
 /**
  * Store Plasmid specific fields.
@@ -25,27 +24,28 @@ import javax.persistence.Table;
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 @Entity
-@Indexed
+@Indexed(index = "Plasmid")
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "plasmids")
 public class Plasmid extends Entry {
 
     @Column(name = "backbone", length = 127)
-    @Field
+    @FullTextField
     private String backbone;
 
     @Column(name = "origin_of_replication", length = 127)
-    @Field
+    @FullTextField
     private String originOfReplication;
 
     @Column(name = "promoters", length = 512)
-    @Field
+    @FullTextField
     private String promoters;
 
     @Column(name = "circular")
     private Boolean circular;
 
     @Column(name = "replicates_in")
+    @FullTextField
     private String replicatesIn;
 
     public Plasmid() {

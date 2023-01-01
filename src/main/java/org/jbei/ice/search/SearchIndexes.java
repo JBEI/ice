@@ -85,7 +85,7 @@ public class SearchIndexes {
         Logger.info(userId + ": rebuilding search index " + type);
         switch (type) {
             case LUCENE:
-                IceExecutorService.getInstance().runTask(new RebuildLuceneIndexTask());
+                IceExecutorService.getInstance().runTask(new RebuildSearchIndexTask());
                 break;
 
             case BLAST:

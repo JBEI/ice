@@ -1,12 +1,12 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.jbei.ice.dto.entry.CustomField;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.ParameterModel;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 

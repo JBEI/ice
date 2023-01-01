@@ -1,5 +1,9 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.HibernateException;
 import org.jbei.ice.bulkupload.BulkUploadStatus;
 import org.jbei.ice.dto.entry.Visibility;
@@ -10,10 +14,6 @@ import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.BulkUpload;
 import org.jbei.ice.storage.model.Entry;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
 import java.util.List;
 
 /**

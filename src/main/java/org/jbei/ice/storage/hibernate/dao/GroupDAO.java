@@ -1,5 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import jakarta.persistence.criteria.*;
 import org.jbei.ice.dto.group.GroupType;
 import org.jbei.ice.group.GroupController;
 import org.jbei.ice.logging.Logger;
@@ -8,7 +9,6 @@ import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Group;
 
-import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

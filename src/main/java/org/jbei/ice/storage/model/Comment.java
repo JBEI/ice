@@ -1,10 +1,9 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.*;
 import org.jbei.ice.dto.comment.UserComment;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -35,7 +34,6 @@ public class Comment implements DataModel {
 
     @Column(name = "body", nullable = false)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String body;
 
     @Column(name = "creation_time")
@@ -121,10 +119,8 @@ public class Comment implements DataModel {
         userComment.setMessage(getBody());
         userComment.setAccountTransfer(getAccount().toDataTransferObject());
         userComment.setEntryId(getEntry().getId());
-        if (this.samples != null) {
-            for (Sample sample : this.samples) {
-                userComment.getSamples().add(sample.toDataTransferObject());
-            }
+        for (Sample sample : this.samples) {
+            userComment.getSamples().add(sample.toDataTransferObject());
         }
         return userComment;
     }

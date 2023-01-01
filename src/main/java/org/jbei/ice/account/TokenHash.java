@@ -2,11 +2,11 @@ package org.jbei.ice.account;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.xml.bind.DatatypeConverter;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Base64;
 
 /**
  * @author Hector Plahar
@@ -27,7 +27,7 @@ public class TokenHash {
         try {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             byte[] hash = keyFactory.generateSecret(spec).getEncoded();
-            return DatatypeConverter.printBase64Binary(hash);
+            return Base64.getEncoder().encodeToString(hash);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             return null;
         }
@@ -43,20 +43,20 @@ public class TokenHash {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[SALT_BYTE_SIZE];
         random.nextBytes(salt);
-        return DatatypeConverter.printBase64Binary(salt);
+        return Base64.getEncoder().encodeToString(salt);
     }
 
     public String generateRandomToken() {
         SecureRandom random = new SecureRandom();
         byte[] token = new byte[TOKEN_BYTE_SIZE];
         random.nextBytes(token);
-        return DatatypeConverter.printBase64Binary(token);
+        return Base64.getEncoder().encodeToString(token);
     }
 
     public String generateRandomToken(int byteSize) {
         SecureRandom random = new SecureRandom();
         byte[] token = new byte[byteSize];
         random.nextBytes(token);
-        return DatatypeConverter.printBase64Binary(token);
+        return Base64.getEncoder().encodeToString(token);
     }
 }

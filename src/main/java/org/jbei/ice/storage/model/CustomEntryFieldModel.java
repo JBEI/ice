@@ -1,12 +1,12 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.dto.entry.CustomEntryField;
 import org.jbei.ice.dto.entry.EntryFieldLabel;
 import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.dto.entry.FieldType;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 

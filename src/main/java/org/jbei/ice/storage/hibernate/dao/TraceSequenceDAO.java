@@ -1,6 +1,8 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import com.google.common.io.ByteStreams;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.jbei.ice.logging.Logger;
@@ -10,8 +12,6 @@ import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.TraceSequence;
 import org.jbei.ice.storage.model.TraceSequenceAlignment;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;

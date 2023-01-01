@@ -1,12 +1,8 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.search.annotations.ContainedIn;
-import org.hibernate.search.annotations.Field;
+import jakarta.persistence.*;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IDataTransferModel;
-
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Store url link information.
@@ -23,14 +19,11 @@ public class Link implements DataModel {
     private long id;
 
     @Column(name = "link", length = 1023)
-    @Field
     private String link;
 
-    @Field
     @Column(name = "url", length = 1023)
     private String url;
 
-    @ContainedIn
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
@@ -38,7 +31,6 @@ public class Link implements DataModel {
     public Link() {
     }
 
-    @XmlTransient
     public long getId() {
         return id;
     }
@@ -63,7 +55,6 @@ public class Link implements DataModel {
         this.url = url;
     }
 
-    @XmlTransient
     public Entry getEntry() {
         return entry;
     }

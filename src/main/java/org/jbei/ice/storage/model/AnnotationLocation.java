@@ -3,7 +3,7 @@ package org.jbei.ice.storage.model;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IDataTransferModel;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * Store the basepair location annotation for a {@link org.jbei.ice.storage.model.SequenceFeature} object.

@@ -4,12 +4,12 @@ import org.apache.commons.codec.binary.Hex;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Base64;
 import java.util.UUID;
 
 public class PasswordUtils {
@@ -61,6 +61,6 @@ public class PasswordUtils {
     public static String generateRandomToken(int byteSize) {
         byte[] token = new byte[byteSize];
         Holder.random.nextBytes(token);
-        return DatatypeConverter.printBase64Binary(token);
+        return Base64.getEncoder().encodeToString(token);
     }
 }

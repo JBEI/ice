@@ -1,5 +1,7 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.jbei.ice.dto.ConfigurationKey;
@@ -10,8 +12,6 @@ import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.ShotgunSequence;
 import org.jbei.ice.utils.Utils;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

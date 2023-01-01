@@ -1,9 +1,8 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.dto.access.AccessPermission;
 import org.jbei.ice.storage.DataModel;
-
-import javax.persistence.*;
 
 /**
  * Stores access information for remote shares

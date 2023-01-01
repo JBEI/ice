@@ -1,11 +1,11 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.account.Account;
 import org.jbei.ice.bulkupload.BulkUploadInfo;
 import org.jbei.ice.bulkupload.BulkUploadStatus;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;

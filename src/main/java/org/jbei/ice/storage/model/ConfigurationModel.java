@@ -1,10 +1,9 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.Setting;
 import org.jbei.ice.storage.DataModel;
-
-import javax.persistence.*;
 
 /**
  * Site wide configuration values. See {@link ConfigurationKey} for

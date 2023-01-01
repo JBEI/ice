@@ -1,14 +1,9 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.ContainedIn;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.FieldBridge;
+import jakarta.persistence.*;
 import org.jbei.ice.dto.sample.PartSample;
 import org.jbei.ice.storage.DataModel;
-import org.jbei.ice.storage.hibernate.bridge.EntryBooleanPropertiesBridge;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,15 +36,14 @@ public class Sample implements DataModel {
 
     @Column(name = "notes")
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String notes;
 
-    @ContainedIn
+    //    @ContainedIn
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false, unique = false)
-    @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
-            @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasSample")
-    }))
+//    @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
+//            @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasSample")
+//    }))
     private org.jbei.ice.storage.model.Entry entry;
 
     @Column(name = "creation_time")

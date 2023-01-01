@@ -1,14 +1,13 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.HibernateException;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.ConfigurationModel;
-
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  * Manage {@link ConfigurationModel} objects in the database.

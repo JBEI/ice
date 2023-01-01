@@ -1,15 +1,14 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.search.annotations.ClassBridge;
-import org.hibernate.search.annotations.ContainedIn;
-import org.jbei.ice.access.EntryFolderPermissionBridge;
+import org.hibernate.search.mapper.pojo.bridge.binding.TypeBindingContext;
+import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.TypeBinder;
 import org.jbei.ice.dto.folder.FolderDetails;
 import org.jbei.ice.dto.folder.FolderType;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -23,9 +22,9 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "folder")
-@ClassBridge(impl = EntryFolderPermissionBridge.class)
+//@ClassBridge(impl = EntryFolderPermissionBridge.class)
 @SequenceGenerator(name = "folder_id", sequenceName = "folder_id_seq", allocationSize = 1)
-public class Folder implements DataModel {
+public class Folder implements DataModel, TypeBinder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "folder_id")
@@ -61,10 +60,10 @@ public class Folder implements DataModel {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
+        inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
     @LazyCollection(LazyCollectionOption.EXTRA)
-    @ContainedIn
-    private final Set<org.jbei.ice.storage.model.Entry> contents = new LinkedHashSet<>();
+//    @ContainedIn
+    private final Set<Entry> contents = new LinkedHashSet<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, mappedBy = "folder",
             orphanRemoval = true, fetch = FetchType.LAZY)
@@ -171,5 +170,10 @@ public class Folder implements DataModel {
             details.setCreationTime(getCreationTime().getTime());
         details.setPropagatePermission(this.isPropagatePermissions());
         return details;
+    }
+
+    @Override
+    public void bind(TypeBindingContext context) {
+
     }
 }

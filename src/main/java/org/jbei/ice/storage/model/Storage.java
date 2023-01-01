@@ -1,10 +1,10 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.jbei.ice.dto.StorageLocation;
 import org.jbei.ice.dto.sample.SampleType;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 

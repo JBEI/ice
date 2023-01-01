@@ -1,21 +1,14 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.FieldBridge;
+import jakarta.persistence.*;
 import org.jbei.ice.dto.entry.SequenceInfo;
 import org.jbei.ice.entry.sequence.SequenceFormat;
 import org.jbei.ice.storage.DataModel;
-import org.jbei.ice.storage.hibernate.bridge.EntryBooleanPropertiesBridge;
 import org.jbei.ice.utils.SequenceUtils;
 import org.jbei.ice.utils.UtilityException;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
 import java.util.HashSet;
 import java.util.Set;
-
-import static javax.persistence.FetchType.LAZY;
 
 /**
  * Stores the unique sequence for an {@link org.jbei.ice.storage.model.Entry} object.
@@ -42,7 +35,6 @@ public class Sequence implements DataModel {
 
     @Column(name = "sequence")
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private String sequence;
 
     @Column(name = "identifier")
@@ -50,8 +42,6 @@ public class Sequence implements DataModel {
 
     @Column(name = "sequence_user")
     @Lob
-    @Basic(fetch = LAZY)
-    @Type(type = "org.hibernate.type.TextType")
     private String sequenceUser;
 
     @Column(name = "fwd_hash", length = 40)
@@ -74,13 +64,13 @@ public class Sequence implements DataModel {
     private SequenceFormat format;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "entries_id", nullable = true, unique = true)
-    @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
-            @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasSequence")
-    }))
+    @JoinColumn(name = "entries_id", unique = true)
+//    @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
+//            @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasSequence")
+//    }))
     private org.jbei.ice.storage.model.Entry entry;
 
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = LAZY, mappedBy = "sequence")
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "sequence")
     private Set<SequenceFeature> sequenceFeatures = new HashSet<>();
 
     public Sequence() {
@@ -96,7 +86,6 @@ public class Sequence implements DataModel {
         this.entry = entry;
     }
 
-    @XmlTransient
     public long getId() {
         return id;
     }
@@ -119,7 +108,6 @@ public class Sequence implements DataModel {
         }
     }
 
-    @XmlTransient
     public String getSequenceUser() {
         return sequenceUser;
     }
@@ -128,7 +116,6 @@ public class Sequence implements DataModel {
         this.sequenceUser = sequenceUser;
     }
 
-    @XmlTransient
     public String getFwdHash() {
         return fwdHash;
     }
@@ -137,7 +124,6 @@ public class Sequence implements DataModel {
         this.fwdHash = fwdHash;
     }
 
-    @XmlTransient
     public String getRevHash() {
         return revHash;
     }
@@ -146,7 +132,6 @@ public class Sequence implements DataModel {
         this.revHash = revHash;
     }
 
-    @XmlTransient
     public org.jbei.ice.storage.model.Entry getEntry() {
         return entry;
     }

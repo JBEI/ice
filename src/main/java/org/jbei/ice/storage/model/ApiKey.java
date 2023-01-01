@@ -6,7 +6,8 @@ import org.jbei.ice.account.Account;
 import org.jbei.ice.dto.access.AccessKey;
 import org.jbei.ice.storage.DataModel;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
 import java.util.Date;
 
 /**
