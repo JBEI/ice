@@ -1,6 +1,9 @@
 package org.jbei.ice.storage.model;
 
 import jakarta.persistence.*;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.TypeBinderRef;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.TypeBinding;
+import org.jbei.ice.access.PermissionEntryBridge;
 import org.jbei.ice.dto.access.AccessPermission;
 import org.jbei.ice.storage.DataModel;
 
@@ -12,6 +15,7 @@ import org.jbei.ice.storage.DataModel;
  */
 @Entity
 @Table(name = "PERMISSION")
+@TypeBinding(binder = @TypeBinderRef(type = PermissionEntryBridge.class))
 //@ClassBridge(name = "permission", analyze = Analyze.NO, impl = PermissionEntryBridge.class)
 @SequenceGenerator(name = "permission_id", sequenceName = "permission_id_seq", allocationSize = 1)
 public class Permission implements DataModel {

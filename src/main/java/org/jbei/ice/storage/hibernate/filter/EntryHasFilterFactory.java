@@ -5,7 +5,6 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
-import org.hibernate.search.annotations.Factory;
 
 import java.util.ArrayList;
 
@@ -21,7 +20,6 @@ public class EntryHasFilterFactory {
         this.field = field.toArray(new String[field.size()]);
     }
 
-    @Factory
     public Query getFilter() {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
 

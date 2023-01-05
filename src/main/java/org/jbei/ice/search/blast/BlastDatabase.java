@@ -25,6 +25,6 @@ public class BlastDatabase {
                 throw new IllegalArgumentException(e);
             }
         }
-        this.dbName = "org/jbei/ice";
+        this.dbName = "ice";
     }
 }

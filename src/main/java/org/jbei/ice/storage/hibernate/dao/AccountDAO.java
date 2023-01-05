@@ -54,7 +54,7 @@ public class AccountDAO extends HibernateRepository<AccountModel> {
                                 getBuilder().like(getBuilder().lower(from.get("email")), "%" + tok + "%"))
                 );
             }
-            query.where(predicates.toArray(new Predicate[predicates.size()])).distinct(true);
+            query.where(predicates.toArray(new Predicate[0])).distinct(true);
             return currentSession().createQuery(query).setMaxResults(limit).list();
         } catch (HibernateException e) {
             Logger.error(e);

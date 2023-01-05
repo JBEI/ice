@@ -22,7 +22,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "folder")
-//@ClassBridge(impl = EntryFolderPermissionBridge.class)
+//@TypeBinding(binder = @TypeBinderRef(type = EntryFolderPermissionBridge.class))
 @SequenceGenerator(name = "folder_id", sequenceName = "folder_id_seq", allocationSize = 1)
 public class Folder implements DataModel, TypeBinder {
 
@@ -34,13 +34,13 @@ public class Folder implements DataModel, TypeBinder {
     @JoinColumn(name = "parent_id")
     private Folder parent;
 
-    @Column(name = "name", length = 255, nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "description", length = 1023)
     private String description;
 
-    @Column(name = "owner_email", length = 255, nullable = false)
+    @Column(name = "owner_email", nullable = false)
     private String ownerEmail;
 
     @Column(name = "creation_time")
@@ -62,11 +62,10 @@ public class Folder implements DataModel, TypeBinder {
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
         inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
     @LazyCollection(LazyCollectionOption.EXTRA)
-//    @ContainedIn
     private final Set<Entry> contents = new LinkedHashSet<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, mappedBy = "folder",
-            orphanRemoval = true, fetch = FetchType.LAZY)
+        orphanRemoval = true, fetch = FetchType.LAZY)
     private final Set<Permission> permissions = new HashSet<>();
 
     public Folder() {

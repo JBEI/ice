@@ -1,10 +1,9 @@
 package org.jbei.ice.storage.model;
 
+import jakarta.persistence.*;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.jbei.ice.dto.entry.*;
-
-import jakarta.persistence.*;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -135,7 +134,7 @@ public class ArabidopsisSeed extends Entry {
         seedData.setEcotype(this.ecotype);
         seedData.setGeneration(this.generation);
         if (this.harvestDate != null) {
-            DateFormat format = new SimpleDateFormat("MM/dd/YYYY");
+            DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
             String dateFormat = format.format(this.harvestDate);
             seedData.setHarvestDate(dateFormat);
         }

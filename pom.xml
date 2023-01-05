@@ -9,8 +9,8 @@
     <version>6.0.0</version>
 
     <properties>
-        <maven.compiler.source>16</maven.compiler.source>
-        <maven.compiler.target>16</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -63,8 +63,8 @@
         </dependency>
         <dependency>
             <groupId>org.hibernate.search</groupId>
-            <artifactId>hibernate-search-mapper-orm</artifactId>
-            <version>6.1.4.Final</version>
+            <artifactId>hibernate-search-mapper-orm-orm6</artifactId>
+            <version>6.1.7.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate.search</groupId>
@@ -82,9 +82,9 @@
             <version>8.0.0.Final</version>
         </dependency>
         <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>javax.el-api</artifactId>
-            <version>3.0.0</version>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.el</artifactId>
+            <version>5.0.0-M1</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>

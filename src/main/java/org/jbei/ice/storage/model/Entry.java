@@ -3,12 +3,14 @@ package org.jbei.ice.storage.model;
 import jakarta.persistence.*;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Sortable;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.TypeBinderRef;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.*;
 import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.entry.Visibility;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.ModelToInfoFactory;
+import org.jbei.ice.storage.hibernate.bridge.EntryBooleanPropertiesBridge;
 import org.jbei.ice.utils.Utils;
 
 import java.util.*;
@@ -64,6 +66,7 @@ import java.util.*;
  */
 @Entity
 @Indexed(index = "Entry")
+@TypeBinding(binder = @TypeBinderRef(type = EntryBooleanPropertiesBridge.class))
 //@FullTextFilterDefs({
 //    @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class, cache = FilterCacheModeType.INSTANCE_ONLY),
 //    @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class, cache = FilterCacheModeType.INSTANCE_ONLY)
@@ -158,13 +161,11 @@ public class Entry implements DataModel {
 
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
-    @GenericField
-    @KeywordField(name = "created_sort", sortable = Sortable.YES, projectable = Projectable.YES)
+//    @KeywordField(name = "created_sort", sortable = Sortable.YES, projectable = Projectable.YES)
     private Date creationTime;
 
     @Column(name = "modification_time")
     @Temporal(TemporalType.TIMESTAMP)
-    @GenericField
     private Date modificationTime;
 
     @Column(name = "bio_safety_level")
@@ -222,7 +223,7 @@ public class Entry implements DataModel {
     @IndexedEmbedded(includeDepth = 1)
     private final Set<Attachment> attachments = new HashSet<>();
 
-    @OneToOne(orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "entry")
+    @OneToOne(orphanRemoval = true, mappedBy = "entry")
     @IndexedEmbedded(includeDepth = 1)
     private Sequence sequence;
 

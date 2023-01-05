@@ -5,7 +5,6 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
-import org.hibernate.search.annotations.Factory;
 import org.jbei.ice.access.IndexField;
 
 import java.util.HashSet;
@@ -34,7 +33,6 @@ public class EntrySecurityFilterFactory {
         this.folderIds = folderIds;
     }
 
-    @Factory
     public Query getFilter() {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
 

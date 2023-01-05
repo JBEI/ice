@@ -1,93 +1,74 @@
 package org.jbei.ice.storage.hibernate.bridge;
 
-import org.apache.lucene.document.Document;
-import org.hibernate.search.mapper.pojo.bridge.RoutingBridge;
-import org.hibernate.search.mapper.pojo.bridge.binding.RoutingBindingContext;
-import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.RoutingBinder;
-import org.hibernate.search.mapper.pojo.bridge.runtime.RoutingBridgeRouteContext;
-import org.hibernate.search.mapper.pojo.route.DocumentRoutes;
+import org.hibernate.search.engine.backend.document.DocumentElement;
+import org.hibernate.search.engine.backend.document.IndexFieldReference;
+import org.hibernate.search.mapper.pojo.bridge.TypeBridge;
+import org.hibernate.search.mapper.pojo.bridge.binding.TypeBindingContext;
+import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.TypeBinder;
+import org.hibernate.search.mapper.pojo.bridge.runtime.TypeBridgeWriteContext;
 import org.jbei.ice.storage.model.Entry;
-
-import java.util.Map;
 
 /**
  * @author Hector Plahar
  */
-public class EntryBooleanPropertiesBridge implements RoutingBinder {
-
-    public static final String BOOLEAN_PROPERTY = "boolean";
-    private String field;
+public class EntryBooleanPropertiesBridge implements TypeBinder {
 
     @Override
-    public void setParameterValues(Map parameters) {
-        field = (String) parameters.get(BOOLEAN_PROPERTY);
+    public void bind(TypeBindingContext context) {
+        // declare dependencies. these will be use to trigger reindexing when modified
+        context.dependencies()
+            .use("samples")
+            .use("attachments")
+            .use("sequence");
+
+        // declare fields that will be populated
+        IndexFieldReference<Boolean> hasSampleReference = context.indexSchemaElement()
+            .field("hasSample", f -> f.asBoolean()).toReference();
+        IndexFieldReference<Boolean> hasAttachmentReference = context.indexSchemaElement()
+            .field("hasAttachment", f -> f.asBoolean()).toReference();
+        IndexFieldReference<Boolean> hasSequenceReference = context.indexSchemaElement()
+            .field("hasSequence", f -> f.asBoolean()).toReference();
+
+        // pass references to bridge
+        context.bridge(Entry.class, new EntryBridge(hasSampleReference, hasSequenceReference, hasAttachmentReference));
     }
 
-    @Override
-    public void set(String name, Object value, Document document, LuceneOptions luceneOptions) {
-        if (value == null)
-            return;
+    public static class EntryBridge implements TypeBridge<Entry> {
 
-        Entry entry = (Entry) value;
-        boolean booleanValue = false;
+        private final IndexFieldReference<Boolean> hasSampleReference;
+        private final IndexFieldReference<Boolean> hasSequenceReference;
+        private final IndexFieldReference<Boolean> hasAttachmentReference;
 
-        switch (field) {
-            case "hasSample":
-                booleanValue = (entry.getSamples() != null && !entry.getSamples().isEmpty());
-                break;
-
-            case "hasAttachment":
-                booleanValue = (entry.getAttachments() != null && !entry.getAttachments().isEmpty());
-                break;
-
-            case "hasSequence":
-                booleanValue = (entry.getSequence() != null);
-                break;
-        }
-
-        luceneOptions.addFieldToDocument(field, Boolean.toString(booleanValue), document);
-    }
-
-    @Override
-    public void bind(RoutingBindingContext context) {
-        context.dependencies().use(BOOLEAN_PROPERTY);
-
-        context.bridge(Entry.class, );
-
-    }
-
-
-    public static class Bridge implements RoutingBridge<Entry> {
-        @Override
-        public void route(DocumentRoutes routes, Object entityIdentifier, Entry entry,
-                          RoutingBridgeRouteContext context) {
-            if (entry.getSamples() != null && !entry.getSamples().isEmpty()) {
-                routes.addRoute();
-            }
-
-            switch (entry.) {
-                case "hasSample":
-                    booleanValue =;
-                    break;
-
-                case "hasAttachment":
-                    booleanValue = (entry.getAttachments() != null && !entry.getAttachments().isEmpty());
-                    break;
-
-                case "hasSequence":
-                    booleanValue = (entry.getSequence() != null);
-                    break;
-            }
+        public EntryBridge(IndexFieldReference<Boolean> sampleReference,
+                           IndexFieldReference<Boolean> sequenceReference,
+                           IndexFieldReference<Boolean> attachmentReference) {
+            this.hasSampleReference = sampleReference;
+            this.hasSequenceReference = sequenceReference;
+            this.hasAttachmentReference = attachmentReference;
         }
 
         @Override
-        public void previousRoutes(DocumentRoutes documentRoutes, Object o, Entry entry, RoutingBridgeRouteContext routingBridgeRouteContext) {
+        public void write(DocumentElement document, Entry entry, TypeBridgeWriteContext context) {
+            // set value of has attachments
+            if (entry.getAttachments() != null && !entry.getAttachments().isEmpty()) {
+                document.addValue(this.hasAttachmentReference, Boolean.TRUE);
+            } else {
+                document.addValue(this.hasAttachmentReference, Boolean.FALSE);
+            }
 
+            // set value of has sample
+            if (entry.getSamples() != null && !entry.getSamples().isEmpty())
+                document.addValue(this.hasSampleReference, Boolean.TRUE);
+            else
+                document.addValue(this.hasSampleReference, Boolean.FALSE);
+
+            // set value of has sequence index to true is entry has sequence associated with it, false otherwise
+            document.addValue(this.hasSequenceReference, entry.getSequence() != null ? Boolean.TRUE : Boolean.FALSE);
         }
 
         @Override
         public void close() {
-            RoutingBridge.super.close();
+            TypeBridge.super.close();
         }
     }
 }

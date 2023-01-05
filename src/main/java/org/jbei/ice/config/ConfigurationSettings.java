@@ -170,7 +170,7 @@ public class ConfigurationSettings {
     public void initPropertyValues() {
         for (ConfigurationKey key : ConfigurationKey.values()) {
             ConfigurationModel config = dao.get(key);
-            if (config != null || key.getDefaultValue().isEmpty())
+            if (config != null || key.getDefaultValue() == null || key.getDefaultValue().isEmpty())
                 continue;
 
             Logger.info("Setting value for " + key.name() + " to " + key.getDefaultValue());
