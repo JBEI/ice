@@ -40,6 +40,7 @@
 
                                                         <!--                        <div class="border btn btn-white mb-1 me-2 px-2">-->
                                                         <div (click)="showCreateNewFolderModal()"
+                                                             *ngIf="this.selectedOption && this.selectedOption.name === 'personal'"
                                                              class="border btn btn-white me-2 mb-1 text-black-50 py-0 px-1 shadow-sm">
                                                             <i class="bi bi-plus" style="font-size: 2.8em"></i>
                                                             <div class="small text-nowrap" style="margin-top: -10px">

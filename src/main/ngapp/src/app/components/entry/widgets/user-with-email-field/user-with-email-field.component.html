@@ -7,11 +7,12 @@
     </div>
 
     <div class="col-8 d-flex">
-
         <div class="input-group">
-            <input type="text" class="form-control form-control-sm" aria-label="Name">
+            <input type="text" class="form-control form-control-sm" aria-label="Name"
+                   (focusout)="textInputFocusOut(field)" (focusin)="textInputFocusIn(field)">
             <input type="text" class="form-control form-control-sm" aria-label="Email"
-                   placeholder="Optional Email">
+                   placeholder="Optional Email" (focusout)="textInputFocusOut(field)"
+                   (focusin)="textInputFocusIn(field)">
         </div>
     </div>
 

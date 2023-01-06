@@ -61,10 +61,8 @@ export class CreateNewEntryComponent implements OnInit {
         if (!field.value || !field.value.trim())
             return;
 
-        console.log(field.value);
         if (!this.newPart.id) {
             this.createPartData().subscribe((result: Part) => {
-                console.log(result);
                 this.newPart = result;
                 this.updateField(field);
             });
@@ -75,6 +73,5 @@ export class CreateNewEntryComponent implements OnInit {
 
     textInputFocusIn(field: CustomField): void {
         field.active = true;
-
     }
 }

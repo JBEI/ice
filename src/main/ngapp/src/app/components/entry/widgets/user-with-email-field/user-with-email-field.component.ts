@@ -18,4 +18,11 @@ export class UserWithEmailFieldComponent implements OnInit {
     ngOnInit(): void {
     }
 
+    textInputFocusOut(field: CustomField): void {
+        field.active = false;
+    }
+
+    textInputFocusIn(field: CustomField): void {
+        field.active = true;
+    }
 }

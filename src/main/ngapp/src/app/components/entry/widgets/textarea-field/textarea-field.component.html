@@ -1,16 +1,12 @@
 <div class="row">
     <div class="col-3 offset-1 d-flex">
         <label [for]="field.label" [ngClass]="{'fw-bold': field.active}">{{field.label}}
-            <span class="text-danger" *ngIf="field.required"
-                  style="font-size: larger">*</span>
+            <span class="text-danger" *ngIf="field.required" style="font-size: larger">*</span>
         </label>
     </div>
 
     <div class="col-8" [id]="field.label">
-
         <textarea style="height: 70px;" class="form-control form-control-sm" (focusout)="textInputFocusOut(field)"
                   (focusin)="textInputFocusIn(field)"></textarea>
-
     </div>
-
 </div>
