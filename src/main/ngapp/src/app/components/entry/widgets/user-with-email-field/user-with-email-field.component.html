@@ -10,9 +10,10 @@
         <div class="input-group">
             <input type="text" class="form-control form-control-sm" aria-label="Name"
                    (focusout)="textInputFocusOut(field)" (focusin)="textInputFocusIn(field)">
+
             <input type="text" class="form-control form-control-sm" aria-label="Email"
-                   placeholder="Optional Email" (focusout)="textInputFocusOut(field)"
-                   (focusin)="textInputFocusIn(field)">
+                   placeholder="Optional Email" (focusout)="textInputFocusOut(field, true)"
+                   (focusin)="textInputFocusIn(field, true)">
         </div>
     </div>
 

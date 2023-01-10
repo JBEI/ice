@@ -1,5 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {CustomField} from "../../../../models/custom-field";
+import {Part} from "../../../../models/Part";
 
 @Component({
     selector: 'app-textarea-field',
@@ -9,6 +10,7 @@ import {CustomField} from "../../../../models/custom-field";
 export class TextareaFieldComponent implements OnInit {
 
     @Input() field: CustomField;
+    @Input() part: Part;
 
     constructor() {
     }

@@ -1,9 +1,32 @@
-<div class="row mt-4">
+<div class="row mt-4 mb-5">
     <div class="col">
         <div class="fw-bold">Sequence Information</div>
-        <div class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
-            <i style="font-size: 18px" class="bi bi-info-lg"></i>
-            <span>Supported file formats are Genbank, Fasta and SBOL</span>
+
+        <div draggable="true" ngClass="{{dragAreaClass}}" style="border: 1px darkgrey dashed; padding: 4px">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    Drag files here
+                    <a href="javascript:void(0)" (click)="file.click()">
+                        or click to open
+                    </a>
+                    <input type="file" #file [multiple]="false" (change)="onFileChange($event)" style="display:none"/>
+                    <div class="dragged-files-wrapper" *ngIf="draggedFiles">
+                        <div class="file" *ngFor="let file of draggedFiles">
+                            {{file}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
+                <i class="bi bi-info font-16em"></i>
+                <span>Supported file formats are Genbank, Fasta and SBOL</span>
+            </div>
+
+            <div class="error" *ngIf="error">
+                Only one file at time allow
+            </div>
+
         </div>
     </div>
 </div>
