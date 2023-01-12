@@ -113,7 +113,7 @@ public class HibernateConfiguration {
         configuration.setProperty("hibernate.connection.driver_class", "org.postgresql.Driver");
         configuration.setProperty("hibernate.connection.username", username);
         configuration.setProperty("hibernate.connection.password", password);
-        configuration.setProperty("hibernate.search.default.indexBase", dbPath + "/data/lucene-data");
+        configuration.setProperty("hibernate.search.backend.directory.root", dbPath + "/data/lucene-data");
     }
 
     private static void configureH2Db(Configuration configuration, String dbPath) {
