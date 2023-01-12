@@ -163,6 +163,9 @@ public class ApplicationInitialize {
         ConfigurationSettings settings = new ConfigurationSettings();
         settings.initPropertyValues();
 
+        // check and set data directory
+        setDataDirectory(dataDirectory);
+
         try {
             // check blast database exists and build if it doesn't
             RebuildBlastIndexTask task = new RebuildBlastIndexTask();
@@ -173,12 +176,14 @@ public class ApplicationInitialize {
         } catch (Exception e) {
             Logger.error(e);
         }
-
-        // check data directory
-        checkDataDirectory(dataDirectory);
     }
 
-    private static void checkDataDirectory(Path dataDirectory) {
+    /**
+     * Set the data directory configuration value (if empty)
+     *
+     * @param dataDirectory data directory location
+     */
+    private static void setDataDirectory(Path dataDirectory) {
         ConfigurationSettings settings = new ConfigurationSettings();
         String value = settings.getPropertyValue(ConfigurationKey.DATA_DIRECTORY);
         if (!StringUtils.isEmpty(value))

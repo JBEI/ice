@@ -1,5 +1,6 @@
 package org.jbei.ice.search.blast;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.utils.Utils;
@@ -16,7 +17,13 @@ public class BlastDatabase {
     protected final String dbName;
 
     public BlastDatabase(String folderName) {
-        this.indexPath = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), folderName);
+        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        if (StringUtils.isEmpty(dataDir)) {
+            Logger.error("No data directory value.");
+            throw new IllegalArgumentException("Invalid data dir");
+        }
+
+        this.indexPath = Paths.get(dataDir, folderName);
         if (!Files.exists(this.indexPath)) {
             try {
                 Files.createDirectories(this.indexPath);

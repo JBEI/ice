@@ -31,7 +31,7 @@ import java.util.List;
 public class ConfigurationSettings {
 
     private static final String UI_CONFIG_DIR = "asset";
-    private static final String BLAST_FTP_DIR = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.6.0/";
+    private static final String BLAST_FTP_DIR = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.13.0/";
 
     private final ConfigurationDAO dao;
 
