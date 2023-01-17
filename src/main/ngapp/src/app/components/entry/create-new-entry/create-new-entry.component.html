@@ -23,46 +23,52 @@
                         <div class="col">
 
                             <div class="container" style="width: 75vw">
-                                <div class="row p-1" *ngFor="let field of fields">
+                                <ng-container *ngIf="!fields">
+                                    <img src="assets/img/loader-mini.gif"> &nbsp; <i class="text-muted">Loading
+                                    fields...</i>
+                                </ng-container>
 
-                                    <ng-container *ngIf="field.fieldInputType === 'TEXT' || !field.fieldInputType
+                                <ng-container *ngIf="fields && fields.length">
+                                    <div class="row p-1" *ngFor="let field of fields">
+
+                                        <ng-container *ngIf="field.fieldInputType === 'TEXT' || !field.fieldInputType
                                     || field.fieldInputType === 'LONG_TEXT'">
-                                        <app-text-field [field]="field"
-                                                        [longText]="field.fieldInputType === 'LONG_TEXT'"></app-text-field>
-                                    </ng-container>
+                                            <app-text-field [field]="field"
+                                                            [longText]="field.fieldInputType === 'LONG_TEXT'"></app-text-field>
+                                        </ng-container>
 
 
-                                    <ng-container *ngIf="field.fieldInputType === 'SELECT'">
-                                        <app-select-field [field]="field"></app-select-field>
-                                    </ng-container>
+                                        <ng-container *ngIf="field.fieldInputType === 'SELECT'">
+                                            <app-select-field [field]="field"></app-select-field>
+                                        </ng-container>
 
 
-                                    <ng-container *ngIf="field.fieldInputType === 'DATE'">
-                                        <app-date-picker [field]="field"></app-date-picker>
-                                    </ng-container>
+                                        <ng-container *ngIf="field.fieldInputType === 'DATE'">
+                                            <app-date-picker [field]="field"></app-date-picker>
+                                        </ng-container>
 
 
-                                    <ng-container *ngIf="field.fieldInputType === 'USER_WITH_EMAIL'">
-                                        <app-user-with-email-field [field]="field"></app-user-with-email-field>
-                                    </ng-container>
+                                        <ng-container *ngIf="field.fieldInputType === 'USER_WITH_EMAIL'">
+                                            <app-user-with-email-field [field]="field"></app-user-with-email-field>
+                                        </ng-container>
 
 
-                                    <ng-container *ngIf="field.fieldInputType === 'TEXTAREA'">
-                                        <app-textarea-field [field]="field"></app-textarea-field>
-                                    </ng-container>
+                                        <ng-container *ngIf="field.fieldInputType === 'TEXTAREA'">
+                                            <app-textarea-field [field]="field"></app-textarea-field>
+                                        </ng-container>
 
 
-                                    <ng-container *ngIf="field.fieldInputType === 'BOOLEAN'">
-                                        <app-boolean-field [field]="field"></app-boolean-field>
-                                    </ng-container>
+                                        <ng-container *ngIf="field.fieldInputType === 'BOOLEAN'">
+                                            <app-boolean-field [field]="field"></app-boolean-field>
+                                        </ng-container>
 
 
-                                    <ng-container *ngIf="field.fieldInputType === 'MULTI_TEXT'">
-                                        <app-multi-text-field [field]="field"></app-multi-text-field>
-                                    </ng-container>
+                                        <ng-container *ngIf="field.fieldInputType === 'MULTI_TEXT'">
+                                            <app-multi-text-field [field]="field"></app-multi-text-field>
+                                        </ng-container>
 
-                                </div>
-
+                                    </div>
+                                </ng-container>
                                 <app-sequence-visualization></app-sequence-visualization>
 
                             </div>
