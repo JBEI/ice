@@ -6,4 +6,6 @@ export class Sequence {
     identifier: string;
     canEdit: boolean;
     features: DnaFeature[];
+    genbankStartBP: number;
+    endBP: number;
 }

@@ -1,9 +1,9 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Part} from "../../../models/Part";
 import {VectorEditorService} from "../../visualization/sequence/vector-editor.service";
-import {Sequence} from "../../../models/Sequence";
 import {PartField} from "../../../models/part-field";
 import {PartInformationService} from "./part-information.service";
+import {Sequence} from "../../../models/sequence";
 
 @Component({
     selector: 'app-part-general-information',
