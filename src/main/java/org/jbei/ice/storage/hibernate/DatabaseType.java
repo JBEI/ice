@@ -1,6 +1,6 @@
 package org.jbei.ice.storage.hibernate;
 
-public enum DbType {
+public enum DatabaseType {
     MEMORY,
     POSTGRESQL,
     H2DB,

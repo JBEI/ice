@@ -1,6 +1,5 @@
 package org.jbei.ice.bulkupload;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.account.AccountController;
@@ -30,8 +29,6 @@ import org.jbei.ice.utils.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -454,9 +451,7 @@ public class BulkUploadEntries {
             String fileId = Utils.generateUUID();
             attachment.setFileId(fileId);
             attachment.setFileName(attachmentName);
-            String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-            Path path = Paths.get(dataDir, "attachments", attachment.getFileId());
-            Files.write(path, IOUtils.toByteArray(attachmentStream));
+
             DAOFactory.getAttachmentDAO().create(attachment);
         }
 

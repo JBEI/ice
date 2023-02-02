@@ -11,7 +11,7 @@ import org.jbei.ice.storage.IDataTransferModel;
  */
 public enum ConfigurationKey implements IDataTransferModel {
 
-    APPLICATION_VERSION("5.9.4"),
+    APPLICATION_VERSION("6.0.0"),
     TEMPORARY_DIRECTORY("/tmp"),
     DATA_DIRECTORY(System.getenv("ICE_DATA_HOME")),
 
@@ -40,7 +40,7 @@ public enum ConfigurationKey implements IDataTransferModel {
     SAMPLE_CREATE_APPROVAL_MESSAGE(""),
     AUTHENTICATION_METHOD("DEFAULT");
 
-    private String defaultValue;
+    private final String defaultValue;
 
     ConfigurationKey(String defaultValue) {
         this.defaultValue = defaultValue;

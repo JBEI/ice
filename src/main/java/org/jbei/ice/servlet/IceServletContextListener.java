@@ -5,6 +5,7 @@ import jakarta.servlet.ServletContextListener;
 import org.jbei.ice.ApplicationInitialize;
 import org.jbei.ice.executor.IceExecutorService;
 import org.jbei.ice.logging.Logger;
+import org.jbei.ice.storage.StorageConfiguration;
 import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 
 import java.nio.file.Path;
@@ -18,7 +19,8 @@ import java.nio.file.Path;
 public class IceServletContextListener implements ServletContextListener {
 
     public void contextInitialized(ServletContextEvent event) {
-        Path path = ApplicationInitialize.configure();
+        StorageConfiguration storageConfiguration = new StorageConfiguration();
+        Path path = storageConfiguration.initialize();
         if (path == null)
             return;
 

@@ -5,11 +5,11 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
+import org.jbei.ice.dto.DataStorage;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.model.*;
 
 import java.nio.file.Path;
-import java.util.Properties;
 
 /**
  * Helper class to Initialize Hibernate, and obtain new sessions.
@@ -64,34 +64,35 @@ public class HibernateConfiguration {
     }
 
     /**
-     * Configure the database using the (optional) connection properties
+     * Configure the database using the storage parameters
      *
-     * @param dbType        database type
-     * @param properties    optional connection properties. Required only if
-     *                      DbType is <code>POSTGRESQL</code>
+     * @param storage       wrapper around data type and associated parameters. If null, <code>MEMORY</code> is assumed
      * @param dataDirectory path to the data directory optional for in memory database
      */
-    public static synchronized void initialize(DbType dbType, Properties properties, Path dataDirectory) {
+    public static synchronized void initialize(DataStorage storage, Path dataDirectory) {
         if (sessionFactory != null) {
             Logger.info("Database already configured. Close/reset to re-configure");
             return;
         }
 
-        Logger.info("Initializing session factory for type " + dbType.name());
+        if (storage == null)
+            throw new IllegalArgumentException("Invalid storage params");
+
+        Logger.info("Initializing session factory for type " + storage.getType().name());
         Configuration configuration = new Configuration();
 
-        switch (dbType) {
+        switch (storage.getType()) {
             case H2DB:
-            default:
-                configureH2Db(configuration, dataDirectory.toString());
+                configureH2Db(configuration, dataDirectory);
                 break;
 
             case MEMORY:
+            default:
                 configureInMemoryDb(configuration);
                 break;
 
             case POSTGRESQL:
-                configurePostgresDb(configuration, properties, dataDirectory.toString());
+                configurePostgresDb(configuration, storage, dataDirectory);
                 break;
         }
 
@@ -101,42 +102,48 @@ public class HibernateConfiguration {
         sessionFactory = configuration.buildSessionFactory(serviceRegistry);
     }
 
-    private static void configurePostgresDb(Configuration configuration, Properties properties, String dbPath) {
+    /**
+     * Configure hibernate to connect to a postgres db.
+     * todo : validate
+     *
+     * @param configuration hibernate configuration API
+     * @param storage       wrapper around storage params for connecting to a postgres database
+     * @param dbPath        path to the data directory
+     */
+    private static void configurePostgresDb(Configuration configuration, DataStorage storage, Path dbPath) {
         // load (additional) base configuration
         configuration.configure();
-        String url = properties.getProperty("connectionUrl");
-        String username = properties.getProperty("username");
-        String password = properties.getProperty("password");
-        String dbName = properties.getProperty("dbName");
 
-        configuration.setProperty("hibernate.connection.url", "jdbc:postgresql://" + url + "/" + dbName);
-        configuration.setProperty("hibernate.connection.driver_class", "org.postgresql.Driver");
-        configuration.setProperty("hibernate.connection.username", username);
-        configuration.setProperty("hibernate.connection.password", password);
-        configuration.setProperty("hibernate.search.backend.directory.root", dbPath + "/data/lucene-data");
+        configuration.setProperty(HibernateConstants.CONNECTION_URL, "jdbc:postgresql://" + storage.getConnectionUrl() + "/" + storage.getDatabaseName());
+        configuration.setProperty(HibernateConstants.CONNECTION_DRIVER_CLASS, "org.postgresql.Driver");
+        configuration.setProperty(HibernateConstants.CONNECTION_USERNAME, storage.getDatabaseUser());
+        configuration.setProperty(HibernateConstants.CONNECTION_PASSWORD, storage.getDatabasePassword());
+        configuration.setProperty(HibernateConstants.SEARCH_BACKEND_DIRECTORY, dbPath + "/data/lucene-data");
     }
 
-    private static void configureH2Db(Configuration configuration, String dbPath) {
+    private static void configureH2Db(Configuration configuration, Path dbPath) {
         configuration.configure();
-        configuration.setProperty("hibernate.connection.url", "jdbc:h2:" + dbPath + "/db/ice-h2db");
-        configuration.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
-        configuration.setProperty("hibernate.connection.username", "sa");
-        configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-
-        // todo : retrieve from data config directory
-        configuration.setProperty("hibernate.search.backend.directory.root", dbPath + "/data/lucene-data");
+        configuration.setProperty(HibernateConstants.CONNECTION_URL, "jdbc:h2:" + dbPath + "/db/ice-h2db");
+        configuration.setProperty(HibernateConstants.CONNECTION_DRIVER_CLASS, "org.h2.Driver");
+        configuration.setProperty(HibernateConstants.CONNECTION_USERNAME, "sa");
+        configuration.setProperty(HibernateConstants.DIALECT, "org.hibernate.dialect.H2Dialect");
+        configuration.setProperty(HibernateConstants.SEARCH_BACKEND_DIRECTORY, dbPath + "/data/lucene-data");
     }
 
+    /**
+     * Configure hibernate to use an in-memory/transient database. Currently used mostly for running unit tests
+     * s     * @param configuration
+     */
     private static void configureInMemoryDb(Configuration configuration) {
-        configuration.setProperty("hibernate.connection.url", "jdbc:h2:mem:test");
-        configuration.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
-        configuration.setProperty("hibernate.connection.username", "sa");
+        configuration.setProperty(HibernateConstants.CONNECTION_URL, "jdbc:h2:mem:test");
+        configuration.setProperty(HibernateConstants.CONNECTION_DRIVER_CLASS, "org.h2.Driver");
+        configuration.setProperty(HibernateConstants.CONNECTION_USERNAME, "sa");
         configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         configuration.setProperty("hibernate.current_session_context_class",
-                "org.hibernate.context.internal.ThreadLocalSessionContext");
+            "org.hibernate.context.internal.ThreadLocalSessionContext");
         configuration.setProperty("hibernate.hbm2ddl.auto", "update");
         configuration.setProperty("hibernate.search.default.directory_provider",
-                "org.hibernate.search.store.impl.RAMDirectoryProvider");
+            "org.hibernate.search.store.impl.RAMDirectoryProvider");
     }
 
     private static void addAnnotatedClasses(Configuration configuration) {
@@ -188,10 +195,10 @@ public class HibernateConfiguration {
     }
 
     /**
-     * Initialize a in-memory mock database for testing.
+     * Initialize an in-memory mock database for testing.
      */
     public static void initializeMock() {
-        initialize(DbType.MEMORY, null, null);
+        initialize(null, null);
     }
 
     public static void close() {

@@ -1,7 +1,7 @@
 package org.jbei.ice.dto;
 
 import org.jbei.ice.storage.IDataTransferModel;
-import org.jbei.ice.storage.hibernate.DbType;
+import org.jbei.ice.storage.hibernate.DatabaseType;
 
 /**
  * Storage DTO for configuration database
@@ -9,18 +9,18 @@ import org.jbei.ice.storage.hibernate.DbType;
  * @author Hector Plahar
  */
 public class DataStorage implements IDataTransferModel {
-    private DbType type;
+    private DatabaseType type;
     private String connectionUrl;
     private String databaseName;
     private String databasePassword;
     private String databaseUser;
     private String folder;
 
-    public DbType getType() {
+    public DatabaseType getType() {
         return type;
     }
 
-    public void setType(DbType type) {
+    public void setType(DatabaseType type) {
         this.type = type;
     }
 
