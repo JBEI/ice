@@ -82,18 +82,10 @@ public class HibernateConfiguration {
         Configuration configuration = new Configuration();
 
         switch (storage.getType()) {
-            case H2DB:
-                configureH2Db(configuration, dataDirectory);
-                break;
-
-            case MEMORY:
-            default:
-                configureInMemoryDb(configuration);
-                break;
-
-            case POSTGRESQL:
-                configurePostgresDb(configuration, storage, dataDirectory);
-                break;
+            case H2DB -> configureH2Db(configuration, dataDirectory);
+            case MEMORY -> configureInMemoryDb(configuration);
+            case POSTGRESQL -> configurePostgresDb(configuration, storage, dataDirectory);
+            default -> throw new IllegalArgumentException("Invalid/Unhandled storage type: " + storage.getType());
         }
 
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();

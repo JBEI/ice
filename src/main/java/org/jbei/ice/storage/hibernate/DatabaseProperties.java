@@ -26,7 +26,6 @@ public class DatabaseProperties {
     private static final String SERVER_PROPERTY_NAME = "ice-server.properties";
     private static final String CONFIG_FOLDER = "config";
 
-    private DataStorage dataStorage;
 
     public DatabaseProperties() {
     }
@@ -43,7 +42,7 @@ public class DatabaseProperties {
         Path serverPropertiesPath = Paths.get(propertiesFile.toString(), CONFIG_FOLDER, SERVER_PROPERTY_NAME);
         try {
             properties.load(new FileInputStream(serverPropertiesPath.toFile()));
-            dataStorage = new DataStorage();
+            DataStorage dataStorage = new DataStorage();
 
             // check database type
             String dbTypeString = properties.getProperty(CONNECTION_TYPE);
@@ -65,9 +64,5 @@ public class DatabaseProperties {
         } catch (IOException ioException) {
             throw new IllegalArgumentException(ioException.getMessage());
         }
-    }
-
-    public DataStorage getDataStorage() {
-        return this.dataStorage;
     }
 }

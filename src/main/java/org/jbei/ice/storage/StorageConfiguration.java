@@ -19,6 +19,8 @@ import java.nio.file.Paths;
 public class StorageConfiguration {
 
     private final DatabaseProperties databaseProperties;
+    private static final String ENV_DATA_HOME = "ICE_DATA_HOME";
+    private static final String FOLDER_ICE_DEFAULT = ".ICEData";
 
     public StorageConfiguration() {
         databaseProperties = new DatabaseProperties();
@@ -34,7 +36,7 @@ public class StorageConfiguration {
         // initialize/load data properties
         DataStorage storage = databaseProperties.initialize(dataDirectory);
 
-        // pass info on to hibernate
+        // pass info on to hibernate to initialize data layer
         HibernateConfiguration.initialize(storage, dataDirectory);
 
         return dataDirectory;
@@ -44,19 +46,27 @@ public class StorageConfiguration {
         return null;
     }
 
+    /**
+     * Initializes the data directory location as follows:
+     * 1. Checks for value of environment variable <code>ICE_DATA_HOME</code>. If set, then value is used as home dir
+     * 2. If environment variable is not set, the home directory is used and a folder name <code>.ICEData</code>
+     * is created and used as the home directory
+     *
+     * @return the resolved data directory/path or null
+     */
     private Path initializeDataDirectory() {
         // check environ variable
-        String propertyHome = System.getenv("ICE_DATA_HOME");
+        String propertyHome = System.getenv(ENV_DATA_HOME);
         Path iceHome;
 
         if (StringUtils.isBlank(propertyHome)) {
             // check system property (-D in startup script)
-            propertyHome = System.getProperty("ICE_DATA_HOME");
+            propertyHome = System.getProperty(ENV_DATA_HOME);
 
             // still nothing, check home directory
             if (StringUtils.isBlank(propertyHome)) {
                 String userHome = System.getProperty("user.home");
-                iceHome = Paths.get(userHome, ".ICEData");
+                iceHome = Paths.get(userHome, FOLDER_ICE_DEFAULT);
                 if (!Files.exists(iceHome)) {
                     // create home directory
                     try {

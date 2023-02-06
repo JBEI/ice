@@ -38,6 +38,7 @@ public enum ConfigurationKey implements IDataTransferModel {
 
     // sample request config
     SAMPLE_CREATE_APPROVAL_MESSAGE(""),
+    STORAGE_TYPE(""),
     AUTHENTICATION_METHOD("DEFAULT");
 
     private final String defaultValue;
