@@ -26,17 +26,17 @@ public class IceServletContextListener implements ServletContextListener {
 
     public void contextInitialized(ServletContextEvent event) {
         // fetch using factory based on user entered value for "ENV_STORE_TYPE"
+        // this defaults "LOCAL" if not set
         DataStorageType type = determineStorageType();
 
         // configure storage params
         StorageConfiguration storageConfiguration = new StorageConfiguration();
         Path path = storageConfiguration.initialize();
-        if (path == null)
-            throw new RuntimeException("No valid file paths available");
 
         try {
             HibernateConfiguration.beginTransaction();
-            saveConfigKeyValue(ConfigurationKey.DATA_DIRECTORY, path.toString());
+            if (path != null)
+                saveConfigKeyValue(ConfigurationKey.DATA_DIRECTORY, path.toString());
             saveConfigKeyValue(ConfigurationKey.STORAGE_TYPE, type.name());
             IceExecutorService.getInstance().startService();
             Application.start();

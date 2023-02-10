@@ -31,7 +31,7 @@ public class DatabaseProperties {
     }
 
     /**
-     * @param propertiesFile
+     * @param propertiesFile location of properties to start up application
      * @throws IllegalArgumentException
      */
     public DataStorage initialize(Path propertiesFile) {

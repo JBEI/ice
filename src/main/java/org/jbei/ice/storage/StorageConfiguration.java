@@ -6,7 +6,6 @@ import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.hibernate.DatabaseProperties;
 import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,11 +29,11 @@ public class StorageConfiguration {
     public Path initialize() {
         // get or initialize data directory
         Path dataDirectory = initializeDataDirectory();
-        if (dataDirectory == null || Files.notExists(dataDirectory))
-            return null;
-
-        // initialize/load data properties
-        DataStorage storage = databaseProperties.initialize(dataDirectory);
+        DataStorage storage = null;
+        if (dataDirectory != null && Files.exists(dataDirectory)) {
+            // initialize/load data properties
+            storage = databaseProperties.initialize(dataDirectory);
+        }
 
         // pass info on to hibernate to initialize data layer
         HibernateConfiguration.initialize(storage, dataDirectory);
@@ -64,23 +63,11 @@ public class StorageConfiguration {
             propertyHome = System.getProperty(ENV_DATA_HOME);
 
             // still nothing, check home directory
-            if (StringUtils.isBlank(propertyHome)) {
-                String userHome = System.getProperty("user.home");
-                iceHome = Paths.get(userHome, FOLDER_ICE_DEFAULT);
-                if (!Files.exists(iceHome)) {
-                    // create home directory
-                    try {
-                        if (Files.isWritable(Paths.get(userHome)))
-                            return Files.createDirectory(iceHome);
-                        else
-                            return null;
-                    } catch (IOException e) {
-                        Logger.error(e);
-                        return null;
-                    }
-                }
-            } else {
+            if (StringUtils.isNotEmpty(propertyHome)) {
                 iceHome = Paths.get(propertyHome);
+            } else {
+                Logger.info("No ICE data directory set");
+                return null;
             }
         } else {
             iceHome = Paths.get(propertyHome);

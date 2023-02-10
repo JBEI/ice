@@ -66,7 +66,7 @@ public class HibernateConfiguration {
     /**
      * Configure the database using the storage parameters
      *
-     * @param storage       wrapper around data type and associated parameters. If null, <code>MEMORY</code> is assumed
+     * @param storage       wrapper around data type and associated parameters.
      * @param dataDirectory path to the data directory optional for in memory database
      */
     public static synchronized void initialize(DataStorage storage, Path dataDirectory) {
@@ -75,8 +75,10 @@ public class HibernateConfiguration {
             return;
         }
 
-        if (storage == null)
-            throw new IllegalArgumentException("Invalid storage params");
+        if (storage == null) {
+            storage = new DataStorage();
+            storage.setType(DatabaseType.MEMORY);
+        }
 
         Logger.info("Initializing session factory for type " + storage.getType().name());
         Configuration configuration = new Configuration();
@@ -124,18 +126,20 @@ public class HibernateConfiguration {
 
     /**
      * Configure hibernate to use an in-memory/transient database. Currently used mostly for running unit tests
-     * s     * @param configuration
+     *
+     * @param configuration
      */
     private static void configureInMemoryDb(Configuration configuration) {
-        configuration.setProperty(HibernateConstants.CONNECTION_URL, "jdbc:h2:mem:test");
+        configuration.setProperty(HibernateConstants.CONNECTION_URL, "jdbc:h2:mem:ice-mem-h2db");
         configuration.setProperty(HibernateConstants.CONNECTION_DRIVER_CLASS, "org.h2.Driver");
         configuration.setProperty(HibernateConstants.CONNECTION_USERNAME, "sa");
-        configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+        configuration.setProperty(HibernateConstants.CONNECTION_PASSWORD, "");
+        configuration.setProperty(HibernateConstants.DIALECT, "org.hibernate.dialect.H2Dialect");
         configuration.setProperty("hibernate.current_session_context_class",
             "org.hibernate.context.internal.ThreadLocalSessionContext");
-        configuration.setProperty("hibernate.hbm2ddl.auto", "update");
-        configuration.setProperty("hibernate.search.default.directory_provider",
-            "org.hibernate.search.store.impl.RAMDirectoryProvider");
+        configuration.setProperty("hibernate.search.backend.directory.type", "local-heap");
+        configuration.setProperty("hibernate.hbm2ddl.auto", "create");
+        configuration.setProperty("hibernate.search.backend.lucene_version", "LATEST");
     }
 
     private static void addAnnotatedClasses(Configuration configuration) {

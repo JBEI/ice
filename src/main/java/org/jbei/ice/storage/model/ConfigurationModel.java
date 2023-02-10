@@ -7,7 +7,7 @@ import org.jbei.ice.storage.DataModel;
 
 /**
  * Site wide configuration values. See {@link ConfigurationKey} for
- * the built in configuration values
+ * the built-in configuration values
  *
  * @author Hector Plahar, Timothy Ham
  */
