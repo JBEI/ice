@@ -1,5 +1,6 @@
 package org.jbei.ice.search;
 
+import org.hibernate.Session;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
 import org.hibernate.search.mapper.orm.session.SearchSession;
@@ -17,7 +18,8 @@ public class RebuildSearchIndexTask extends Task {
     @Override
     public void execute() {
         Logger.info("Rebuilding search index in background");
-        SearchSession searchSession = Search.session(HibernateConfiguration.newSession());
+        Session session = HibernateConfiguration.newSession();
+        SearchSession searchSession = Search.session(session);
         MassIndexer massIndexer = searchSession.massIndexer();
         massIndexer.idFetchSize(20).monitor(IndexerProgressMonitor.getInstance());
 
@@ -26,6 +28,7 @@ public class RebuildSearchIndexTask extends Task {
         } catch (InterruptedException e) {
             Thread.interrupted();
         }
+        session.close();
         Logger.info("Lucene rebuild complete");
     }
 }
