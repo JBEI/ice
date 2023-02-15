@@ -19,8 +19,7 @@ public class ICEExceptionMapper implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
         Response response;
-        if (exception instanceof WebApplicationException) {
-            WebApplicationException webEx = (WebApplicationException) exception;
+        if (exception instanceof WebApplicationException webEx) {
             response = webEx.getResponse();
         } else if (exception instanceof PermissionException) {
             response = Response.status(Response.Status.FORBIDDEN).build();

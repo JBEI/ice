@@ -56,7 +56,6 @@ public class ConfigResource extends RestResource {
     @Path("/storage")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStorageConfiguration() {
-        String userId = requireUserId();
         // todo : check appropriate permission
         StorageConfiguration storageConfiguration = new StorageConfiguration();
         return super.respond(storageConfiguration.get());

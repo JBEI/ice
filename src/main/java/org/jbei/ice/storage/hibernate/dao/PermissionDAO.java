@@ -136,7 +136,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
             predicates.add(getPredicate(from, "entry", entry));
             predicates.add(getPredicate(from, "upload", upload));
 
-            delete.where(predicates.toArray(new Predicate[predicates.size()]));
+            delete.where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(delete).executeUpdate();
         } catch (HibernateException he) {
             Logger.error(he);

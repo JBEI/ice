@@ -1,6 +1,6 @@
 package org.jbei.ice.search;
 
-import org.hibernate.search.mapper.pojo.massindexing.MassIndexingMonitor;
+import org.hibernate.search.mapper.orm.massindexing.MassIndexingMonitor;
 
 import java.util.concurrent.atomic.AtomicLong;
 

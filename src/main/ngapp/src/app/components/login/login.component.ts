@@ -72,41 +72,45 @@ export class LoginComponent implements OnInit {
         console.log(this.loggedInUser, this.form.get('id').value);
 
         this.processing = true;
-        this.http.post('accesstokens', this.loggedInUser).subscribe((result: User) => {
-            this.processing = false;
+        this.http.post('accesstokens', this.loggedInUser).subscribe({
+            next: (result: User) => {
+                this.processing = false;
 
-            // this relies on the user knowing their password before being notified which is highly unlikely
-            // if (result.disabled) {
-            //     console.log('Account is still being vetted');
-            //     return;
-            // }
+                // this relies on the user knowing their password before being notified which is highly unlikely
+                // if (result.disabled) {
+                //     console.log('Account is still being vetted');
+                //     return;
+                // }
 
-            // check if password needs to be created and re-direct if so
-            // if (result.usingTemporaryPassword) {
-            //     this.userService.setUser(result);
-            //     this.router.navigate(['/password']);
-            //     return;
-            // }
+                // check if password needs to be created and re-direct if so
+                // if (result.usingTemporaryPassword) {
+                //     this.userService.setUser(result);
+                //     this.router.navigate(['/password']);
+                //     return;
+                // }
 
-            // save to session
-            this.loggedInUser = result;
-            if (result && result.sessionId) {
-                this.userService.setUser(result);
+                // save to session
+                this.loggedInUser = result;
+                if (result && result.sessionId) {
+                    this.userService.setUser(result);
 
-                // redirect
-                let redirectUrl = this.userService.getLoginRedirect();
-                if (redirectUrl === '/forgotPassword' || redirectUrl === '/login' || !redirectUrl) {
-                    redirectUrl = '/';
+                    // redirect
+                    let redirectUrl = this.userService.getLoginRedirect();
+                    if (redirectUrl === '/forgotPassword' || redirectUrl === '/login' || !redirectUrl) {
+                        redirectUrl = '/';
+                    }
+
+                    console.log('redirecting to', redirectUrl);
+                    this.router.navigate([redirectUrl]);
                 }
+            }, error: (error: any) => {
+                this.processing = false;
+                console.error(error);
+                if (error.status === 401) {
+                    this.validation.invalidPassword = true;
+                }
+            }, complete: () => {
 
-                console.log('redirecting to', redirectUrl);
-                this.router.navigate([redirectUrl]);
-            }
-        }, error => {
-            this.processing = false;
-            console.error(error);
-            if (error.status === 401) {
-                this.validation.invalidPassword = true;
             }
         });
     }

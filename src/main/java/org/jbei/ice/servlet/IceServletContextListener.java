@@ -35,8 +35,7 @@ public class IceServletContextListener implements ServletContextListener {
 
         try {
             HibernateConfiguration.beginTransaction();
-            if (path != null)
-                saveConfigKeyValue(ConfigurationKey.DATA_DIRECTORY, path.toString());
+            saveConfigKeyValue(ConfigurationKey.DATA_DIRECTORY, path.toString());
             saveConfigKeyValue(ConfigurationKey.STORAGE_TYPE, type.name());
             IceExecutorService.getInstance().startService();
             Application.start();

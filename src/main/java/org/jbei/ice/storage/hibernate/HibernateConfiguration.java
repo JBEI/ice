@@ -130,13 +130,13 @@ public class HibernateConfiguration {
      * @param configuration
      */
     private static void configureInMemoryDb(Configuration configuration) {
-        configuration.setProperty(HibernateConstants.CONNECTION_URL, "jdbc:h2:mem:ice-mem-h2db");
+        configuration.setProperty(HibernateConstants.CONNECTION_URL, "jdbc:h2:mem:ice-mem-h2db;DB_CLOSE_DELAY=-1");
         configuration.setProperty(HibernateConstants.CONNECTION_DRIVER_CLASS, "org.h2.Driver");
         configuration.setProperty(HibernateConstants.CONNECTION_USERNAME, "sa");
         configuration.setProperty(HibernateConstants.CONNECTION_PASSWORD, "");
         configuration.setProperty(HibernateConstants.DIALECT, "org.hibernate.dialect.H2Dialect");
-        configuration.setProperty("hibernate.current_session_context_class",
-            "org.hibernate.context.internal.ThreadLocalSessionContext");
+//        configuration.setProperty("hibernate.current_session_context_class",
+//            "thread");
         configuration.setProperty("hibernate.search.backend.directory.type", "local-heap");
         configuration.setProperty("hibernate.hbm2ddl.auto", "create");
         configuration.setProperty("hibernate.search.backend.lucene_version", "LATEST");

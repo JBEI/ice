@@ -17,6 +17,7 @@ import org.jbei.ice.utils.PasswordUtils;
 import org.jbei.ice.utils.UtilityException;
 import org.jbei.ice.utils.Utils;
 
+import javax.naming.ConfigurationException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -427,12 +428,11 @@ public class AccountController {
      *                 If the sessionId field is set, it may or may not be used as the user's session id
      * @return {@link Account}
      */
-    public Account authenticate(final Account transfer) {
+    public Account authenticate(final Account transfer) throws ConfigurationException {
         if (StringUtils.isEmpty(transfer.getEmail()) || StringUtils.isEmpty(transfer.getPassword())) {
             Logger.error("Invalid login or password");
-            return null;
+            throw new IllegalArgumentException("Invalid login credentials");
         }
-
 
         final AccountModel account = authenticate(transfer.getEmail(), transfer.getPassword(), "");
         if (account == null) {

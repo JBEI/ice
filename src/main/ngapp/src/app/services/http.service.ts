@@ -79,6 +79,7 @@ export class HttpService {
 
     private handleError<T>(result?: any) {
         return (error: any): Observable<T> => {
+            console.log(error);
 
             // TODO: send the error to remote logging infrastructure
             if (error.status === 401) {

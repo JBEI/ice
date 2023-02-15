@@ -11,6 +11,8 @@ import org.jbei.ice.dto.web.RegistryPartner;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.net.WebPartners;
 
+import javax.naming.ConfigurationException;
+
 /**
  * API for access tokens (also session id for the user interface)
  *
@@ -32,7 +34,13 @@ public class AccessTokenResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response create(final Account transfer) {
-        final Account info = accountController.authenticate(transfer);
+        final Account info;
+        try {
+            info = accountController.authenticate(transfer);
+        } catch (ConfigurationException e) {
+            return respond(Response.Status.NO_CONTENT);
+        }
+
         if (info == null) {
             Logger.warn("Authentication failed for user " + transfer.getEmail());
             return respond(Response.Status.UNAUTHORIZED);

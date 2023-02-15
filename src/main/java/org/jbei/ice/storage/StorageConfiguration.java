@@ -62,7 +62,6 @@ public class StorageConfiguration {
             // check system property (-D in startup script)
             propertyHome = System.getProperty(ENV_DATA_HOME);
 
-            // still nothing, check home directory
             if (StringUtils.isNotEmpty(propertyHome)) {
                 iceHome = Paths.get(propertyHome);
             } else {
