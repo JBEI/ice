@@ -72,17 +72,29 @@ public class PartDefaults {
     }
 
     public String getForLabel(EntryFieldLabel label) {
-        return switch (label) {
-            default -> "";
+        if (label == EntryFieldLabel.STATUS)
+            return "Complete";
 
-            case CREATOR -> account.getFullName();
-            case CREATOR_EMAIL -> account.getEmail();
-            case PI ->
-                // pi defaults
-                preferencesController.getPreferenceValue(userId, PreferenceKey.PRINCIPAL_INVESTIGATOR.name());
-            case FUNDING_SOURCE ->
-                preferencesController.getPreferenceValue(userId, PreferenceKey.FUNDING_SOURCE.name());
-        };
+        if (label == EntryFieldLabel.CREATOR) {
+            return account.getFullName();
+        }
 
+        if (label == EntryFieldLabel.CREATOR_EMAIL) {
+            return account.getEmail();
+        }
+
+        if (label == EntryFieldLabel.PI) {
+            return preferencesController.getPreferenceValue(userId, PreferenceKey.PRINCIPAL_INVESTIGATOR.name());
+        }
+
+        if (label == EntryFieldLabel.FUNDING_SOURCE) {
+            return preferencesController.getPreferenceValue(userId, PreferenceKey.FUNDING_SOURCE.name());
+        }
+
+        if (label == EntryFieldLabel.BIO_SAFETY_LEVEL) {
+            return "1";
+        }
+
+        return "";
     }
 }
