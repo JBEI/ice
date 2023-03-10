@@ -230,6 +230,18 @@ public class EntryController extends HasEntry {
         return retrieveEntryDetails(null, entry);
     }
 
+    public PartData get(String userId, String id) {
+        Entry entry = getEntry(id);
+        if (entry == null)
+            return null;
+
+        // user must be able to read if not public entry
+        authorization.expectRead(userId, entry);
+
+        return null;
+
+    }
+
     public PartData retrieveEntryDetails(String userId, String id) {
         Entry entry = getEntry(id);
         if (entry == null)
@@ -285,7 +297,6 @@ public class EntryController extends HasEntry {
 
             // create and add entry field
             field.setRequired(customEntryField.isRequired());
-            field.setEntryType(entryType);
             field.setCustom(true);
             field.setId(customEntryField.getId());
             field.setValue(customEntryField.getValue());
@@ -295,8 +306,8 @@ public class EntryController extends HasEntry {
         }
 
         // get fields data
-        PartFields partFields = new PartFields(userId, entryType);
-        for (EntryField entryField : partFields.get()) {        // note: this also includes custom fields
+        EntryFields entryFields = new EntryFields(userId, entryType);
+        for (EntryField entryField : entryFields.get()) {        // note: this also includes custom fields
             if (entryField.isCustom() || existingCustomFields.contains(EntryFieldLabel.fromString(entryField.getLabel())))
                 continue;
 

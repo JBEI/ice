@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Router} from "@angular/router";
+import {Router, RouteReuseStrategy} from "@angular/router";
 import {UserService} from "../../services/user.service";
 import {User} from "../../models/User";
 import {EntryService} from "../../services/entry.service";
@@ -14,9 +14,11 @@ export class HeaderComponent implements OnInit {
     loggedInUser: User;
     types: string[];
 
-    constructor(private userService: UserService, private entryService: EntryService, private router: Router) {
+    constructor(private userService: UserService, private entryService: EntryService, private router: Router,
+                reuse: RouteReuseStrategy) {
         this.loggedInUser = this.userService.getUser();
         this.types = this.entryService.getEntryTypes();
+
         this.router.routeReuseStrategy.shouldReuseRoute = () => {
             return false;
         };

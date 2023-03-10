@@ -7,6 +7,7 @@
 
     <div class="col-8" [id]="field.label">
         <textarea style="height: 70px;" class="form-control form-control-sm" (focusout)="textInputFocusOut(field)"
+                  [ngClass]="{'is-invalid': field.isInvalid}" [(ngModel)]="field.value"
                   (focusin)="textInputFocusIn(field)"></textarea>
     </div>
 </div>

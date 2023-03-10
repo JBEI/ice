@@ -19,7 +19,6 @@ export class CreateNewEntryComponent implements OnInit {
 
     constructor(private route: ActivatedRoute, private http: HttpService, private entryService: EntryService,
                 private router: Router) {
-        this.newPart = new Part();
     }
 
     /**
@@ -33,11 +32,23 @@ export class CreateNewEntryComponent implements OnInit {
             this.router.navigate((['create', this.entryService.getEntryTypes()[0].toLowerCase()]));
             return;
         }
-        this.newPart.type = this.type.toUpperCase();
+        // this.newPart.type = this.type.toUpperCase();
 
+        // retrieve the fields for specific type
         this.http.get('parts/fields/' + this.type).subscribe((any: CustomField[]) => {
             this.fields = any;
         })
+
+        // create new part from server if none in progress
+        this.newPart = JSON.parse(sessionStorage.getItem('in-progress-entry'));
+        if (!this.newPart) {
+            this.http.post('parts', {type: this.type.toUpperCase()}).subscribe({
+                next: (part: Part) => {
+                    this.newPart = part;
+                    sessionStorage.setItem('in-progress-entry', JSON.stringify(this.newPart));
+                }
+            });
+        }
     }
 
     private createPartData(): Observable<Part> {
@@ -48,10 +59,12 @@ export class CreateNewEntryComponent implements OnInit {
     }
 
     private updateField(field: CustomField): void {
-        this.http.put('parts/' + this.newPart.id + '/fields', field).subscribe(result => {
+        this.http.put('parts/' + this.newPart.id + '/fields', field).subscribe({
+            next: (result: any) => {
 
-        }, error => {
-            // todo : show error to user
+            }, error: (error: any) => {
+                // todo : show error to user
+            }
         })
     }
 
@@ -73,5 +86,46 @@ export class CreateNewEntryComponent implements OnInit {
 
     textInputFocusIn(field: CustomField): void {
         field.active = true;
+    }
+
+    // deletes current in progress entry from session (user client)
+    // and from the database (makes a "delete" call to backend)
+    clearNewPart(): void {
+        this.http.delete('parts/' + this.newPart.id).subscribe({
+            next: (result: any) => {
+                sessionStorage.removeItem('in-progress-entry');
+                // todo : redirect to somewhere
+            }
+        })
+    }
+
+    submitNewPart(): void {
+        let hasErrors: boolean = false;
+
+        // check for errors
+        for (let i = 0; i < this.fields.length; i += 1) {
+            const field = this.fields[i];
+            field.isInvalid = false;
+            if (!field.required)
+                continue;
+
+            field.isInvalid = !field.value;
+            hasErrors = hasErrors ? true : field.isInvalid;
+        }
+
+        if (hasErrors)
+            return;
+
+        this.newPart.fields = this.fields;
+
+        // submit to the backend
+        this.http.post('parts/' + this.newPart.id, this.newPart).subscribe({
+            next: (result: Part) => {
+                this.router.navigate(["entry", result.id]);
+            }, error: (error: any) => {
+
+            }, complete: () => {
+            }
+        })
     }
 }

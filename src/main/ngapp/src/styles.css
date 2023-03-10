@@ -140,3 +140,7 @@ html body {
     box-shadow: 0 1px 1px rgb(0 0 0 / 5%);
     color: #16192c;
 }
+
+.btn-primary {
+    --bs-btn-bg: #206bc4;
+}

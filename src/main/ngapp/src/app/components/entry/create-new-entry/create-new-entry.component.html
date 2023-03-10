@@ -25,47 +25,49 @@
                             <div class="container" style="width: 75vw">
                                 <ng-container *ngIf="!fields">
                                     <img src="assets/img/loader-mini.gif" alt="Loading..."> &nbsp; <i
-                                    class="text-muted">Loading
-                                    fields...</i>
+                                    class="text-muted">Loading fields...</i>
                                 </ng-container>
 
                                 <ng-container *ngIf="fields && fields.length">
+                                    <span *ngIf="newPart">{{newPart.id}}</span>
                                     <div class="row p-1" *ngFor="let field of fields">
 
                                         <ng-container *ngIf="field.fieldInputType === 'TEXT' || !field.fieldInputType
                                     || field.fieldInputType === 'LONG_TEXT'">
-                                            <app-text-field [field]="field"
+                                            <app-text-field [field]="field" [part]="newPart"
                                                             [longText]="field.fieldInputType === 'LONG_TEXT'"></app-text-field>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'SELECT'">
-                                            <app-select-field [field]="field"></app-select-field>
+                                            <app-select-field [field]="field" [part]="newPart"></app-select-field>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'DATE'">
-                                            <app-date-picker [field]="field"></app-date-picker>
+                                            <app-date-picker [field]="field" [part]="newPart"></app-date-picker>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'USER_WITH_EMAIL'">
-                                            <app-user-with-email-field [field]="field"></app-user-with-email-field>
+                                            <app-user-with-email-field [field]="field"
+                                                                       [part]="newPart"></app-user-with-email-field>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'TEXTAREA'">
-                                            <app-textarea-field [field]="field"></app-textarea-field>
+                                            <app-textarea-field [field]="field" [part]="newPart"></app-textarea-field>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'BOOLEAN'">
-                                            <app-boolean-field [field]="field"></app-boolean-field>
+                                            <app-boolean-field [field]="field" [part]="newPart"></app-boolean-field>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'MULTI_TEXT'">
-                                            <app-multi-text-field [field]="field"></app-multi-text-field>
+                                            <app-multi-text-field [field]="field"
+                                                                  [part]="newPart"></app-multi-text-field>
                                         </ng-container>
 
                                     </div>
@@ -76,10 +78,15 @@
                         </div>
                     </div>
 
-                    <div class="col px-4 float-end">
-                        <button class="btn btn-primary">Save</button>
-                        <button class="btn btn-light">Cancel</button>
+                    <div class="row">
+                        <div class="col">
+                            <div class="float-end px-5">
+                                <button class="btn btn-primary" (click)="submitNewPart()">Save</button>
+                                <button class="btn btn-white ms-2" (click)="clearNewPart()">Cancel</button>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>

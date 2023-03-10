@@ -11,9 +11,16 @@
                     <app-header></app-header>
                 </div>
 
-                <div class="container-fluid p-0">
+                <div class="container">
+
                     <div class="row">
-                        <div class="col px-4 pt-5 pb-3">
+                        <div class="col">
+                            &nbsp;
+                        </div>
+                    </div>
+
+                    <div class="row bg-white px-4 pt-4 pb-3 mx-2">
+                        <div class="col">
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <h3 class="mb-0">
@@ -38,30 +45,28 @@
                         </div>
                     </div>
 
-                    <!--                    <div class="row">-->
-                    <!--                    <div class="row">-->
-                    <!--                        <div class="col">-->
-                    <!--                            <div class="container-fluid" style="width: 75vw">-->
-                    <ng-container *ngFor="let field of entry.fields; let i = index">
-                        <app-text-field *ngIf="field.fieldInputType === 'TEXT'"
-                                        [(field)]="entry.fields[i]"></app-text-field>
-                        <ng-container *ngIf="field.fieldInputType !== 'TEXT'">
-                            <div class="row p-1">
+                    <div class="row mt-4">
+                        <div class="col">
+                            <!--                            <div class="container-fluid" style="width: 75vw">-->
+                            <ng-container *ngFor="let field of entry.fields; let i = index">
+                                <app-text-field *ngIf="field.fieldInputType === 'TEXT'"
+                                                [(field)]="entry.fields[i]"></app-text-field>
+                                <ng-container *ngIf="field.fieldInputType !== 'TEXT'">
+                                    <div class="row p-1">
 
-                                <div class="col-3 offset-1">
-                                    {{field.label}}
-                                </div>
+                                        <div class="col-3 offset-1">
+                                            {{field.label}}
+                                        </div>
 
-                                <div class="col-8">
-                                    {{field.value}}
-                                </div>
-                            </div>
+                                        <div class="col-8">
+                                            {{field.value}}
+                                        </div>
+                                    </div>
 
-                        </ng-container>
-                    </ng-container>
-                    <!--                            </div>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                    </div>
 
                     <div class="row mt-4">
                         <div class="col px-4">

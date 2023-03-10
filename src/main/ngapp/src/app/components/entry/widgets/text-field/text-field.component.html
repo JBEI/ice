@@ -14,7 +14,7 @@
         <div *ngIf="!inEditMode" class="d-flex">
             <input class="form-control form-control-sm" [(ngModel)]="field.value"
                    (focusout)="textInputFocusOut(field)" name="field-value"
-                   [ngClass]="{'w-75': longText, ' w-50': !longText}"
+                   [ngClass]="{'w-75': longText, ' w-50': !longText, 'is-invalid': field.isInvalid}"
                    (focusin)="textInputFocusIn(field)" maxlength="127">
 
             <button class="btn btn-sm border ms-1" (click)="switchEditMode()">

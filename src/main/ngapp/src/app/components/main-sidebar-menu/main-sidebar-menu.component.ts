@@ -15,6 +15,7 @@ export class MainSidebarMenuComponent implements OnInit {
     collections: CollectionMenuOption[];
     selectedOption: string;
     user: User;
+    collapseMode: boolean;
 
     @Output() selectedCollectionChange: EventEmitter<CollectionMenuOption> = new EventEmitter<CollectionMenuOption>();
 

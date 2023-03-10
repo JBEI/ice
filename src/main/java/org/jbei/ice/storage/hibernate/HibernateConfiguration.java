@@ -107,7 +107,6 @@ public class HibernateConfiguration {
     private static void configurePostgresDb(Configuration configuration, DataStorage storage, Path dbPath) {
         // load (additional) base configuration
         configuration.configure();
-
         configuration.setProperty(HibernateConstants.CONNECTION_URL, "jdbc:postgresql://" + storage.getConnectionUrl() + "/" + storage.getDatabaseName());
         configuration.setProperty(HibernateConstants.CONNECTION_DRIVER_CLASS, "org.postgresql.Driver");
         configuration.setProperty(HibernateConstants.CONNECTION_USERNAME, storage.getDatabaseUser());
@@ -188,6 +187,7 @@ public class HibernateConfiguration {
         configuration.addAnnotatedClass(CustomEntryFieldValueModel.class);
         configuration.addAnnotatedClass(SequenceHistoryModel.class);
         configuration.addAnnotatedClass(SampleCreateModel.class);
+        configuration.addAnnotatedClass(EntryFieldValueModel.class);
     }
 
     /**

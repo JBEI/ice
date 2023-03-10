@@ -2,14 +2,49 @@
 
     <div class="row">
         <div class="col px-0 pt-5 pb-3">
+
             <div class="d-flex justify-content-between">
                 <h2 class="text-secondary">
                     {{collectionName | titlecase}}  <i class="bi bi-chevron-right font-80em"></i>
                     {{folderDetails.folderName}}
-                    <!--                                                            <span *ngIf="selectedFolderId">-->
-                    <!--                                                                <i class="bi bi-chevron-right small"></i> {{selectedFolder.folderName}}-->
-                    <!--                                                            </span>-->
+                    <div ngbDropdown class="d-inline-block" #myDrop="ngbDropdown">
+                        <button class="btn" ngbDropdownAnchor (focus)="myDrop.open()">
+                        </button>
+                        <div ngbDropdownMenu aria-labelledby="dropdownManual">
+                            <button ngbDropdownItem class="small">Create Samples</button>
+                            <button ngbDropdownItem class="small">Promote Folder</button>
+                            <button ngbDropdownItem class="small">Transfer Folder</button>
+                            <button ngbDropdownItem class="small">Accept Folder</button>
+                        </div>
+                    </div>
                 </h2>
+
+
+                <div class="d-inline-block">
+                    <button type="button" class="btn btn-sm" [ngClass]="{'text-muted': false}"
+                            (click)="shareFolder()">
+                        <!--                            [disabled]="!selectedFolderId"-->
+                        <i class="bi bi-people-fill"></i>
+                    </button>
+                </div>
+
+                <div class="d-inline-block ps-2 pe-2">
+                    <button class="btn btn-sm btn-white border" [ngbTooltip]="'Add to folder'" [disabled]="true">
+                        <i class="bi bi-folder-plus"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-white border ms-2" [ngbTooltip]="'Remove from folder'"
+                            [disabled]="true">
+                        <i class="bi bi-folder-minus"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-white border ms-2" [ngbTooltip]="'Move from folder'"
+                            [disabled]="true">
+                        <i class="bi bi-folder-symlink-fill"></i>
+                    </button>
+
+                </div>
+
 
                 <div *ngIf="folderDetails.canEdit">
                     <!--                                                            <button type="button" class="btn btn-white"-->
@@ -26,10 +61,14 @@
                         <i class="bi bi-upload"></i> Upload
                     </button>
 
+
                     <button type="button" class="btn btn-white ms-3 border font-95em">
                         <i class="bi bi-download"></i> Export
                     </button>
+
                 </div>
+
+
             </div>
         </div>
     </div>
@@ -42,5 +81,3 @@
         </div>
     </div>
 </div>
-
-<pre>{{folderDetails | json}}</pre>

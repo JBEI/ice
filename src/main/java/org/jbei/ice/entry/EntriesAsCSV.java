@@ -26,6 +26,7 @@ import org.jbei.ice.utils.Utils;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -200,23 +201,23 @@ public class EntriesAsCSV {
         }
 
         switch (SequenceFormat.fromString(format)) {
-            case ORIGINAL:
+            case ORIGINAL -> {
                 Sequence sequence = sequenceDAO.getByEntry(entry);
                 if (sequence == null)
                     return "";
                 return sequence.getFileName();
-
-            case GENBANK:
-            default:
+            }
+            case GENBANK -> {
                 return entry.getPartNumber() + ".gb";
-
-            case FASTA:
+            }
+            case FASTA -> {
                 return entry.getPartNumber() + ".fasta";
-
-            case SBOL1:
-            case SBOL2:
+            }
+            case SBOL1, SBOL2 -> {
                 return entry.getPartNumber() + ".xml";
+            }
         }
+        return entry.getPartNumber() + ".gb";
     }
 
     private void writeZip(Set<Long> sequenceSet) {
@@ -266,7 +267,7 @@ public class EntriesAsCSV {
 
     private EntryFieldLabel[] getEntryFields() {
         Set<String> recordTypes = new HashSet<>(dao.getRecordTypes(entries));
-        List<EntryFieldLabel> fields = EntryFields.getCommonFields();
+        List<EntryFieldLabel> fields = new ArrayList<>();
 
         for (String recordType : recordTypes) {
             EntryType type = EntryType.nameToType(recordType);
@@ -275,23 +276,15 @@ public class EntriesAsCSV {
                 continue;
             }
 
-            switch (type) {
-                case SEED:
-                    EntryFields.addArabidopsisSeedHeaders(fields);
-                    break;
+            List<EntryFieldLabel> labels = switch (type) {
+                default -> EntryFieldLabel.getPartLabels();
+                case PLASMID -> EntryFieldLabel.getPlasmidLabels();
+                case STRAIN -> EntryFieldLabel.getStrainLabels();
+                case SEED -> EntryFieldLabel.getSeedLabels();
+                case PROTEIN -> EntryFieldLabel.getProteinFields();
+            };
 
-                case STRAIN:
-                    EntryFields.addStrainHeaders(fields);
-                    break;
-
-                case PLASMID:
-                    EntryFields.addPlasmidHeaders(fields);
-                    break;
-
-                case PROTEIN:
-                    EntryFields.addProteinHeaders(fields);
-                    break;
-            }
+            fields.addAll(labels);
         }
 
         return fields.toArray(new EntryFieldLabel[0]);

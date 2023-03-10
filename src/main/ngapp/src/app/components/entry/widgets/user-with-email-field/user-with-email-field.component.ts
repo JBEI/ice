@@ -26,6 +26,8 @@ export class UserWithEmailFieldComponent implements OnInit {
         if (removeAppend && field.label.endsWith(this.appendString)) {
             field.label = field.label.slice(0, field.label.length - this.appendString.length);
         }
+        if (field.required)
+            field.isInvalid = !field.value;
     }
 
     textInputFocusIn(field: CustomField, append: boolean = false): void {

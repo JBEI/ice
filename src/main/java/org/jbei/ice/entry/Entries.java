@@ -45,6 +45,7 @@ public class Entries extends HasEntry {
     private final EntryAuthorization authorization;
     private final SequenceDAO sequenceDAO;
     private final CustomEntryFieldValueDAO entryFieldValueDAO;
+    private final static String CURRENT_MAJOR_VERSION = "6.0";
 
     /**
      * @param userId unique identifier for user creating permissions. Must have write privileges on the entry
@@ -149,42 +150,44 @@ public class Entries extends HasEntry {
         if (data == null || data.getCustomEntryFields() == null || entry == null)
             return;
 
-        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
-
         for (CustomEntryField customEntryField : data.getCustomEntryFields()) {
             // skip existing because that is covered by "existing" fields
             if (customEntryField.getFieldType() == FieldType.EXISTING)
                 continue;
 
+            updateCustomField(entry, customEntryField);
+        }
+    }
 
-            CustomEntryFieldModel customEntryFieldModel = dao.get(customEntryField.getId());
-            if (customEntryFieldModel == null) {
-                // get details about custom field (note: this is different from value)
-                if (customEntryField.getEntryType() == null) {
-                    customEntryField.setEntryType(EntryType.nameToType(entry.getRecordType()));
-                }
-
-                // try again with label and type
-                Optional<CustomEntryFieldModel> optional = dao.getLabelForType(customEntryField.getEntryType(), customEntryField.getLabel());
-                if (optional.isEmpty()) {
-                    Logger.error("Could not retrieve custom field with id " + customEntryField.getId());
-                    continue;
-                }
-                customEntryFieldModel = optional.get();
+    private void updateCustomField(Entry entry, CustomEntryField field) {
+        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
+        CustomEntryFieldModel customEntryFieldModel = dao.get(field.getId());
+        if (customEntryFieldModel == null) {
+            // get details about custom field (note: this is different from value)
+            if (field.getEntryType() == null) {
+                field.setEntryType(EntryType.nameToType(entry.getRecordType()));
             }
 
-            CustomEntryFieldValueModel model = entryFieldValueDAO.getByFieldAndEntry(entry, customEntryFieldModel);
-            if (model == null) {
-                // create new
-                model = new CustomEntryFieldValueModel();
-                model.setEntry(entry);
-                model.setField(customEntryFieldModel);
-                model.setValue(customEntryField.getValue());
-                entryFieldValueDAO.create(model);
-            } else {
-                model.setValue(customEntryField.getValue());
-                entryFieldValueDAO.update(model);
+            // try again with label and type
+            Optional<CustomEntryFieldModel> optional = dao.getLabelForType(field.getEntryType(), field.getLabel());
+            if (optional.isEmpty()) {
+                Logger.error("Could not retrieve custom field with id " + field.getId());
+                return;
             }
+            customEntryFieldModel = optional.get();
+        }
+
+        CustomEntryFieldValueModel model = entryFieldValueDAO.getByFieldAndEntry(entry, customEntryFieldModel);
+        if (model == null) {
+            // create new
+            model = new CustomEntryFieldValueModel();
+            model.setEntry(entry);
+            model.setField(customEntryFieldModel);
+            model.setValue(field.getValue());
+            entryFieldValueDAO.create(model);
+        } else {
+            model.setValue(field.getValue());
+            entryFieldValueDAO.update(model);
         }
     }
 
@@ -440,6 +443,35 @@ public class Entries extends HasEntry {
         }
 
         return entry;
+    }
+
+    /**
+     * Create new part with the minimum requirements and a status of DRAFT
+     */
+    public PartData createNew(PartData part) {
+        EntryType type = part.getType();
+
+        Entry entry = switch (type) {
+            case PLASMID -> new Plasmid();
+            case STRAIN -> new Strain();
+            case SEED -> new ArabidopsisSeed();
+            case PROTEIN -> new Protein();
+            default -> new Part();
+        };
+
+        entry.setRecordId(UUID.randomUUID().toString());
+        entry.setVersionId(CURRENT_MAJOR_VERSION);
+        entry.setVisibility(Visibility.DRAFT.getValue());
+        entry.setCreationTime(new Date());
+        AccountModel account = DAOFactory.getAccountDAO().getByEmail(this.userId);
+        entry.setOwner(account.getFullName());
+        entry.setOwnerEmail(account.getEmail());
+
+        entry = this.dao.create(entry);
+
+        // todo : if parts has list of new, send to EntryFieldValues
+
+        return entry.toDataTransferObject();
     }
 
     /**

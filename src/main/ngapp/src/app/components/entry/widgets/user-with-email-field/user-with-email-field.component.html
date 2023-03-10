@@ -9,11 +9,12 @@
     <div class="col-8 d-flex">
         <div class="input-group">
             <input type="text" class="form-control form-control-sm" aria-label="Name"
+                   [ngClass]="{'is-invalid': field.isInvalid}" [(ngModel)]="field.value"
                    (focusout)="textInputFocusOut(field)" (focusin)="textInputFocusIn(field)">
 
             <input type="text" class="form-control form-control-sm" aria-label="Email"
                    placeholder="Optional Email" (focusout)="textInputFocusOut(field, true)"
-                   (focusin)="textInputFocusIn(field, true)">
+                   (focusin)="textInputFocusIn(field, true)" [(ngModel)]="field.subField">
         </div>
     </div>
 

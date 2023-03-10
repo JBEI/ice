@@ -13,12 +13,12 @@ import java.util.List;
 public class EntryField implements IDataTransferModel {
 
     private long id;
-    private EntryType entryType;
     private String label;   // display label
     private boolean required;
     private boolean custom;
     private String value;
     private FieldInputType fieldInputType;
+    private EntryFieldLabel fieldType;
     private String field;
     private String subField;
 
@@ -30,14 +30,6 @@ public class EntryField implements IDataTransferModel {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public EntryType getEntryType() {
-        return entryType;
-    }
-
-    public void setEntryType(EntryType entryType) {
-        this.entryType = entryType;
     }
 
     public List<CustomField> getOptions() {
@@ -98,5 +90,13 @@ public class EntryField implements IDataTransferModel {
 
     public void setSubField(String subField) {
         this.subField = subField;
+    }
+
+    public EntryFieldLabel getFieldType() {
+        return fieldType;
+    }
+
+    public void setFieldType(EntryFieldLabel fieldType) {
+        this.fieldType = fieldType;
     }
 }

@@ -1,64 +1,124 @@
 package org.jbei.ice.entry;
 
-import org.jbei.ice.dto.entry.EntryFieldLabel;
+import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.dto.entry.*;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
+ * Entry fields for a specific entry
+ *
  * @author Hector Plahar
- * todo : duplicate of EntryFieldLabel get***Labels
  */
 public class EntryFields {
 
-    public static List<EntryFieldLabel> getCommonFields() {
-        List<EntryFieldLabel> list = new ArrayList<>();
-        list.add(EntryFieldLabel.PI);
-        list.add(EntryFieldLabel.FUNDING_SOURCE);
-        list.add(EntryFieldLabel.IP);
-        list.add(EntryFieldLabel.BIO_SAFETY_LEVEL);
-        list.add(EntryFieldLabel.NAME);
-        list.add(EntryFieldLabel.ALIAS);
-        list.add(EntryFieldLabel.KEYWORDS);
-        list.add(EntryFieldLabel.SUMMARY);
-        list.add(EntryFieldLabel.NOTES);
-        list.add(EntryFieldLabel.REFERENCES);
-//        list.add(EntryFieldLabel.LINKS);
-        list.add(EntryFieldLabel.STATUS);
-        list.add(EntryFieldLabel.CREATOR);
-        return list;
+    private final EntryType type;
+    private final String userId;
+
+    /**
+     * @param userId unique identifier of user making request
+     * @param type   type of entry
+     */
+    public EntryFields(String userId, EntryType type) {
+        if (type == null)
+            throw new IllegalArgumentException("Illegal null entry type");
+
+        this.type = type;
+        this.userId = userId;
     }
 
-    public static void addStrainHeaders(List<EntryFieldLabel> list) {
-        list.add(EntryFieldLabel.HOST);
-        list.add(EntryFieldLabel.GENOTYPE_OR_PHENOTYPE);
-        list.add(EntryFieldLabel.SELECTION_MARKERS);
+    /**
+     * Determines which entry type fields to return
+     *
+     * @return List of {@link EntryField}
+     */
+    public List<EntryField> get() {
+
+        List<EntryFieldLabel> labels = switch (this.type) {
+            default -> EntryFieldLabel.getPartLabels();
+            case PLASMID -> EntryFieldLabel.getPlasmidLabels();
+            case STRAIN -> EntryFieldLabel.getStrainLabels();
+            case SEED -> EntryFieldLabel.getSeedLabels();
+            case PROTEIN -> EntryFieldLabel.getProteinFields();
+        };
+
+        // retrieves the default labels for the specific entry types
+
+        // retrieve the entry fields for the retrieved labels
+        return getFieldsForLabels(labels);
     }
 
-    public static void addPlasmidHeaders(List<EntryFieldLabel> list) {
-        list.add(EntryFieldLabel.CIRCULAR);
-        list.add(EntryFieldLabel.BACKBONE);
-        list.add(EntryFieldLabel.PROMOTERS);
-        list.add(EntryFieldLabel.REPLICATES_IN);
-        list.add(EntryFieldLabel.ORIGIN_OF_REPLICATION);
-        list.add(EntryFieldLabel.SELECTION_MARKERS);
-    }
+    /**
+     * Retrieve associated {@link EntryField}s for the referenced labels
+     *
+     * @param labels list of {@link EntryFieldLabel}s that are to be used for retrieval
+     * @return list of fields
+     */
+    private List<EntryField> getFieldsForLabels(List<EntryFieldLabel> labels) {
+        List<EntryField> fields = new LinkedList<>();
+        Set<EntryFieldLabel> existingCustomFields = new HashSet<>();
 
-    public static void addArabidopsisSeedHeaders(List<EntryFieldLabel> list) {
-        list.add(EntryFieldLabel.HOMOZYGOSITY);
-        list.add(EntryFieldLabel.HARVEST_DATE);
-        list.add(EntryFieldLabel.ECOTYPE);
-        list.add(EntryFieldLabel.PARENTS);
-        list.add(EntryFieldLabel.GENERATION);
-        list.add(EntryFieldLabel.PLANT_TYPE);
-        list.add(EntryFieldLabel.SELECTION_MARKERS);
-        list.add(EntryFieldLabel.SENT_TO_ABRC);
-    }
+        // retrieve custom fields created on this instance of ICE
+        CustomFields customFields = new CustomFields();
+        List<CustomEntryField> customEntryFields = customFields.get(this.type).getData();
 
-    public static void addProteinHeaders(List<EntryFieldLabel> list) {
-        list.add(EntryFieldLabel.ORGANISM);
-        list.add(EntryFieldLabel.FULL_NAME);
-        list.add(EntryFieldLabel.GENE_NAME);
-        list.add(EntryFieldLabel.UPLOADED_FROM);
+        // iterate through the list of custom entries
+        for (CustomEntryField customEntryField : customEntryFields) {
+
+            EntryField field = new EntryField();
+
+            switch (customEntryField.getFieldType()) {
+
+                // keep track of existing field customizations to avoid duplicating it when retrieving
+                // regular fields
+                case EXISTING -> {
+                    existingCustomFields.add(customEntryField.getExistingField());
+                    field.setFieldInputType(customEntryField.getExistingField().getFieldType());
+                }
+
+                case MULTI_CHOICE, MULTI_CHOICE_PLUS -> field.setFieldInputType(FieldInputType.SELECT);
+            }
+
+            // create and add entry field
+            field.setRequired(customEntryField.isRequired());
+            field.setCustom(true);
+            field.setId(customEntryField.getId());
+            field.setValue(customEntryField.getValue());
+            field.setLabel(customEntryField.getLabel());
+            field.getOptions().addAll(customEntryField.getOptions());
+            fields.add(field);
+        }
+
+        // default values for entries
+        PartDefaults partDefaults = new PartDefaults(this.userId);
+
+        // get regular fields using list of labels
+        for (EntryFieldLabel label : labels) {
+            // skip any that have been modified via custom fields since it is already accounted for
+            if (existingCustomFields.contains(label))
+                continue;
+
+            // create and add entry field
+            EntryField field = new EntryField();
+            field.setLabel(label.getDisplay());
+            field.setFieldType(label);
+            field.setFieldInputType(label.getFieldType());
+
+            // get the user set default value for field label
+            String defaultValue = partDefaults.getForLabel(label);
+            if (!StringUtils.isEmpty(defaultValue))
+                field.setValue(defaultValue);
+
+            field.setRequired(label.isRequired());
+
+            // retrieve options (should be restricted to only type SELECT)
+            field.getOptions().addAll(EntryFieldLabel.getDefaultOptions(label));
+            fields.add(field);
+        }
+
+        return fields;
     }
 }

@@ -93,7 +93,7 @@ public class PartResource extends RestResource {
                 return super.respond(controller.getRequestedEntry(remoteUserId, remoteUserToken, id, fid, partner));
             } else {
                 log(userId, "retrieving details for " + id);
-                return super.respond(controller.retrieveEntryDetails(userId, id));
+                return super.respond(controller.get(userId, id));
             }
         }
     }
@@ -136,8 +136,19 @@ public class PartResource extends RestResource {
         if (entryType == null)
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
 
-        PartFields partFields = new PartFields(userId, entryType);
-        return super.respond(partFields.get());
+        EntryFields entryFields = new EntryFields(userId, entryType);
+        return super.respond(entryFields.get());
+    }
+
+    @POST
+    @Path("/{id}")
+    public Response updatePartFields(@PathParam("id") String id, PartData partData) {
+        String userId = requireUserId();
+        EntryFieldValues values = new EntryFieldValues(userId, id, partData.getFields());
+        List<String> invalidFields = values.validates();
+        if (invalidFields != null && !invalidFields.isEmpty())
+            return super.respond(Response.Status.INTERNAL_SERVER_ERROR, invalidFields);
+        return super.respond(values.set());
     }
 
     /**
@@ -616,7 +627,8 @@ public class PartResource extends RestResource {
         final Entries creator = new Entries(userId);
         if (StringUtils.isEmpty(sourceId)) {
             log(userId, "created new " + partData.getType().getDisplay());
-            return super.respond(creator.create(partData));
+//            return super.respond(creator.create(partData));
+            return super.respond(creator.createNew(partData));
         }
 
         try {

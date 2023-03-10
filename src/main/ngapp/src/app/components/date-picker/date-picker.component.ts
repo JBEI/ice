@@ -3,6 +3,7 @@ import {NgbCalendar, NgbDate, NgbDateParserFormatter, NgbDateStruct} from "@ng-b
 import {DateParserFormatterService} from "../../services/date-parser-formatter.service";
 import {DateUtilsService} from "../../services/date-utils.service";
 import {CustomField} from "../../models/custom-field";
+import {Part} from "../../models/Part";
 
 @Component({
     selector: 'app-date-picker',
@@ -19,6 +20,8 @@ export class DatePickerComponent implements OnInit {
     @Input() halfWidth: boolean = true;
     @Input() value: number;  // optional input. set if we are displaying existing record
     @Input() field: CustomField;
+
+    @Input() part: Part;
 
     selectedDate: NgbDateStruct;
 

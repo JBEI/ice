@@ -42,6 +42,7 @@ public class DAOFactory {
     private static CustomEntryFieldValueDAO customEntryFieldValueDAO;
     private static SampleCreateModelDAO sampleCreateModelDAO;
     private static SequenceFeatureAttributeDAO sequenceFeatureAttributeDAO;
+    private static EntryFieldValueModelDAO entryFieldValueModelDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -251,5 +252,11 @@ public class DAOFactory {
         if (sequenceFeatureAttributeDAO == null)
             sequenceFeatureAttributeDAO = new SequenceFeatureAttributeDAO();
         return sequenceFeatureAttributeDAO;
+    }
+
+    public static EntryFieldValueModelDAO getEntryFieldValueModelDAO() {
+        if (entryFieldValueModelDAO == null)
+            entryFieldValueModelDAO = new EntryFieldValueModelDAO();
+        return entryFieldValueModelDAO;
     }
 }

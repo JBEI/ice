@@ -2,7 +2,6 @@ package org.jbei.ice.bulkupload;
 
 import org.jbei.ice.dto.entry.EntryFieldLabel;
 import org.jbei.ice.dto.entry.EntryType;
-import org.jbei.ice.entry.EntryFields;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,29 +17,13 @@ class BulkCSVUploadHeaders {
         if (type == null)
             return null;
 
-        List<EntryFieldLabel> list = EntryFields.getCommonFields();
-
-        switch (type) {
-            case SEED:
-                EntryFields.addArabidopsisSeedHeaders(list);
-                break;
-
-            case STRAIN:
-                EntryFields.addStrainHeaders(list);
-                break;
-
-            case PLASMID:
-                EntryFields.addPlasmidHeaders(list);
-                break;
-
-            case PROTEIN:
-                EntryFields.addProteinHeaders(list);
-                break;
-
-            default:
-        }
-
-        return list;
+        return switch (type) {
+            default -> EntryFieldLabel.getPartLabels();
+            case PLASMID -> EntryFieldLabel.getPlasmidLabels();
+            case STRAIN -> EntryFieldLabel.getStrainLabels();
+            case SEED -> EntryFieldLabel.getSeedLabels();
+            case PROTEIN -> EntryFieldLabel.getProteinFields();
+        };
     }
 
     static List<EntryFieldLabel> getFileHeaders() {

@@ -7,7 +7,7 @@ export class CustomField {
     entryType: string;          // e.g. PLASMID
     custom: boolean;
     fieldType: string;          // EXISTING or TEXT_INPUT or MULTI_CHOICE or MULTI_CHOICE_PLUS (multi + text input)
-    existingField: string;
+    existingField: string;      // maps to enum "EntryFieldLabel" on backend
     required: boolean;
     options: FieldOption [];
     disabled: boolean;
@@ -16,6 +16,7 @@ export class CustomField {
     field: string;
     subField: string;
 
-    // ui helpers
+    // ui helper fields
     active: boolean;
+    isInvalid: boolean;
 }

@@ -20,30 +20,13 @@ public class InfoToModelFactory {
 
     public static Entry infoToEntry(PartData info) {
         EntryType type = info.getType();
-        Entry entry;
-
-        switch (type) {
-            case PLASMID:
-                entry = setPlasmidFields(info.getPlasmidData(), new Plasmid());
-                break;
-
-            case STRAIN:
-                entry = setStrainFields(info.getStrainData(), new Strain());
-                break;
-
-            case SEED:
-                entry = setSeedFields(info.getSeedData(), new ArabidopsisSeed());
-                break;
-
-            case PROTEIN:
-                entry = setProteinFields(info.getProteinData(), new Protein());
-                break;
-
-            case PART:
-            default:
-                entry = new Part();
-                break;
-        }
+        Entry entry = switch (type) {
+            default -> new Part();
+            case PLASMID -> setPlasmidFields(info.getPlasmidData(), new Plasmid());
+            case STRAIN -> setStrainFields(info.getStrainData(), new Strain());
+            case SEED -> setSeedFields(info.getSeedData(), new ArabidopsisSeed());
+            case PROTEIN -> setProteinFields(info.getProteinData(), new Protein());
+        };
 
         if (entry == null)
             throw new IllegalArgumentException("Could not create entry from info object");
@@ -543,8 +526,8 @@ public class InfoToModelFactory {
 
             case CIRCULAR:
                 plasmid.setCircular("yes".equalsIgnoreCase(value)
-                        || "true".equalsIgnoreCase(value)
-                        || "circular".equalsIgnoreCase(value));
+                    || "true".equalsIgnoreCase(value)
+                    || "circular".equalsIgnoreCase(value));
                 return;
 
             case ORIGIN_OF_REPLICATION:

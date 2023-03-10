@@ -7,7 +7,6 @@ import org.jbei.ice.dto.common.Results;
 import org.jbei.ice.dto.entry.EntryFieldLabel;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.web.PartnerEntries;
-import org.jbei.ice.entry.EntryFields;
 import org.jbei.ice.entry.EntryUtil;
 import org.jbei.ice.entry.PartDataUtil;
 import org.jbei.ice.entry.sequence.InputStreamWrapper;
@@ -232,12 +231,11 @@ public class RemoteEntriesAsCSV {
     }
 
     protected List<EntryFieldLabel> getEntryFields() {
-        List<EntryFieldLabel> fields = EntryFields.getCommonFields();
-
-        EntryFields.addArabidopsisSeedHeaders(fields);
-        EntryFields.addStrainHeaders(fields);
-        EntryFields.addPlasmidHeaders(fields);
-
+        List<EntryFieldLabel> fields = EntryFieldLabel.getPartLabels();
+        fields.addAll(EntryFieldLabel.getPlasmidLabels());
+        fields.addAll(EntryFieldLabel.getStrainLabels());
+        fields.addAll(EntryFieldLabel.getSeedLabels());
+        fields.addAll(EntryFieldLabel.getProteinFields());
         return fields;
     }
 

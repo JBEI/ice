@@ -1,15 +1,19 @@
 <div class="row">
 
     <div class="col-3 offset-1">
-        <span [ngClass]="{'fw-bold': field.active}">{{field.label}}</span>
+        <span [ngClass]="{'fw-bold': field.active}">{{field.label}}
+            <span class="text-danger" *ngIf="field.required" style="font-size: larger">*</span>
+        </span>
     </div>
 
     <div class="col-8">
-        <select class="form-select form-select-sm w-50" id="inputGroupSelect01" (focusout)="textInputFocusOut(field)"
+        <select class="form-select form-select-sm w-50" id="inputGroupSelect01"
+                [ngClass]="{'is-invalid': field.isInvalid}"
+                (focusout)="textInputFocusOut(field)" [(ngModel)]="field.value"
                 (focusin)="textInputFocusIn(field)" *ngIf="field.fieldInputType === 'SELECT'">
-            <option selected>Choose...</option>
-            <option value="1" *ngFor="let option of field.options">
-                {{option.name}}
+            <option selected>Choose One...</option>
+            <option [value]="option.name" *ngFor="let option of field.options">
+                {{option.value}}
             </option>
         </select>
     </div>

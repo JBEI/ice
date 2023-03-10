@@ -20,6 +20,8 @@ export class SelectFieldComponent implements OnInit {
 
     textInputFocusOut(field: CustomField): void {
         field.active = false;
+        if (field.required)
+            field.isInvalid = !field.value;
     }
 
     textInputFocusIn(field: CustomField): void {
