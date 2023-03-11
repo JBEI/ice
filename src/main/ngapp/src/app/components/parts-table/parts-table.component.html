@@ -3,8 +3,8 @@
 </div>
 
 <div *ngIf="parts && parts.length">
-    <table class="table border-bottom table-hover" [ngClass]="{'opacity-25':paging.processing}">
-        <thead class="text-uppercase bg-light font-80em">
+    <table class="table border-bottom table-hover table-bordered" [ngClass]="{'opacity-25':paging.processing}">
+        <thead class="text-uppercase text-muted bg-light font-80em">
         <tr>
             <th scope="col"><i class="bi font-12em cursor-pointer" (click)="selection.selectAll()"
                                [ngClass]="{'bi-dash-square': selection.hasAtLeastOneSelected(),
@@ -12,9 +12,8 @@
             </th>
             <th scope="col">Type</th>
             <th scope="col">Part ID</th>
-            <th scope="col">Name</th>
-            <th scope="col">Status</th>
-            <th scope="col"></th>
+            <th scope="col" *ngFor="let field of parts[0].fields">{{field.fieldType}}</th>
+            <th scope="col">&nbsp;</th>
             <th scope="col" class="cursor-pointer" (click)="sort('created')">Created
                 <i class="bi float-end" [ngClass]="{'bi-sort-up': paging.asc, 'bi-sort-down': !paging.asc}"></i>
             </th>
@@ -24,35 +23,35 @@
         <tbody>
         <tr *ngFor="let part of parts"
             [ngClass]="{'row-disabled':part.visible !== 'OK', 'table-primary': isSelected(part)}" class="">
+
             <td style="width: 43px" class="cursor-pointer align-middle">
-                <i class="bi" (click)="select(part)"
+                <i class="bi text-muted" (click)="select(part)"
                    [ngClass]="{'bi-square':!isSelected(part), 'bi-check-square':isSelected(part)}">
                 </i>
             </td>
+
             <td class="font-90em text-uppercase text-black-50 font-weight-bold align-middle">
                 <i class="bi bi-trash text-danger" *ngIf="part.visible==='DELETED'"></i>
-                {{part.type}}
+                <div class="text-muted fw-bold small">{{part.type}}</div>
                 <i class="bi bi-cloud" *ngIf="part.visible==='REMOTE'" style="color: #c9e6f2"></i>
             </td>
+
             <td style="width: 120px" class="align-middle">
                 <a [href]="'entry/' + part.id">{{part.partId}}</a>
             </td>
-            <td>
-                <div title="{{part.name}}" class="text-truncate" style="width: 350px">{{part.name}}</div>
-                <div *ngIf="part.shortDescription" title="{{part.shortDescription}}"
-                     class="small text-muted text-truncate" style="width: 350px">
-                    {{part.shortDescription}}
-                </div>
-                <i *ngIf="!part.shortDescription" class="small text-muted">No description provided</i>
+
+            <td *ngFor="let field of part.fields">
+                {{field.value || '&nbsp'}}
             </td>
-            <td style="vertical-align: middle; width:100px; white-space:nowrap">
-                <i class="bi bi-circle-fill" [ngClass]="{
-                'text-success':part.status.toUpperCase()==='COMPLETE',
-                'text-secondary': part.status.toUpperCase()==='In Progress'.toUpperCase(),
-                'text-danger': part.status.toUpperCase()==='Abandoned'.toUpperCase(),
-                'text-info': part.status.toUpperCase()==='Planned'.toUpperCase()}"></i>
-                <span class="text-muted text-capitalize"> {{part.status}}</span>
-            </td>
+
+            <!--            <td>-->
+            <!--                <div title="{{part.name}}" class="text-truncate" style="width: 350px">{{part.name}}</div>-->
+            <!--                <div *ngIf="part.shortDescription" title="{{part.shortDescription}}"-->
+            <!--                     class="small text-muted text-truncate" style="width: 350px">-->
+            <!--                    {{part.shortDescription}}-->
+            <!--                </div>-->
+            <!--                <i *ngIf="!part.shortDescription" class="small text-muted">No description provided</i>-->
+            <!--            </td>-->
 
             <td style="vertical-align: middle; white-space: nowrap">
                 <i *ngIf="part.hasSample" class="fa fa-flask fa-fw dark-gray"
@@ -104,7 +103,8 @@
 
         <div>
             <small class="text-muted pull-right">Show:
-                <select (change)="pageChange(1)" [(ngModel)]="paging.limit" [disabled]="paging.processing">
+                <select class="btn btn-white btn-sm" (change)="pageChange(1)" [(ngModel)]="paging.limit"
+                        [disabled]="paging.processing">
                     <option [value]="option" *ngFor="let option of pagingOptions">{{option}}</option>
                 </select>
             </small>

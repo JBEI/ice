@@ -57,7 +57,8 @@ public class OwnerEntries {
         this.isSelf = userId.equalsIgnoreCase(ownerEmail);
     }
 
-    public List<PartData> retrieveOwnerEntries(ColumnField sort, boolean asc, int start, int limit, String filter, List<String> fields) {
+    public List<PartData> retrieveOwnerEntries(ColumnField sort, boolean asc, int start, int limit, String filter,
+                                               List<String> fields) {
         List<Long> entries;
 
         if (this.isAdmin || this.isSelf) {
@@ -69,7 +70,7 @@ public class OwnerEntries {
             accountGroups.add(everybodyGroup);
             // retrieve entries for user that can be read by others
             entries = entryDAO.retrieveUserEntries(account, this.ownerAccount.getEmail(),
-                    accountGroups, sort, asc, start, limit, filter);
+                accountGroups, sort, asc, start, limit, filter);
         }
 
         ArrayList<PartData> data = new ArrayList<>();

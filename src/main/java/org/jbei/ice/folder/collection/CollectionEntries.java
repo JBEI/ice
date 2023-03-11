@@ -93,33 +93,20 @@ public class CollectionEntries {
      * of such entries that are available
      */
     public Results<PartData> getEntries(ColumnField sortField, boolean asc, int offset, int limit, String filter, List<String> fields) {
-        switch (this.type) {
-            case PERSONAL:
-            default:
-                return this.getPersonalEntries(sortField, asc, offset, limit, filter, fields);
-
-            case FEATURED:
-            case AVAILABLE:
-                return this.getAvailableEntries(sortField, asc, offset, limit, filter, fields);
-
-            case SHARED:
-                return this.getSharedEntries(sortField, asc, offset, limit, filter, fields);
-
-            case DELETED:
-                return this.getEntriesByVisibility(Visibility.DELETED, sortField, asc, offset, limit, this.userId, filter, fields);
-
-            case DRAFTS:
-                return this.getEntriesByVisibility(Visibility.DRAFT, sortField, asc, offset, limit, this.userId, filter, fields);
-
-            case PENDING:
-                return this.getEntriesByVisibility(Visibility.PENDING, sortField, asc, offset, limit, null, filter, fields);
-
-            case TRANSFERRED:
-                return this.getEntriesByVisibility(Visibility.TRANSFERRED, sortField, asc, offset, limit, null, filter, fields);
-
-            case SAMPLES:
-                return this.getSampleEntries(sortField, asc, offset, limit, filter, fields);
-        }
+        return switch (this.type) {
+            default -> this.getPersonalEntries(sortField, asc, offset, limit, filter, fields);
+            case FEATURED, AVAILABLE -> this.getAvailableEntries(sortField, asc, offset, limit, filter, fields);
+            case SHARED -> this.getSharedEntries(sortField, asc, offset, limit, filter, fields);
+            case DELETED ->
+                this.getEntriesByVisibility(Visibility.DELETED, sortField, asc, offset, limit, this.userId, filter, fields);
+            case DRAFTS ->
+                this.getEntriesByVisibility(Visibility.DRAFT, sortField, asc, offset, limit, this.userId, filter, fields);
+            case PENDING ->
+                this.getEntriesByVisibility(Visibility.PENDING, sortField, asc, offset, limit, null, filter, fields);
+            case TRANSFERRED ->
+                this.getEntriesByVisibility(Visibility.TRANSFERRED, sortField, asc, offset, limit, null, filter, fields);
+            case SAMPLES -> this.getSampleEntries(sortField, asc, offset, limit, filter, fields);
+        };
     }
 
     private Results<PartData> getSampleEntries(ColumnField field, boolean asc, int offset, int limit, String filter, List<String> fields) {

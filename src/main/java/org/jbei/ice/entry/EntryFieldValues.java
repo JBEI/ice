@@ -11,6 +11,7 @@ import org.jbei.ice.storage.model.EntryFieldValueModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Field values for specified entry types. Maps the fields to built in types or creates new custom fields as needed
@@ -95,15 +96,19 @@ public class EntryFieldValues {
     }
 
     private void update(Entry entry, EntryField field) {
-        EntryFieldValueModel model = this.dao.get(field.getId());
-        if (model == null) {
-            model = new EntryFieldValueModel();
+//        EntryFieldValueModel model = this.dao.get(field.getId());
+        Optional<EntryFieldValueModel> optional = this.dao.getByFieldAndEntry(entry.getId(), field.getFieldType());
+
+        if (optional.isEmpty()) {
+            EntryFieldValueModel model = new EntryFieldValueModel();
             model.setEntry(entry);
             model.setValue(field.getValue());
             model.setLabel(EntryFieldLabel.fromLabel(null, field.getLabel()));
             this.dao.create(model);
         } else {
-
+            EntryFieldValueModel model = optional.get();
+            model.setValue(field.getValue());
+            this.dao.update(model);
         }
         // todo: if custom, update custom below
 //        CustomEntryFieldModel customEntryFieldModel = customFieldDAO.get(field.getId());

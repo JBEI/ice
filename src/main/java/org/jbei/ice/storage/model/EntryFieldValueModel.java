@@ -63,6 +63,7 @@ public class EntryFieldValueModel implements DataModel {
     @Override
     public EntryField toDataTransferObject() {
         EntryField entryField = new EntryField();
+        entryField.setFieldType(label);
         entryField.setId(this.id);
         entryField.setValue(this.value);
         return entryField;

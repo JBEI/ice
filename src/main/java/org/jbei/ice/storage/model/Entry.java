@@ -223,6 +223,10 @@ public class Entry implements DataModel {
     @IndexedEmbedded(includeDepth = 1)
     private final Set<Attachment> attachments = new HashSet<>();
 
+    @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "entry")
+    @IndexedEmbedded(includeDepth = 1)
+    private final Set<EntryFieldValueModel> fieldValues = new HashSet<>();
+
     @OneToOne(orphanRemoval = true, mappedBy = "entry")
     @IndexedEmbedded(includeDepth = 1)
     private Sequence sequence;
@@ -545,5 +549,9 @@ public class Entry implements DataModel {
 
     public void setPrincipalInvestigatorEmail(String principalInvestigatorEmail) {
         this.principalInvestigatorEmail = principalInvestigatorEmail;
+    }
+
+    public Set<EntryFieldValueModel> getFieldValues() {
+        return fieldValues;
     }
 }

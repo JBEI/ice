@@ -91,12 +91,8 @@ export class CreateNewEntryComponent implements OnInit {
     // deletes current in progress entry from session (user client)
     // and from the database (makes a "delete" call to backend)
     clearNewPart(): void {
-        this.http.delete('parts/' + this.newPart.id).subscribe({
-            next: (result: any) => {
-                sessionStorage.removeItem('in-progress-entry');
-                // todo : redirect to somewhere
-            }
-        })
+        sessionStorage.removeItem('in-progress-entry');
+        this.router.navigate(['/']);
     }
 
     submitNewPart(): void {
@@ -121,6 +117,7 @@ export class CreateNewEntryComponent implements OnInit {
         // submit to the backend
         this.http.post('parts/' + this.newPart.id, this.newPart).subscribe({
             next: (result: Part) => {
+                sessionStorage.removeItem('in-progress-entry');
                 this.router.navigate(["entry", result.id]);
             }, error: (error: any) => {
 

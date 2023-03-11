@@ -233,7 +233,6 @@ public class ModelToInfoFactory {
     }
 
 
-
     public static PartData createTableView(long entryId, List<String> fields) {
         Set<String> fieldsToProcess;
         if (fields == null)
@@ -254,11 +253,19 @@ public class ModelToInfoFactory {
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
         view.setPartId(entry.getPartNumber());
-        view.setName(entry.getName());
-        view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime().getTime());
-        view.setStatus(entry.getStatus());
-        view.setShortDescription(entry.getShortDescription());
+
+        // get entry details
+        List<EntryFieldValueModel> values = DAOFactory.getEntryFieldValueModelDAO().getFieldsForEntry(entryId, EntryFieldLabel.getTableViewFields());
+        for (EntryFieldValueModel valueModel : values) {
+            view.getFields().add(valueModel.toDataTransferObject());
+        }
+
+//        view.setName(entry.getName());
+//        view.setShortDescription(entry.getShortDescription());
+//        view.setCreationTime(entry.getCreationTime().getTime());
+//        view.setStatus(entry.getStatus());
+//        view.setShortDescription(entry.getShortDescription());
 
         // has sample
         view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));

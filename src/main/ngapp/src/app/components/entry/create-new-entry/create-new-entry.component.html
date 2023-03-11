@@ -29,7 +29,6 @@
                                 </ng-container>
 
                                 <ng-container *ngIf="fields && fields.length">
-                                    <span *ngIf="newPart">{{newPart.id}}</span>
                                     <div class="row p-1" *ngFor="let field of fields">
 
                                         <ng-container *ngIf="field.fieldInputType === 'TEXT' || !field.fieldInputType

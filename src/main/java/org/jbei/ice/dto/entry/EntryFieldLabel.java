@@ -197,6 +197,14 @@ public enum EntryFieldLabel implements IDataTransferModel {
         return options;
     }
 
+    public static List<EntryFieldLabel> getTableViewFields() {
+        List<EntryFieldLabel> labels = new LinkedList<>();
+        labels.add(NAME);
+        labels.add(SUMMARY);
+        labels.add(STATUS);
+        return labels;
+    }
+
     @Override
     public String toString() {
         return this.name();
