@@ -1,17 +1,18 @@
 <div class="row">
-    <div class="col-3 offset-1">
-        <span [ngClass]="{'fw-bold': field.active}">{{field.label}}
-            <span class="text-danger" *ngIf="field.required" style="font-size: larger">*</span>
+    <div class="col-2">
+        <span [ngClass]="{'fw-bold': field.active}">
+            <span [ngClass]="{'text-muted': !inEditMode}">{{field.label}}</span>
+            <span class="text-danger" *ngIf="field.required && inEditMode" style="font-size: larger">*</span>
         </span>
     </div>
 
-    <div class="col-8">
+    <div class="col">
 
-        <div class="field-value" *ngIf="inEditMode">
+        <div class="field-value" *ngIf="!inEditMode">
             {{field.value}} <i class="bi bi-pencil" (click)="switchEditMode()"></i>
         </div>
 
-        <div *ngIf="!inEditMode" class="d-flex">
+        <div *ngIf="inEditMode" class="d-flex">
             <input class="form-control form-control-sm" [(ngModel)]="field.value"
                    (focusout)="textInputFocusOut(field)" name="field-value"
                    [ngClass]="{'w-75': longText, ' w-50': !longText, 'is-invalid': field.isInvalid}"
@@ -21,7 +22,7 @@
                 <i class="bi bi-x-lg"></i>
             </button>
 
-            <button class="btn btn-sm" (click)="switchEditMode()">
+            <button class="btn btn-sm" (click)="updateField()">
                 <i class="bi bi-check-lg"></i>
             </button>
         </div>

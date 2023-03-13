@@ -1,13 +1,21 @@
 <div class="row">
 
-    <div class="col-3 offset-1">
-        <span [ngClass]="{'fw-bold': field.active}">{{field.label}}
-            <span class="text-danger" *ngIf="field.required" style="font-size: larger">*</span>
+    <div class="col-2">
+        <span [ngClass]="{'fw-bold': field.active}">
+            <span [ngClass]="{'text-muted': !inEditMode}">{{field.label}}</span>
+            <span class="text-danger" *ngIf="field.required && inEditMode" style="font-size: larger">*</span>
         </span>
     </div>
 
-    <div class="col-8 d-flex">
-        <div class="input-group">
+    <div class="col d-flex">
+
+        <div class="field-value" *ngIf="!inEditMode">
+            <span *ngIf="!field.subField">{{field.value}}</span>
+            <a *ngIf="field.subField">{{field.value}} ({{field.subField}})</a>
+            &nbsp;<i class="bi bi-pencil" (click)="switchEditMode()"></i>
+        </div>
+
+        <div class="input-group" *ngIf="inEditMode">
             <input type="text" class="form-control form-control-sm" aria-label="Name"
                    [ngClass]="{'is-invalid': field.isInvalid}" [(ngModel)]="field.value"
                    (focusout)="textInputFocusOut(field)" (focusin)="textInputFocusIn(field)">

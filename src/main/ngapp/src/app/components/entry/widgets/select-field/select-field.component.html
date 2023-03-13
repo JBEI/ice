@@ -1,16 +1,21 @@
 <div class="row">
 
-    <div class="col-3 offset-1">
-        <span [ngClass]="{'fw-bold': field.active}">{{field.label}}
-            <span class="text-danger" *ngIf="field.required" style="font-size: larger">*</span>
+    <div class="col-2">
+        <span [ngClass]="{'fw-bold': field.active}">
+            <span [ngClass]="{'text-muted': !inEditMode}">{{field.label}}</span>
+            <span class="text-danger" *ngIf="field.required && inEditMode" style="font-size: larger">*</span>
         </span>
     </div>
 
-    <div class="col-8">
-        <select class="form-select form-select-sm w-50" id="inputGroupSelect01"
+    <div class="col">
+        <div class="field-value" *ngIf="!inEditMode">
+            {{displayForValue()}} <i class="bi bi-pencil" (click)="switchEditMode()"></i>
+        </div>
+
+        <select class="form-select form-select-sm w-25" id="inputGroupSelect01"
                 [ngClass]="{'is-invalid': field.isInvalid}"
                 (focusout)="textInputFocusOut(field)" [(ngModel)]="field.value"
-                (focusin)="textInputFocusIn(field)" *ngIf="field.fieldInputType === 'SELECT'">
+                (focusin)="textInputFocusIn(field)" *ngIf="field.fieldInputType === 'SELECT' && inEditMode">
             <option selected>Choose One...</option>
             <option [value]="option.name" *ngFor="let option of field.options">
                 {{option.value}}

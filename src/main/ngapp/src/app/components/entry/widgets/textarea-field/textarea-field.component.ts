@@ -11,11 +11,16 @@ export class TextareaFieldComponent implements OnInit {
 
     @Input() field: CustomField;
     @Input() part: Part;
+    @Input() inEditMode: boolean = false;
 
     constructor() {
     }
 
     ngOnInit(): void {
+    }
+
+    switchEditMode(): void {
+        this.inEditMode = !this.inEditMode;
     }
 
     textInputFocusOut(field: CustomField): void {

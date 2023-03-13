@@ -144,3 +144,14 @@ html body {
 .btn-primary {
     --bs-btn-bg: #206bc4;
 }
+
+.field-value i {
+    color: #cccccc;
+    font-size: smaller;
+}
+
+.field-value:hover i {
+    cursor: pointer;
+    color: rebeccapurple;
+}
+

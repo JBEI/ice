@@ -13,60 +13,101 @@
 
                 <div class="container">
 
-                    <div class="row">
-                        <div class="col">
-                            &nbsp;
-                        </div>
-                    </div>
-
-                    <div class="row bg-white px-4 pt-4 pb-3 mx-2">
+                    <div class="row px-4 pt-4 pb-3 mx-2">
                         <div class="col">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h3 class="mb-0">
-                                        <span class="text-secondary">{{entry.type}}</span> {{entry.name}}
-                                    </h3>
 
-                                    <div class="small text-muted">
-                                        {{entry.creationTime | date : 'medium'}}
-                                        <a class="ms-2" routerLink="/profile/{{entry.ownerId}}">{{entry.owner}}</a>
-                                    </div>
-                                    <!--                <a type="button" class="btn bg-white"><i class="bi bi-people-fill"></i> Share</a>-->
+                                    &nbsp;<h2 class="page-title"><span class="text-muted">{{entry.type}}</span>
+                                    &nbsp;{{entry.partId}}</h2>
+                                    <span style="letter-spacing: .04em; line-height: 1rem;"
+                                          class="small text-muted"> {{entry.creationTime | date : 'medium'}}</span>
+                                    &nbsp;<span class="text-muted">|</span>&nbsp;
+                                    <a routerLink="/profile/{{entry.ownerId}}">{{entry.owner}}</a>
                                 </div>
 
                                 <div>
-                                    <a class="border btn btn-sm bg-white shadow-sm"
+                                    <a class="border btn btn-sm bg-white shadow-sm mt-3"
                                        style="color: #525f7f; font-weight: 500"
                                        [ngbTooltip]="entry.name" [placement]="'top'">
                                         <i class="bi bi-arrow-90deg-up"></i> Strain
                                     </a>
+
+                                    <button class="btn btn-sm btn-white ms-1 mt-3">Actions</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row mt-4">
-                        <div class="col">
-                            <!--                            <div class="container-fluid" style="width: 75vw">-->
-                            <ng-container *ngFor="let field of entry.fields; let i = index">
-                                <app-text-field *ngIf="field.fieldInputType === 'TEXT'"
-                                                [(field)]="entry.fields[i]"></app-text-field>
-                                <ng-container *ngIf="field.fieldInputType !== 'TEXT'">
-                                    <div class="row p-1">
+                    <div class="row bg-white border mt-3" style="margin-left: 40px">
+                        <div class="col pt-2 pb-3">
+                            <ng-container *ngIf="entry.fields && entry.fields.length">
+                                <div class="row p-1" *ngFor="let field of entry.fields">
 
-                                        <div class="col-3 offset-1">
-                                            {{field.label}}
-                                        </div>
+                                    <ng-container *ngIf="field.fieldInputType === 'TEXT' || !field.fieldInputType
+                                    || field.fieldInputType === 'LONG_TEXT'">
+                                        <app-text-field [field]="field" [part]="entry"
+                                                        [longText]="field.fieldInputType === 'LONG_TEXT'"></app-text-field>
+                                    </ng-container>
 
-                                        <div class="col-8">
-                                            {{field.value}}
-                                        </div>
-                                    </div>
 
-                                </ng-container>
+                                    <ng-container *ngIf="field.fieldInputType === 'SELECT'">
+                                        <app-select-field [field]="field" [part]="entry"></app-select-field>
+                                    </ng-container>
+
+
+                                    <ng-container *ngIf="field.fieldInputType === 'DATE'">
+                                        <app-date-picker [field]="field" [part]="entry"></app-date-picker>
+                                    </ng-container>
+
+
+                                    <ng-container *ngIf="field.fieldInputType === 'USER_WITH_EMAIL'">
+                                        <app-user-with-email-field [field]="field"
+                                                                   [part]="entry"></app-user-with-email-field>
+                                    </ng-container>
+
+
+                                    <ng-container *ngIf="field.fieldInputType === 'TEXTAREA'">
+                                        <app-textarea-field [field]="field" [part]="entry"></app-textarea-field>
+                                    </ng-container>
+
+
+                                    <ng-container *ngIf="field.fieldInputType === 'BOOLEAN'">
+                                        <app-boolean-field [field]="field" [part]="entry"></app-boolean-field>
+                                    </ng-container>
+
+
+                                    <ng-container *ngIf="field.fieldInputType === 'MULTI_TEXT'">
+                                        <app-multi-text-field [field]="field" [part]="entry"></app-multi-text-field>
+                                    </ng-container>
+
+                                </div>
                             </ng-container>
                         </div>
                     </div>
+
+                    <!--                    <div class="row mt-4">-->
+                    <!--                        <div class="col">-->
+                    <!--                            &lt;!&ndash;                            <div class="container-fluid" style="width: 75vw">&ndash;&gt;-->
+                    <!--                            <ng-container *ngFor="let field of entry.fields; let i = index">-->
+                    <!--                                <app-text-field *ngIf="field.fieldInputType === 'TEXT'"-->
+                    <!--                                                [(field)]="entry.fields[i]"></app-text-field>-->
+                    <!--                                <ng-container *ngIf="field.fieldInputType !== 'TEXT'">-->
+                    <!--                                    <div class="row p-1">-->
+
+                    <!--                                        <div class="col-3 offset-1">-->
+                    <!--                                            {{field.label}}-->
+                    <!--                                        </div>-->
+
+                    <!--                                        <div class="col-8">-->
+                    <!--                                            {{field.value}}-->
+                    <!--                                        </div>-->
+                    <!--                                    </div>-->
+
+                    <!--                                </ng-container>-->
+                    <!--                            </ng-container>-->
+                    <!--                        </div>-->
+                    <!--                    </div>-->
 
                     <div class="row mt-4">
                         <div class="col px-4">

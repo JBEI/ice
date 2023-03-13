@@ -98,27 +98,17 @@ public class PartResource extends RestResource {
         }
     }
 
-//    /**
-//     * Retrieves the defaults for the requested entry types.
-//     *
-//     * @param type the type of entry i.e. <code>PLASMID</code>, <code>PART</code>, <code>STRAIN</code> or
-//     *             <code>SEED</code>. Used to retrieve the default values for that entry
-//     * @deprecated This is has been replaced by /rest/parts/fields/{type}
-//     */
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Path("/defaults/{type}")
-//    public Response get(@PathParam("type") String type) {
-//        String userId = requireUserId();
-//        final EntryType entryType = EntryType.nameToType(type);
-//        if (entryType == null)
-//            throw new WebApplicationException();
-//
-//        PartDefaults partDefaults = new PartDefaults(userId);
-//        PartData partData = partDefaults.get(entryType);
-//        partData.setCustomEntryFields(new CustomFields().get(entryType).getData());
-//        return super.respond(partData);
-//    }
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/fields/{fid}")
+    public Response updatePartField(@PathParam("id") final String id, @PathParam("fid") long fieldId,
+                                    EntryField field) {
+        String userId = getUserId();
+        log(userId, "updating part " + id);
+        EntryFields entryFields = new EntryFields(userId);
+        return super.respond(entryFields.update(id, fieldId, field));
+    }
 
     /**
      * Retrieves list of fields for the specified entry type. If also includes
@@ -136,8 +126,8 @@ public class PartResource extends RestResource {
         if (entryType == null)
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
 
-        EntryFields entryFields = new EntryFields(userId, entryType);
-        return super.respond(entryFields.get());
+        EntryFields entryFields = new EntryFields(userId);
+        return super.respond(entryFields.get(entryType));
     }
 
     @POST

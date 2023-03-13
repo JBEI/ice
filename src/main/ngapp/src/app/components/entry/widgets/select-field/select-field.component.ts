@@ -11,11 +11,24 @@ export class SelectFieldComponent implements OnInit {
 
     @Input() field: CustomField;
     @Input() part: Part;
+    @Input() inEditMode: boolean = false;
 
     constructor() {
     }
 
     ngOnInit(): void {
+    }
+
+    switchEditMode(): void {
+        this.inEditMode = !this.inEditMode;
+    }
+
+    displayForValue(): string {
+        for (const option of this.field.options) {
+            if (option.name === this.field.value)
+                return option.value;
+        }
+        return "";
     }
 
     textInputFocusOut(field: CustomField): void {

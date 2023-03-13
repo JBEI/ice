@@ -20,6 +20,7 @@ export class DatePickerComponent implements OnInit {
     @Input() halfWidth: boolean = true;
     @Input() value: number;  // optional input. set if we are displaying existing record
     @Input() field: CustomField;
+    @Input() inEditMode: boolean = false;
 
     @Input() part: Part;
 

@@ -11,6 +11,7 @@ export class BooleanFieldComponent implements OnInit {
 
     @Input() field: CustomField;
     @Input() part: Part;
+    @Input() inEditMode: boolean = false;
 
     constructor() {
     }

@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {CustomField} from "../../../../models/custom-field";
 import {User} from "../../../../models/User";
 import {Part} from "../../../../models/Part";
+import {HttpService} from "../../../../services/http.service";
 
 @Component({
     selector: 'app-user-with-email-field',
@@ -14,11 +15,16 @@ export class UserWithEmailFieldComponent implements OnInit {
     @Input() user: User;
     appendString: string = ' Email';
     @Input() part: Part;
+    @Input() inEditMode: boolean = false;
 
-    constructor() {
+    constructor(private http: HttpService) {
     }
 
     ngOnInit(): void {
+    }
+
+    switchEditMode(): void {
+        this.inEditMode = !this.inEditMode;
     }
 
     textInputFocusOut(field: CustomField, removeAppend: boolean = false): void {

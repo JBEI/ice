@@ -142,6 +142,7 @@ public class EntriesAsCSV {
 
         if (fields == null || fields.length == 0)
             fields = getEntryFields();
+
         String[] headers = getCSVHeaders(fields);
         Set<Long> sequenceSet = new HashSet<>();
 

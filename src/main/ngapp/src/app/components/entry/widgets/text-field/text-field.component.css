@@ -1,9 +1,0 @@
-.field-value i {
-    color: #cccccc;
-    font-size: smaller;
-}
-
-.field-value:hover i {
-    cursor: pointer;
-    color: rebeccapurple;
-}

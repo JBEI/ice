@@ -15,10 +15,7 @@ import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
-import org.jbei.ice.storage.hibernate.dao.CommentDAO;
-import org.jbei.ice.storage.hibernate.dao.EntryDAO;
-import org.jbei.ice.storage.hibernate.dao.SampleDAO;
-import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
+import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
 
 import java.util.*;
@@ -237,9 +234,29 @@ public class EntryController extends HasEntry {
 
         // user must be able to read if not public entry
         authorization.expectRead(userId, entry);
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        PartData partData = new PartData(type);
+        partData.setRecordId(entry.getRecordId());
+        partData.setPartId(entry.getPartNumber());
+        partData.setId(entry.getId());
+        partData.setCreationTime(entry.getCreationTime().getTime());
+        partData.setOwnerEmail(entry.getOwnerEmail());
+        partData.setOwner(entry.getOwner());
 
-        return null;
-
+        // get field values
+        EntryFields entryFields = new EntryFields(userId);
+        List<EntryField> fields = entryFields.get(type);
+        EntryFieldValueModelDAO valueModelDAO = DAOFactory.getEntryFieldValueModelDAO();
+        for (EntryField field : fields) {
+            Optional<EntryFieldValueModel> optional = valueModelDAO.getByFieldAndEntry(entry.getId(), field.getFieldType());
+            if (optional.isPresent()) {
+                EntryFieldValueModel model = optional.get();
+                field.setId(model.getId());
+                field.setValue(model.getValue());
+            }
+            partData.getFields().add(field);
+        }
+        return partData;
     }
 
     public PartData retrieveEntryDetails(String userId, String id) {
@@ -306,8 +323,8 @@ public class EntryController extends HasEntry {
         }
 
         // get fields data
-        EntryFields entryFields = new EntryFields(userId, entryType);
-        for (EntryField entryField : entryFields.get()) {        // note: this also includes custom fields
+        EntryFields entryFields = new EntryFields(userId);
+        for (EntryField entryField : entryFields.get(entryType)) {        // note: this also includes custom fields
             if (entryField.isCustom() || existingCustomFields.contains(EntryFieldLabel.fromString(entryField.getLabel())))
                 continue;
 
