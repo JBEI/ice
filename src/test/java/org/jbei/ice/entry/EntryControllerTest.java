@@ -9,7 +9,6 @@ import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Entry;
-import org.jbei.ice.storage.model.Strain;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -73,7 +72,7 @@ public class EntryControllerTest extends HibernateRepositoryTest {
         HashSet<String> ids = new HashSet<>(10);
         HashSet<String> permissions = new HashSet<>(5);
         for (int i = 0; i < 10; i += 1) {
-            Strain strain = TestEntryCreator.createTestStrain(admin);
+            Entry strain = TestEntryCreator.createTestStrain(admin);
             Assert.assertNotNull(strain);
             Assert.assertTrue(ids.add(strain.getRecordId()));
 

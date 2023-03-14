@@ -7,7 +7,6 @@ import org.jbei.ice.dto.bulkupload.SampleField;
 import org.jbei.ice.dto.entry.*;
 import org.jbei.ice.dto.sample.PartSample;
 import org.jbei.ice.dto.sample.SampleType;
-import org.jbei.ice.entry.EntryUtil;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
@@ -226,13 +225,7 @@ public class BulkCSVUpload {
                 }
             }
 
-            // validate
-            List<EntryFieldLabel> fields = EntryUtil.validates(partData);
-            if (!fields.isEmpty()) {
-                invalidFields.clear();
-                invalidFields.addAll(fields);
-                return null;
-            }
+            // validate todo
 
             partData.setIndex(row);
             PartWithSample partWithSample = new PartWithSample(partSample, partData);
@@ -316,8 +309,8 @@ public class BulkCSVUpload {
                 data.getLinkedParts().add(toLink);
                 break;
 
-            default:
-                EntryUtil.setPartDataFromField(data, value, field);
+//            default:
+//                EntryUtil.setPartDataFromField(data, value, field);
         }
     }
 

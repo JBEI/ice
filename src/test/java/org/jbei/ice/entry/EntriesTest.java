@@ -2,16 +2,15 @@ package org.jbei.ice.entry;
 
 import org.jbei.ice.AccountCreator;
 import org.jbei.ice.TestEntryCreator;
-import org.jbei.ice.dto.entry.*;
+import org.jbei.ice.dto.entry.EntryType;
+import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.folder.FolderDetails;
 import org.jbei.ice.folder.FolderContents;
 import org.jbei.ice.folder.FolderController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.AccountModel;
-import org.jbei.ice.storage.model.ArabidopsisSeed;
-import org.jbei.ice.storage.model.Plasmid;
-import org.jbei.ice.storage.model.Strain;
+import org.jbei.ice.storage.model.Entry;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,9 +40,9 @@ public class EntriesTest extends HibernateRepositoryTest {
         Assert.assertNotNull(details);
 
         //create entries
-        Plasmid p1Plasmid = TestEntryCreator.createTestPlasmid(person1);
-        Plasmid p2Plasmid = TestEntryCreator.createTestPlasmid(person2);
-        Plasmid adminPlasmid = TestEntryCreator.createTestPlasmid(admin);
+        Entry p1Plasmid = TestEntryCreator.createTestPlasmid(person1);
+        Entry p2Plasmid = TestEntryCreator.createTestPlasmid(person2);
+        Entry adminPlasmid = TestEntryCreator.createTestPlasmid(admin);
 
         // add entries to folder
         EntrySelection selection = new EntrySelection();
@@ -101,39 +100,18 @@ public class EntriesTest extends HibernateRepositoryTest {
 
         // create strain
         PartData strain = new PartData(EntryType.STRAIN);
-        StrainData strainData = new StrainData();
-        strainData.setGenotypePhenotype("genPhen");
-        strainData.setHost("host");
-        strain.setStrainData(strainData);
         strain.setOwner("Tester");
         strain.setOwnerEmail("tester");
-        strain.setCreator(strain.getOwner());
-        strain.setCreatorEmail(strain.getOwnerEmail());
-
-        strain.setBioSafetyLevel(1);
 
         Entries entries = new Entries(userId);
         long id = entries.create(strain).getId();
-        Strain entry = (Strain) DAOFactory.getEntryDAO().get(id);
+        Entry entry = DAOFactory.getEntryDAO().get(id);
         Assert.assertNotNull(entry);
         Assert.assertEquals(entry.getOwnerEmail(), strain.getOwnerEmail());
 
-        Assert.assertEquals(strainData.getGenotypePhenotype(), entry.getGenotypePhenotype());
-        Assert.assertEquals(strainData.getHost(), entry.getHost());
 
         // create arabidopsis seed
         PartData seed = new PartData(EntryType.SEED);
-        SeedData seedData = new SeedData();
-        seedData.setGeneration(Generation.F3);
-        seedData.setPlantType(PlantType.OTHER);
-        seedData.setHarvestDate("01/02/2014");
-        seed.setBioSafetyLevel(2);
-        seed.setSeedData(seedData);
-
         long seedId = entries.create(seed).getId();
-        ArabidopsisSeed entrySeed = (ArabidopsisSeed) DAOFactory.getEntryDAO().get(seedId);
-        Assert.assertNotNull(entrySeed);
-        Assert.assertEquals(seedData.getGeneration(), entrySeed.getGeneration());
-        Assert.assertEquals(seedData.getPlantType(), entrySeed.getPlantType());
     }
 }

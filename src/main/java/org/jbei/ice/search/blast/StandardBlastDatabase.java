@@ -82,7 +82,7 @@ public class StandardBlastDatabase extends BlastDatabase {
         long id = sequence.getEntry().getId();
         String idString = ">" + id;
         idString += DELIMITER + sequence.getEntry().getRecordType();
-        String name = sequence.getEntry().getName() == null ? "None" : sequence.getEntry().getName();
+        String name = sequence.getEntry().getPartNumber() == null ? "None" : sequence.getEntry().getPartNumber();
         idString += DELIMITER + name;
         String pNumber = sequence.getEntry().getPartNumber();
         idString += DELIMITER + pNumber;
@@ -174,8 +174,6 @@ public class StandardBlastDatabase extends BlastDatabase {
             view.setId(Long.decode(line[0]));
             view.setName(line[2]);
             view.setPartId(line[3]);
-            String summary = DAOFactory.getEntryDAO().getEntrySummary(view.getId());
-            view.setShortDescription(summary);
 
             //search result object
             SearchResult searchResult = new SearchResult();

@@ -5,8 +5,7 @@ import org.jbei.ice.TestEntryCreator;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Audit;
-import org.jbei.ice.storage.model.Plasmid;
-import org.jbei.ice.storage.model.Strain;
+import org.jbei.ice.storage.model.Entry;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,7 +30,7 @@ public class AuditDAOTest extends HibernateRepositoryTest {
     public void testGetAuditsForEntry() throws Exception {
         AccountModel account = AccountCreator.createTestAccount("AuditDAOTest.testGetAuditsForEntry", false);
         Assert.assertNotNull(account);
-        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid = TestEntryCreator.createTestPlasmid(account);
         Random random = new Random();
         final long amount = random.nextInt(20);
 
@@ -53,7 +52,7 @@ public class AuditDAOTest extends HibernateRepositoryTest {
     public void testGetAuditsForEntryCount() throws Exception {
         AccountModel account = AccountCreator.createTestAccount("AuditDAOTest.testGetAuditsForEntryCount", false);
         Assert.assertNotNull(account);
-        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid = TestEntryCreator.createTestPlasmid(account);
         Random random = new Random();
         final long amount = random.nextInt(20);
 
@@ -74,7 +73,7 @@ public class AuditDAOTest extends HibernateRepositoryTest {
     public void testDeleteAll() throws Exception {
         AccountModel account = AccountCreator.createTestAccount("AuditDAOTest.testDeleteAll", false);
         Assert.assertNotNull(account);
-        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid = TestEntryCreator.createTestPlasmid(account);
         Random random = new Random();
         final long amount = random.nextInt(20);
 
@@ -90,7 +89,7 @@ public class AuditDAOTest extends HibernateRepositoryTest {
         Assert.assertEquals(amount, dao.getAuditsForEntryCount(plasmid));
 
         // create for second plasmid
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         int amount2 = random.nextInt(20);
 
         for (int i = 0; i < amount2; i += 1) {

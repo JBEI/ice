@@ -143,11 +143,6 @@ public class HibernateConfiguration {
 
     private static void addAnnotatedClasses(Configuration configuration) {
         configuration.addAnnotatedClass(Entry.class);
-        configuration.addAnnotatedClass(Plasmid.class);
-        configuration.addAnnotatedClass(Strain.class);
-        configuration.addAnnotatedClass(Part.class);
-        configuration.addAnnotatedClass(ArabidopsisSeed.class);
-        configuration.addAnnotatedClass(Protein.class);
         configuration.addAnnotatedClass(Link.class);
         configuration.addAnnotatedClass(SelectionMarker.class);
         configuration.addAnnotatedClass(Sequence.class);

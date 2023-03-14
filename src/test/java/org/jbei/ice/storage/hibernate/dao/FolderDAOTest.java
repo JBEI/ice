@@ -191,8 +191,6 @@ public class FolderDAOTest extends HibernateRepositoryTest {
             PartData part = new PartData(EntryType.PART);
             part.setName("name" + i);
             part.setOwnerEmail(email);
-            part.setAlias("alias" + i);
-            part.setShortDescription("short description");
             part = new Entries(account.getEmail()).create(part);
             Entry entry = DAOFactory.getEntryDAO().get(part.getId());
             entries.add(entry);
@@ -208,7 +206,6 @@ public class FolderDAOTest extends HibernateRepositoryTest {
             long entryId = result.get(i - 1);
             Entry entry = DAOFactory.getEntryDAO().get(entryId);
             Assert.assertNotNull(entry);
-            Assert.assertEquals(entry.getName(), "name" + i);
         }
     }
 

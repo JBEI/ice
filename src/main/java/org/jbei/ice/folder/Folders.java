@@ -3,7 +3,6 @@ package org.jbei.ice.folder;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.account.Account;
 import org.jbei.ice.dto.ConfigurationKey;
-import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.dto.folder.FolderAuthorization;
 import org.jbei.ice.dto.folder.FolderDetails;
 import org.jbei.ice.dto.folder.FolderType;
@@ -90,7 +89,7 @@ public class Folders {
         if (folderIds.isEmpty())
             return idStrings;
 
-        idStrings.addAll(folderIds.stream().map(Object::toString).collect(Collectors.toList()));
+        idStrings.addAll(folderIds.stream().map(Object::toString).toList());
         return idStrings;
     }
 
@@ -210,74 +209,9 @@ public class Folders {
 
         for (long entryId : folderContents) {
             Entry entry = entryDAO.get(entryId);
-            if (StringUtils.isEmpty(entry.getIntellectualProperty())) {
-                Logger.info(entry.getPartNumber() + " is missing intellectual property");
-                return false;
-            }
-
-            if (!isValidEntry(entry, folder))
-                return false;
+            // todo : validate entry
         }
 
         return true;
-    }
-
-    /**
-     * Checks if the specified entry matches pre-approved (read: hardcoded) specs for sample requests
-     *
-     * @param entry entry to check
-     * @return true, if entry is approved for sampling, false otherwise
-     */
-    private boolean isValidEntry(Entry entry, Folder folder) {
-        if (EntryType.PLASMID.getName().equalsIgnoreCase(entry.getRecordType())) {
-            Plasmid plasmid = (Plasmid) entry;
-
-            // check the plasmid parent strain. It must be in same folder
-            List<Entry> parents = DAOFactory.getEntryDAO().getParents(entry.getId());
-            for (Entry parent : parents) {
-                if (parent.getRecordType().equalsIgnoreCase(EntryType.STRAIN.getDisplay()) && !parent.getFolders().contains(folder)) {
-                    Logger.info(parent.getPartNumber() + " is a parent strain but is not contained in same folder");
-                    return false;
-                }
-            }
-
-            if (!entry.getFolders().contains(folder))
-                return false;
-
-            if (StringUtils.isEmpty(plasmid.getOriginOfReplication())) {
-                Logger.info(entry.getPartNumber() + " is missing origin of replication");
-                return false;
-            }
-
-            if (StringUtils.isEmpty(plasmid.getBackbone())) {
-                Logger.info(entry.getPartNumber() + " is missing backbone");
-                return false;
-            }
-
-            if (StringUtils.isEmpty(plasmid.getOriginOfReplication())) {
-                Logger.info(entry.getPartNumber() + " is missing origin of replication information");
-                return false;
-            }
-
-            return true;
-        }
-
-        if (EntryType.STRAIN.getName().equalsIgnoreCase(entry.getRecordType())) {
-            Strain strain = (Strain) entry;
-            if (StringUtils.isEmpty(strain.getHost())) {
-                Logger.info(entry.getPartNumber() + " is missing host information");
-                return false;
-            }
-
-            if (StringUtils.isEmpty(strain.getIntellectualProperty())) {
-                Logger.info(entry.getPartNumber() + " is missing intellectual property");
-                return false;
-            }
-
-            return true;
-        }
-
-        // only strains and plasmids are allowed
-        return false;
     }
 }

@@ -59,7 +59,6 @@ public class PlateSamples implements IDataTransferModel {
 
             partSample.setId(sample.getId());
             partSample.setPartId(sample.getEntry().getId());
-            partSample.setPartName(sample.getEntry().getName());
             partSample.setLabel(sample.getLabel());
             partSample.setCreationTime(sample.getCreationTime().getTime());
 

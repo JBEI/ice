@@ -11,8 +11,8 @@ import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceFeatureDAO;
 import org.jbei.ice.storage.model.AccountModel;
+import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Feature;
-import org.jbei.ice.storage.model.Plasmid;
 import org.jbei.ice.storage.model.SequenceFeature;
 import org.junit.After;
 import org.junit.Assert;
@@ -41,7 +41,7 @@ public class AnnotationsTest {
     @Test
     public void testCurate() throws Exception {
         AccountModel account = AccountCreator.createTestAccount("AnnotationsTest.testCurate", true);
-        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid = TestEntryCreator.createTestPlasmid(account);
         Assert.assertNotNull(plasmid);
         SequenceDAO sequenceDAO = new SequenceDAO();
 

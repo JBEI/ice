@@ -8,7 +8,6 @@ import org.jbei.ice.entry.sequence.composers.formatters.IFormatter;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.Entry;
-import org.jbei.ice.storage.model.Plasmid;
 import org.jbei.ice.storage.model.Sequence;
 
 import java.io.ByteArrayInputStream;
@@ -54,10 +53,10 @@ public class SequenceAsString {
 
             case GENBANK:
             default:
-                GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
-                genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false);
-                sequenceString = compose(sequence, genbankFormatter);
                 name = entry.getPartNumber() + ".gb";
+                GenbankFormatter genbankFormatter = new GenbankFormatter(name);
+                genbankFormatter.setCircular(true);
+                sequenceString = compose(sequence, genbankFormatter);
                 break;
 
             case FASTA:

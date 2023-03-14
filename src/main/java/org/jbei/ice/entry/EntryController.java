@@ -328,7 +328,7 @@ public class EntryController extends HasEntry {
             if (entryField.isCustom() || existingCustomFields.contains(EntryFieldLabel.fromString(entryField.getLabel())))
                 continue;
 
-            ModelToInfoFactory.entryToInfo(entry, entryField);
+//            ModelToInfoFactory.entryToInfo(entry, entryField);
             partData.getFields().add(entryField);
         }
 
@@ -356,7 +356,6 @@ public class EntryController extends HasEntry {
                     continue;
 
                 link = ModelToInfoFactory.createTipView(linkedEntry);
-                link.setSelectionMarkers(EntryUtil.getSelectionMarkersAsList(linkedEntry.getSelectionMarkers()));
 
                 Optional<String> linkedSequenceString = sequenceDAO.getSequenceString(linkedEntry);
 
@@ -386,7 +385,7 @@ public class EntryController extends HasEntry {
             EntryType type = EntryType.nameToType(parent.getRecordType());
             PartData parentData = new PartData(type);
             parentData.setId(parent.getId());
-            parentData.setName(parent.getName());
+            parentData.setPartId(parent.getPartNumber());
             parentData.setVisibility(Visibility.valueToEnum(parent.getVisibility()));
             partData.getParents().add(parentData);
         }

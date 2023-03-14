@@ -183,8 +183,7 @@ public class HibernateSearch {
         boolStep.must(scope.predicate().match().field("visibility").matching(Visibility.OK));
 
         // wrap Lucene query in a org.hibernate.Query
-        Class<?>[] classes = SearchFieldFactory.classesForTypes(searchQuery.getEntryTypes());
-        SearchScope<?> allClassesScope = searchSession.scope(Arrays.asList(classes));
+        SearchScope<?> allClassesScope = searchSession.scope(List.of(Entry.class));
 
         // enable security filter if an admin
 //        checkEnableSecurityFilter(userId, fullTextQuery);
@@ -230,10 +229,9 @@ public class HibernateSearch {
                                        SearchQuery searchQuery, HashMap<String, SearchResult> blastResults) {
         // get class types or search
         Set<String> fields = new HashSet<>(SearchFieldFactory.entryFields(searchQuery.getEntryTypes()));
-        Class<?>[] classes = SearchFieldFactory.classesForTypes(searchQuery.getEntryTypes());
         SearchSession searchSession = Search.session(HibernateConfiguration.getCurrentSession());
 
-        SearchScope<?> allClassesScope = searchSession.scope(Arrays.asList(classes));
+        SearchScope<?> allClassesScope = searchSession.scope(List.of(Entry.class));
         BooleanPredicateClausesStep<?> boolStep = null;
 
         // generate queries for terms todo : filtering stop words

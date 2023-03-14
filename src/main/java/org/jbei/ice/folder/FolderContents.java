@@ -106,42 +106,14 @@ public class FolderContents {
         for (PartData partData : remoteEntries) {
             Entry entry = entryDAO.getByRecordId(partData.getRecordId());
             if (entry == null) {
-                switch (partData.getType()) {
-                    case PART:
-                    default:
-                        entry = new Part();
-                        break;
-
-                    case STRAIN:
-                        entry = new Strain();
-                        break;
-
-                    case PLASMID:
-                        entry = new Plasmid();
-                        break;
-
-                    case SEED:
-                        entry = new ArabidopsisSeed();
-                        break;
-
-                    case PROTEIN:
-                        entry = new Protein();
-                        break;
-                }
-
+                entry = new Entry();
+                entry.setRecordType(partData.getType().getName());
                 entry.setRecordId(partData.getRecordId());
                 entry.setVersionId(partData.getRecordId());
                 entry.setRecordType(partData.getType().getDisplay());
-                entry.setName(partData.getName());
-                entry.setShortDescription(partData.getShortDescription());
-                entry.setStatus(partData.getStatus());
                 entry.setVisibility(Visibility.REMOTE.getValue());
                 entry.setPartNumber(partData.getPartId());
-                String sequence = partData.isHasSequence() ? "sequence" : "text";
-                entry.setLongDescriptionType(sequence);
-                entry.setBioSafetyLevel(partData.getBioSafetyLevel());
                 entry.setCreationTime(new Date(partData.getCreationTime()));
-
                 entry = entryDAO.create(entry);
             }
 

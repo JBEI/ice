@@ -7,8 +7,7 @@ import org.jbei.ice.dto.access.AccessPermission;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.AccountModel;
-import org.jbei.ice.storage.model.Plasmid;
-import org.jbei.ice.storage.model.Strain;
+import org.jbei.ice.storage.model.Entry;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,17 +38,17 @@ public class EntryLinksTest {
         AccountModel differentAccount = AccountCreator.createTestAccount("testAddLink2", false);
 
         //create strain and plasmid
-        Strain strain = TestEntryCreator.createTestStrain(account);
-        Plasmid plasmid = TestEntryCreator.createTestPlasmid(differentAccount);
+        Entry strain = TestEntryCreator.createTestStrain(account);
+        Entry plasmid = TestEntryCreator.createTestPlasmid(differentAccount);
 
         // give each AccountModel read permissions
         AccessPermission accessPermission = new AccessPermission(AccessPermission.Article.ACCOUNT, account.getId(),
-                AccessPermission.Type.READ_ENTRY, plasmid.getId(), "");
+            AccessPermission.Type.READ_ENTRY, plasmid.getId(), "");
         PermissionsController permissionsController = new PermissionsController();
         Assert.assertNotNull(permissionsController.addPermission(differentAccount.getEmail(), accessPermission));
 
         accessPermission = new AccessPermission(AccessPermission.Article.ACCOUNT, differentAccount.getId(),
-                AccessPermission.Type.READ_ENTRY, strain.getId(), "");
+            AccessPermission.Type.READ_ENTRY, strain.getId(), "");
         Assert.assertNotNull(permissionsController.addPermission(account.getEmail(), accessPermission));
 
         // add plasmid links to strain
@@ -62,7 +61,7 @@ public class EntryLinksTest {
         Assert.assertTrue(entryLinks.addLink(plasmid.toDataTransferObject(), LinkType.CHILD));
 
         // add second plasmid
-        Plasmid plasmid2 = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid2 = TestEntryCreator.createTestPlasmid(account);
         Assert.assertTrue(entryLinks.addLink(plasmid2.toDataTransferObject(), LinkType.CHILD));
     }
 
@@ -75,27 +74,27 @@ public class EntryLinksTest {
         AccountModel account2 = AccountCreator.createTestAccount("testGetChildren2", true);
 
         // add plasmid links to strain
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         EntryLinks entryLinks = new EntryLinks(userId, Long.toString(strain.getId()));
 
         Assert.assertEquals(0, entryLinks.getChildren().size());
 
         // attempt to add as a parent (expected to fail)
-        Plasmid plasmid1 = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid1 = TestEntryCreator.createTestPlasmid(account);
         Assert.assertFalse(entryLinks.addLink(plasmid1.toDataTransferObject(), LinkType.PARENT));
 
         // now add as a child
         Assert.assertTrue(entryLinks.addLink(plasmid1.toDataTransferObject(), LinkType.CHILD));
 
         // add second plasmid
-        Plasmid plasmid2 = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid2 = TestEntryCreator.createTestPlasmid(account);
         Assert.assertTrue(entryLinks.addLink(plasmid2.toDataTransferObject(), LinkType.CHILD));
 
         List<PartData> children = entryLinks.getChildren();
         Assert.assertEquals(2, children.size());
 
         // create plasmid for alternate account
-        Strain alternateStrain = TestEntryCreator.createTestStrain(account2);
+        Entry alternateStrain = TestEntryCreator.createTestStrain(account2);
 
         // add as child to account's strain
         EntryLinks alternateLinks = new EntryLinks(account2.getEmail(), Long.toString(strain.getId()));
@@ -114,20 +113,20 @@ public class EntryLinksTest {
         String userId = account.getEmail();
 
         // add plasmid links to strain
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         EntryLinks entryLinks = new EntryLinks(userId, Long.toString(strain.getId()));
 
         Assert.assertEquals(0, entryLinks.getParents().size());
 
         // attempt to add as a parent (expected to fail)
-        Plasmid plasmid1 = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid1 = TestEntryCreator.createTestPlasmid(account);
         Assert.assertFalse(entryLinks.addLink(plasmid1.toDataTransferObject(), LinkType.PARENT));
 
         // now add as a child
         Assert.assertTrue(entryLinks.addLink(plasmid1.toDataTransferObject(), LinkType.CHILD));
 
         // add second plasmid
-        Plasmid plasmid2 = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid2 = TestEntryCreator.createTestPlasmid(account);
         Assert.assertTrue(entryLinks.addLink(plasmid2.toDataTransferObject(), LinkType.CHILD));
 
         List<PartData> children = entryLinks.getChildren();

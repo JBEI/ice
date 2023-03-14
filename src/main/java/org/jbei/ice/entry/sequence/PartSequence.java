@@ -96,8 +96,6 @@ public class PartSequence {
         PartData partData = new PartData(type);
         partData.setOwner(entryName);
         partData.setOwnerEmail(entryEmail);
-        partData.setCreator(entryName);
-        partData.setCreatorEmail(entryEmail);
         partData.setVisibility(Visibility.DRAFT);
         Entries entries = new Entries(userId);
         partData = entries.create(partData);

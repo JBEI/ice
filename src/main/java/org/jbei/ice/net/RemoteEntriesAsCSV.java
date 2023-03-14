@@ -7,8 +7,6 @@ import org.jbei.ice.dto.common.Results;
 import org.jbei.ice.dto.entry.EntryFieldLabel;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.web.PartnerEntries;
-import org.jbei.ice.entry.EntryUtil;
-import org.jbei.ice.entry.PartDataUtil;
 import org.jbei.ice.entry.sequence.InputStreamWrapper;
 import org.jbei.ice.entry.sequence.SequenceUtil;
 import org.jbei.ice.entry.sequence.composers.formatters.GenbankFormatter;
@@ -145,7 +143,7 @@ public class RemoteEntriesAsCSV {
 
             int i = 2;
             for (EntryFieldLabel field : fields) {
-                line[i + 1] = PartDataUtil.entryFieldToValue(partData, field);
+//                line[i + 1] = PartDataUtil.entryFieldToValue(partData, field); // TODO
                 i += 1;
             }
 
@@ -200,7 +198,7 @@ public class RemoteEntriesAsCSV {
 
             int i = 2;
             for (EntryFieldLabel field : fields) {
-                line[i + 1] = EntryUtil.entryFieldToValue(entry, field);
+//                line[i + 1] = EntryUtil.entryFieldToValue(entry, field); // tODO
                 i += 1;
             }
 

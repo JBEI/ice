@@ -54,8 +54,6 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
         int count = 100;
         for (int i = 0; i < count; i += 1) {
             PartData partData = new PartData(EntryType.PLASMID);
-            partData.setBioSafetyLevel(1);
-            partData.setShortDescription("part description");
             partData.setName("part" + i);
 
             partData = creator.createEntry(partData);
@@ -183,9 +181,6 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
         EntryDAO dao = DAOFactory.getEntryDAO();
         Entry entry = dao.get(entryId);
         Assert.assertNotNull(entry);
-        Assert.assertNotNull(entry.getLinks());
-        Assert.assertEquals(1, entry.getLinks().size());
-        Assert.assertEquals("google", entry.getLinks().iterator().next().getLink());
     }
 
     @Test
@@ -247,32 +242,17 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
         strainData.setName("testStrain");
         ArrayList<String> selectionMarkers = new ArrayList<>();
         selectionMarkers.add("Spectinomycin");
-        strainData.setSelectionMarkers(selectionMarkers);
-        strainData.setBioSafetyLevel(1);
-        strainData.setStatus("Complete");
-        strainData.setShortDescription("testing bulk upload");
-        strainData.setCreator(account.getFullName());
-        strainData.setCreatorEmail(account.getEmail());
-        strainData.setPrincipalInvestigator("PI");
 
         PartData plasmidData = new PartData(EntryType.PLASMID);
         plasmidData.setName("testPlasmid");
         selectionMarkers.clear();
         selectionMarkers.add("Spectinomycin");
-        plasmidData.setSelectionMarkers(selectionMarkers);
-        plasmidData.setBioSafetyLevel(1);
-//        plasmidData.setStatus("In Progress");
-        plasmidData.setShortDescription("testing bulk upload with strain with plasmid");
-        plasmidData.setCreator(account.getFullName());
-        plasmidData.setCreatorEmail(account.getEmail());
-        plasmidData.setPrincipalInvestigator("PI");
 
         strainData.getLinkedParts().add(plasmidData);
 
         PartData returnStrainData = creator.createEntry(strainData);
         Assert.assertNotNull(returnStrainData);
 
-        plasmidData.setStatus("In Progress");
         plasmidData = creator.updateEntry(returnStrainData.getLinkedParts().get(0).getId(), plasmidData);
         Assert.assertNotNull(plasmidData);
 //        testInfo = controller.submitBulkImportDraft(userId, testInfo.getId());

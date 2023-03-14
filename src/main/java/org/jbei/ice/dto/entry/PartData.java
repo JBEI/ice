@@ -25,26 +25,9 @@ public class PartData implements IDataTransferModel {
     private String owner;
     private String ownerEmail;
     private long ownerId;
-    private String creator;
-    private String creatorEmail;
-    private long creatorId;
-    private String alias;
-    private String keywords;
-    private String status;
-    private String shortDescription;
-    private String longDescription;
-    private String references;
     private long creationTime;
     private long modificationTime;
-    private Integer bioSafetyLevel;
-    private String intellectualProperty;
     private String partId;
-    private ArrayList<String> links; // comma separated list of links
-    private String principalInvestigator;
-    private String principalInvestigatorEmail;
-    private long principalInvestigatorId;
-    private ArrayList<String> selectionMarkers;
-    private String fundingSource;
     private String basePairCount;
     private long featureCount;
     private long viewCount;
@@ -62,10 +45,6 @@ public class PartData implements IDataTransferModel {
     private final ArrayList<PartData> linkedParts;
     private ArrayList<CustomEntryField> customFields;
 
-    private StrainData strainData;
-    private PlasmidData plasmidData;
-    private SeedData seedData;
-    private ProteinData proteinData;
     private final List<EntryField> fields;
 
     public PartData(EntryType type) {
@@ -74,8 +53,6 @@ public class PartData implements IDataTransferModel {
         linkedParts = new ArrayList<>();
         parents = new ArrayList<>();
         customFields = new ArrayList<>();
-        status = "";
-        bioSafetyLevel = 1;
         this.fields = new ArrayList<>();
     }
 
@@ -111,70 +88,6 @@ public class PartData implements IDataTransferModel {
         this.ownerEmail = ownerEmail;
     }
 
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
-    }
-
-    public String getCreatorEmail() {
-        return creatorEmail;
-    }
-
-    public void setCreatorEmail(String creatorEmail) {
-        this.creatorEmail = creatorEmail;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public String getKeywords() {
-        return keywords;
-    }
-
-    public void setKeywords(String keywords) {
-        this.keywords = keywords;
-    }
-
-    public String getShortDescription() {
-        return shortDescription;
-    }
-
-    public void setShortDescription(String shortDescription) {
-        this.shortDescription = shortDescription;
-    }
-
-    public String getLongDescription() {
-        return longDescription;
-    }
-
-    public void setLongDescription(String longDescription) {
-        this.longDescription = longDescription;
-    }
-
-    public String getReferences() {
-        return references;
-    }
-
-    public void setReferences(String references) {
-        this.references = references;
-    }
-
     /**
      * @return number of millisecs since the epoch when part was recorded
      */
@@ -197,22 +110,6 @@ public class PartData implements IDataTransferModel {
         this.modificationTime = modificationTime;
     }
 
-    public void setBioSafetyLevel(Integer bioSafetyLevel) {
-        this.bioSafetyLevel = bioSafetyLevel;
-    }
-
-    public Integer getBioSafetyLevel() {
-        return bioSafetyLevel;
-    }
-
-    public void setIntellectualProperty(String intellectualProperty) {
-        this.intellectualProperty = intellectualProperty;
-    }
-
-    public String getIntellectualProperty() {
-        return intellectualProperty;
-    }
-
     public String getName() {
         return name;
     }
@@ -229,28 +126,12 @@ public class PartData implements IDataTransferModel {
         this.partId = partId;
     }
 
-    public String getPrincipalInvestigator() {
-        return principalInvestigator;
-    }
-
-    public void setPrincipalInvestigator(String principalInvestigator) {
-        this.principalInvestigator = principalInvestigator;
-    }
-
     public ArrayList<CustomField> getParameters() {
         return this.parameters;
     }
 
     public void setCustomFields(ArrayList<CustomField> parameters) {
         this.parameters = parameters;
-    }
-
-    public String getFundingSource() {
-        return this.fundingSource;
-    }
-
-    public void setFundingSource(String fundingSource) {
-        this.fundingSource = fundingSource;
     }
 
     public boolean isHasAttachment() {
@@ -309,14 +190,6 @@ public class PartData implements IDataTransferModel {
         this.ownerId = ownerId;
     }
 
-    public long getCreatorId() {
-        return creatorId;
-    }
-
-    public void setCreatorId(long creatorId) {
-        this.creatorId = creatorId;
-    }
-
     public boolean isHasOriginalSequence() {
         return hasOriginalSequence;
     }
@@ -340,22 +213,6 @@ public class PartData implements IDataTransferModel {
         return linkedParts;
     }
 
-    public String getPrincipalInvestigatorEmail() {
-        return principalInvestigatorEmail;
-    }
-
-    public void setPrincipalInvestigatorEmail(String principalInvestigatorEmail) {
-        this.principalInvestigatorEmail = principalInvestigatorEmail;
-    }
-
-    public long getPrincipalInvestigatorId() {
-        return principalInvestigatorId;
-    }
-
-    public void setPrincipalInvestigatorId(long principalInvestigatorId) {
-        this.principalInvestigatorId = principalInvestigatorId;
-    }
-
     public ArrayList<AccessPermission> getAccessPermissions() {
         return accessPermissions;
     }
@@ -372,22 +229,6 @@ public class PartData implements IDataTransferModel {
         this.accessPermissions = accessPermissions;
     }
 
-    public ArrayList<String> getSelectionMarkers() {
-        return selectionMarkers;
-    }
-
-    public void setSelectionMarkers(ArrayList<String> selectionMarkers) {
-        this.selectionMarkers = selectionMarkers;
-    }
-
-    public ArrayList<String> getLinks() {
-        return links;
-    }
-
-    public void setLinks(ArrayList<String> links) {
-        this.links = links;
-    }
-
     public ArrayList<PartData> getParents() {
         return parents;
     }
@@ -398,38 +239,6 @@ public class PartData implements IDataTransferModel {
 
     public void setCustomEntryFields(List<CustomEntryField> fields) {
         this.customFields = new ArrayList<>(fields);
-    }
-
-    public StrainData getStrainData() {
-        return strainData;
-    }
-
-    public void setStrainData(StrainData strainData) {
-        this.strainData = strainData;
-    }
-
-    public PlasmidData getPlasmidData() {
-        return plasmidData;
-    }
-
-    public void setPlasmidData(PlasmidData plasmidData) {
-        this.plasmidData = plasmidData;
-    }
-
-    public SeedData getSeedData() {
-        return seedData;
-    }
-
-    public void setSeedData(SeedData seedData) {
-        this.seedData = seedData;
-    }
-
-    public ProteinData getProteinData() {
-        return proteinData;
-    }
-
-    public void setProteinData(ProteinData proteinData) {
-        this.proteinData = proteinData;
     }
 
     public String getBasePairCount() {

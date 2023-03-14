@@ -128,7 +128,7 @@ public class PlateStorage {
         // create sample. If main location is null then sample is created without location
         sampleDAO.create(sample);
 
-        String name = entry.getName();
+        String name = entry.getPartNumber();
         if (StringUtils.isNotBlank(prefix) && name != null && !name.startsWith(prefix)) {
             DAOFactory.getEntryDAO().generateNextStrainNameForEntry(entry, prefix);
         }

@@ -72,13 +72,12 @@ public class Entries extends HasEntry {
      * @throws IllegalArgumentException if the entry associated with the partId cannot be located
      */
     public long update(long partId, PartData partData) {
-        Entry existing = dao.get(partId);
-        if (existing == null)
+        Entry entry = dao.get(partId);
+        if (entry == null || partData.getFields() == null)
             throw new IllegalArgumentException("Could not retrieve entry with id " + partId);
 
-        authorization.expectWrite(userId, existing);
+        authorization.expectWrite(userId, entry);
 
-        Entry entry = InfoToModelFactory.updateEntryField(partData, existing);
         entry.setModificationTime(Calendar.getInstance().getTime());
         entry = dao.update(entry);
         partData.setModificationTime(entry.getModificationTime().getTime());
@@ -86,17 +85,6 @@ public class Entries extends HasEntry {
         if (entry.getVisibility() == Visibility.OK.getValue()) {
             EntryHistory history = new EntryHistory(userId, partId);
             history.addEdit();
-        } else if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
-            List<EntryFieldLabel> invalidFields = EntryUtil.validates(partData);
-            if (invalidFields.isEmpty())
-                entry.setVisibility(Visibility.OK.getValue());
-        }
-
-        // check pi email
-        String piEmail = entry.getPrincipalInvestigatorEmail();
-        if (StringUtils.isNotEmpty(piEmail)) {
-            EntryPermissions permissions = new EntryPermissions(entry.getRecordId(), userId);
-            permissions.addAccount(piEmail, true);
         }
 
         // update custom fields
@@ -113,37 +101,10 @@ public class Entries extends HasEntry {
         if (existing == null)
             throw new IllegalArgumentException("Could not retrieve entry with id " + partId);
 
-        EntryFieldLabel field = EntryFieldLabel.fromString(entryField.getField());
-        if (field == null)
+        if (entryField.getFieldType() == null)
             throw new IllegalArgumentException("Invalid entry field label");
 
         authorization.expectWrite(userId, existing);
-        String[] values = new String[]{entryField.getValue()};
-        InfoToModelFactory.infoToEntryForField(existing, values, field);
-        dao.update(existing);
-    }
-
-    public void updateField(String partId, String fieldLabel, List<String> values) {
-        EntryFieldLabel field = EntryFieldLabel.fromString(fieldLabel);
-        if (field == null) {
-            Logger.error("Cannot find field for label \"" + fieldLabel + "\"");
-            return;
-        }
-
-        Entry entry = super.getEntry(partId);
-        authorization.expectWrite(userId, entry);
-
-        String oldValue = EntryUtil.entryFieldToValue(entry, field);
-        InfoToModelFactory.infoToEntryForField(entry, values.toArray(new String[0]), field);
-        long modificationDate = new Date().getTime();
-        entry.setModificationTime(new Date(modificationDate));
-        dao.update(entry);
-
-        try {
-            new EntryAudit(this.userId).fieldUpdated(entry.getId(), field, oldValue, modificationDate);
-        } catch (Exception e) {
-            Logger.error(e);
-        }
     }
 
     private void updateOrCreateCustomFieldValues(Entry entry, PartData data) {
@@ -349,7 +310,6 @@ public class Entries extends HasEntry {
 
         // create entry
         AccountModel account = DAOFactory.getAccountDAO().getByEmail(userId);
-        entry.setName(entry.getName() + " (copy)");
         entry.setRecordId(Utils.generateUUID());
         entry.setVersionId(entry.getRecordId());
         entry.setOwnerEmail(account.getEmail());
@@ -393,32 +353,11 @@ public class Entries extends HasEntry {
         if (StringUtils.isEmpty(entry.getOwnerEmail()))
             entry.setOwnerEmail(account.getEmail());
 
-        if (entry.getSelectionMarkers() != null) {
-            for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
-                selectionMarker.setEntry(entry);
-            }
-        }
-
-        if (entry.getLinks() != null) {
-            for (Link link : entry.getLinks()) {
-                link.setEntry(entry);
-            }
-        }
-
-        if (entry.getStatus() == null)
-            entry.setStatus("");
-
-        if (entry.getBioSafetyLevel() == null)
-            entry.setBioSafetyLevel(0);
-
         entry = dao.create(entry);
+
+        // set permissions
         EntryPermissions permissions = new EntryPermissions(entry.getRecordId(), userId);
 
-        // check for pi
-        String piEmail = entry.getPrincipalInvestigatorEmail();
-        if (StringUtils.isNotEmpty(piEmail)) {
-            permissions.addAccount(piEmail, true);
-        }
 
         // add write permissions for owner
         permissions.addAccount(account.getEmail(), true);
@@ -449,16 +388,8 @@ public class Entries extends HasEntry {
      * Create new part with the minimum requirements and a status of DRAFT
      */
     public PartData createNew(PartData part) {
-        EntryType type = part.getType();
-
-        Entry entry = switch (type) {
-            case PLASMID -> new Plasmid();
-            case STRAIN -> new Strain();
-            case SEED -> new ArabidopsisSeed();
-            case PROTEIN -> new Protein();
-            default -> new Part();
-        };
-
+        Entry entry = new Entry();
+        entry.setRecordType(part.getType().getName());
         entry.setRecordId(UUID.randomUUID().toString());
         entry.setVersionId(CURRENT_MAJOR_VERSION);
         entry.setVisibility(Visibility.DRAFT.getValue());
@@ -485,33 +416,33 @@ public class Entries extends HasEntry {
         AccountModel account = DAOFactory.getAccountDAO().getByEmail(userId);
 
         // linked entries can be a combination of new and existing parts
-        if (part.getLinkedParts() != null) {
-            for (PartData data : part.getLinkedParts()) {
-                Entry linked;
-                if (data.getId() > 0) {
-                    linked = dao.get(data.getId());
-                    if (linked == null || !authorization.canRead(userId, linked)) {
-                        continue;
-                    }
-
-                    // TODO : may contain new information e.g. if the sequence is uploaded before
-                    // TODO : this entry was created then the general information is added here
-                    linked = InfoToModelFactory.updateEntryField(data, linked);
-                    linked.setVisibility(Visibility.OK.getValue());
-
-                    if (authorization.canWrite(userId, linked)) {
-                        // then update
-                    }
-                } else {
-                    // create new linked (can only do one deep)
-                    Entry linkedEntry = InfoToModelFactory.infoToEntry(data);
-                    linked = createEntry(account, linkedEntry, data.getAccessPermissions());
-                    updateOrCreateCustomFieldValues(linkedEntry, data);
-                }
-
-                entry.getLinkedEntries().add(linked);
-            }
-        }
+//        if (part.getLinkedParts() != null) {
+//            for (PartData data : part.getLinkedParts()) {
+//                Entry linked;
+//                if (data.getId() > 0) {
+//                    linked = dao.get(data.getId());
+//                    if (linked == null || !authorization.canRead(userId, linked)) {
+//                        continue;
+//                    }
+//
+//                    // TODO : may contain new information e.g. if the sequence is uploaded before
+//                    // TODO : this entry was created then the general information is added here
+//                    linked = InfoToModelFactory.updateEntryField(data, linked);
+//                    linked.setVisibility(Visibility.OK.getValue());
+//
+//                    if (authorization.canWrite(userId, linked)) {
+//                        // then update
+//                    }
+//                } else {
+//                    // create new linked (can only do one deep)
+//                    Entry linkedEntry = InfoToModelFactory.infoToEntry(data);
+//                    linked = createEntry(account, linkedEntry, data.getAccessPermissions());
+//                    updateOrCreateCustomFieldValues(linkedEntry, data);
+//                }
+//
+//                entry.getLinkedEntries().add(linked);
+//            }
+//        }
 
         entry = createEntry(account, entry, part.getAccessPermissions());
         updateOrCreateCustomFieldValues(entry, part);

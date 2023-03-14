@@ -233,15 +233,15 @@ public class BulkUploadEntries {
     private ProcessedBulkUpload submitBulkImportDraft(String userId, BulkUpload draft,
                                                       ProcessedBulkUpload processedBulkUpload) throws PermissionException {
         // validate entries
-        BulkUploadValidation validation = new BulkUploadValidation(draft);
-        if (!validation.isValid()) {
-            processedBulkUpload.setSuccess(false);
-            for (EntryFieldLabel entryFieldLabel : validation.getFailedFields()) {
-                processedBulkUpload.getHeaders().add(new EntryHeaderValue(entryFieldLabel));
-            }
-            processedBulkUpload.setUserMessage("Cannot submit your bulk upload due to a validation failure");
-            return processedBulkUpload;
-        }
+//        BulkUploadValidation validation = new BulkUploadValidation(draft);
+//        if (!validation.isValid()) {
+//            processedBulkUpload.setSuccess(false);
+//            for (EntryFieldLabel entryFieldLabel : validation.getFailedFields()) {
+//                processedBulkUpload.getHeaders().add(new EntryHeaderValue(entryFieldLabel));
+//            }
+//            processedBulkUpload.setUserMessage("Cannot submit your bulk upload due to a validation failure");
+//            return processedBulkUpload;
+//        }
 
         draft.setStatus(BulkUploadStatus.PENDING_APPROVAL);
         draft.setLastUpdateTime(new Date());
@@ -290,8 +290,6 @@ public class BulkUploadEntries {
             PartData partData = new PartData(autoUpdate.getType());
             partData.setOwner(account.getFullName());
             partData.setOwnerEmail(account.getEmail());
-            partData.setCreator(account.getFullName());
-            partData.setCreatorEmail(account.getEmail());
             partData = entries.create(partData);
             entry = entryDAO.get(partData.getId());
 
@@ -305,7 +303,7 @@ public class BulkUploadEntries {
         for (Map.Entry<EntryFieldLabel, String> set : autoUpdate.getKeyValue().entrySet()) {
             String value = set.getValue();
             EntryFieldLabel field = set.getKey();
-            InfoToModelFactory.infoToEntryForField(entry, new String[]{value}, field);
+//            InfoToModelFactory.infoToEntryForField(entry, new String[]{value}, field);
         }
 
 //        if (this.upload != null && this.upload.getStatus() != BulkUploadStatus.PENDING_APPROVAL) {

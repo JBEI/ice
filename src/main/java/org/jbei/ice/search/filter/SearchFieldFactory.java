@@ -2,7 +2,6 @@ package org.jbei.ice.search.filter;
 
 import org.jbei.ice.dto.entry.EntryFieldLabel;
 import org.jbei.ice.dto.entry.EntryType;
-import org.jbei.ice.storage.model.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -65,10 +64,6 @@ public class SearchFieldFactory {
         proteinFields.add("uploadedFrom");
     }
 
-    public static String[] getCommonFields() {
-        return commonFields.toArray(new String[commonFields.size()]);
-    }
-
     public static HashSet<String> entryFields(List<EntryType> types) {
         HashSet<String> fields = new HashSet<>();
 
@@ -94,38 +89,6 @@ public class SearchFieldFactory {
 
         fields.addAll(commonFields);
         return fields;
-    }
-
-    public static Class<?>[] classesForTypes(List<EntryType> types) {
-        if (types == null || types.isEmpty())
-            return new Class<?>[0];
-
-        Class<?>[] classes = new Class<?>[types.size()];
-
-        for (int i = 0; i < types.size(); i += 1) {
-            switch (types.get(i)) {
-                case STRAIN:
-                    classes[i] = Strain.class;
-                    break;
-
-                case PLASMID:
-                    classes[i] = Plasmid.class;
-                    break;
-
-                case SEED:
-                    classes[i] = ArabidopsisSeed.class;
-                    break;
-
-                case PART:
-                    classes[i] = Part.class;
-                    break;
-
-                case PROTEIN:
-                    classes[i] = Protein.class;
-                    break;
-            }
-        }
-        return classes;
     }
 
     /**

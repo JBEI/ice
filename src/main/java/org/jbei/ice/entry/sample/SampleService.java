@@ -116,7 +116,7 @@ public class SampleService extends HasEntry {
 
         // create sample. If main location is null then sample is created without location
         sample = dao.create(sample);
-        String name = entry.getName();
+        String name = ""; // TODO entry.getName();
         if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
             entryDAO.generateNextStrainNameForEntry(entry, strainNamePrefix);
         }
@@ -288,7 +288,7 @@ public class SampleService extends HasEntry {
             partSample.setId(sample.getId());
             partSample.setPartId(sample.getEntry().getId());
             partSample.setLocation(storageLocation);
-            partSample.setPartName(sample.getEntry().getName());
+            partSample.setPartName(sample.getEntry().getPartNumber());
             partSample.setLabel(sample.getLabel());
 
             if (sample.getEntry().getId() == entry.getId()) {
@@ -403,7 +403,6 @@ public class SampleService extends HasEntry {
             Entry entry = sample.getEntry();
             if (entry == null)
                 continue;
-            Logger.info(entry.getName());
             if (!entryAuthorization.canRead(userId, entry))
                 continue;
 

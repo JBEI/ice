@@ -195,7 +195,7 @@ public class RequestRetriever {
 
                 String[] line = new String[3];
                 Entry entry = request.getEntry();
-                line[0] = entry.getName();
+                line[0] = entry.getPartNumber();
 
                 List<PartSample> samples = sampleService.retrieveEntrySamples(userId, Long.toString(request.getEntry().getId()));
                 if (samples.isEmpty()) {

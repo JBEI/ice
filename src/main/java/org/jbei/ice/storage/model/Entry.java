@@ -9,9 +9,7 @@ import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.entry.Visibility;
 import org.jbei.ice.storage.DataModel;
-import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.bridge.EntryBooleanPropertiesBridge;
-import org.jbei.ice.utils.Utils;
 
 import java.util.*;
 
@@ -109,55 +107,13 @@ public class Entry implements DataModel {
     @KeywordField
     private String ownerEmail;
 
-    @Column(name = "creator", length = 127)
-    @GenericField
-    private String creator;
-
-    @Column(name = "creator_email", length = 127)
-    @KeywordField
-    private String creatorEmail;
-
-    @Column(name = "alias", length = 127)
-    @FullTextField(projectable = Projectable.YES)  // store value in index
-    private String alias;
-
-    @Column(name = "name", length = 127)
-    @FullTextField(projectable = Projectable.YES)  // store value in index
-    private String name;
-
     @Column(name = "part_number", length = 127)
     @KeywordField(name = "partNumber_sort", projectable = Projectable.YES, sortable = Sortable.YES)
     private String partNumber;
 
-    @Column(name = "keywords", length = 127)
-    @FullTextField
-    private String keywords;
-
-    @Column(name = "status", length = 127)
-    @KeywordField(sortable = Sortable.YES, projectable = Projectable.YES)
-    private String status;
-
     @Column(name = "visibility")
     @GenericField
     private Integer visibility = Visibility.OK.getValue();
-
-    @Column(name = "short_description")
-    @FullTextField
-    @Lob
-    private String shortDescription;
-
-    @Column(name = "long_description")
-    @FullTextField
-    @Lob
-    private String longDescription;
-
-    @Column(name = "long_description_type", length = 31, nullable = false)
-    private String longDescriptionType;
-
-    @Column(name = "literature_references")
-    @FullTextField
-    @Lob
-    private String references;
 
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
@@ -167,35 +123,6 @@ public class Entry implements DataModel {
     @Column(name = "modification_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationTime;
-
-    @Column(name = "bio_safety_level")
-    @GenericField
-    private Integer bioSafetyLevel;
-
-    @Column(name = "intellectual_property")
-    @FullTextField
-    @Lob
-    private String intellectualProperty;
-
-    @Column(name = "funding_source", length = 512)
-    @FullTextField
-    private String fundingSource;
-
-    @Column(name = "principal_investigator", length = 512)
-    @KeywordField
-    private String principalInvestigator;
-
-    @Column(name = "principal_investigator_email", length = 127)
-    @KeywordField
-    private String principalInvestigatorEmail;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
-    @IndexedEmbedded(includeDepth = 1)
-    private final Set<SelectionMarker> selectionMarkers = new LinkedHashSet<>();
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
-    @IndexedEmbedded(includeDepth = 1)
-    private final Set<org.jbei.ice.storage.model.Link> links = new LinkedHashSet<>();
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
     @IndexedEmbedded(includeDepth = 1)
@@ -230,10 +157,6 @@ public class Entry implements DataModel {
     @OneToOne(orphanRemoval = true, mappedBy = "entry")
     @IndexedEmbedded(includeDepth = 1)
     private Sequence sequence;
-
-    public Entry() {
-        longDescriptionType = "text";
-    }
 
     public long getId() {
         return id;
@@ -283,121 +206,6 @@ public class Entry implements DataModel {
         this.ownerEmail = ownerEmail;
     }
 
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
-    }
-
-    public String getCreatorEmail() {
-        return creatorEmail;
-    }
-
-    public void setCreatorEmail(String creatorEmail) {
-        this.creatorEmail = creatorEmail;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public Set<SelectionMarker> getSelectionMarkers() {
-        return selectionMarkers;
-    }
-
-    public String getSelectionMarkersAsString() {
-        String result;
-        ArrayList<String> markers = new ArrayList<>();
-        for (SelectionMarker marker : this.selectionMarkers) {
-            markers.add(marker.getName());
-        }
-        result = Utils.join(", ", markers);
-
-        return result;
-    }
-
-    public void setSelectionMarkers(Set<SelectionMarker> inputSelectionMarkers) {
-        if (inputSelectionMarkers == null) {
-            selectionMarkers.clear();
-            return;
-        }
-
-        if (inputSelectionMarkers != selectionMarkers) {
-            selectionMarkers.clear();
-            selectionMarkers.addAll(inputSelectionMarkers);
-        }
-    }
-
-    public Set<org.jbei.ice.storage.model.Link> getLinks() {
-        return links;
-    }
-
-    public void setLinks(Set<Link> inputLinks) {
-        if (inputLinks == null) {
-            links.clear();
-            return;
-        }
-
-        if (inputLinks != links) {
-            links.clear();
-            links.addAll(inputLinks);
-        }
-    }
-
-    public String getKeywords() {
-        return keywords;
-    }
-
-    public void setKeywords(String keywords) {
-        this.keywords = keywords;
-    }
-
-    public String getShortDescription() {
-        return shortDescription;
-    }
-
-    public void setShortDescription(String shortDescription) {
-        this.shortDescription = shortDescription;
-    }
-
-    public String getLongDescription() {
-        return longDescription;
-    }
-
-    public void setLongDescription(String longDescription) {
-        this.longDescription = longDescription;
-    }
-
-    public String getLongDescriptionType() {
-        return longDescriptionType;
-    }
-
-    public void setLongDescriptionType(String longDescriptionType) {
-        this.longDescriptionType = longDescriptionType;
-    }
-
-    public String getReferences() {
-        return references;
-    }
-
-    public void setReferences(String references) {
-        this.references = references;
-    }
-
     public Date getCreationTime() {
         return creationTime;
     }
@@ -416,18 +224,6 @@ public class Entry implements DataModel {
         this.modificationTime = modificationTime;
     }
 
-    public void setBioSafetyLevel(Integer bioSafetyLevel) {
-        this.bioSafetyLevel = bioSafetyLevel;
-    }
-
-    public Integer getBioSafetyLevel() {
-        return bioSafetyLevel;
-    }
-
-    public void setIntellectualProperty(String intellectualProperty) {
-        this.intellectualProperty = intellectualProperty;
-    }
-
     public Integer getVisibility() {
         if (visibility == null)
             return Visibility.OK.getValue();
@@ -436,10 +232,6 @@ public class Entry implements DataModel {
 
     public void setVisibility(Integer visibility) {
         this.visibility = Objects.requireNonNullElseGet(visibility, Visibility.OK::getValue);
-    }
-
-    public String getIntellectualProperty() {
-        return intellectualProperty;
     }
 
     public void setParameters(List<ParameterModel> inputParameters) {
@@ -473,14 +265,6 @@ public class Entry implements DataModel {
         return folders;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getPartNumber() {
         return partNumber;
     }
@@ -506,22 +290,6 @@ public class Entry implements DataModel {
         return this.recordId.equals(other.getRecordId()) && this.id == other.getId();
     }
 
-    public String getFundingSource() {
-        return fundingSource;
-    }
-
-    public void setFundingSource(String fundingSource) {
-        this.fundingSource = fundingSource;
-    }
-
-    public String getPrincipalInvestigator() {
-        return principalInvestigator;
-    }
-
-    public void setPrincipalInvestigator(String principalInvestigator) {
-        this.principalInvestigator = principalInvestigator;
-    }
-
     public Set<Sample> getSamples() {
         return samples;
     }
@@ -540,18 +308,12 @@ public class Entry implements DataModel {
 
     @Override
     public PartData toDataTransferObject() {
-        return ModelToInfoFactory.getCommon(new PartData(EntryType.nameToType(this.getRecordType())), this);
-    }
-
-    public String getPrincipalInvestigatorEmail() {
-        return principalInvestigatorEmail;
-    }
-
-    public void setPrincipalInvestigatorEmail(String principalInvestigatorEmail) {
-        this.principalInvestigatorEmail = principalInvestigatorEmail;
-    }
-
-    public Set<EntryFieldValueModel> getFieldValues() {
-        return fieldValues;
+        PartData partData = new PartData(EntryType.nameToType(this.getRecordType()));
+        partData.setId(this.id);
+        partData.setOwner(this.owner);
+        partData.setOwnerEmail(this.ownerEmail);
+        partData.setCreationTime(this.creationTime.getTime());
+        partData.setPartId(this.partNumber);
+        return partData;
     }
 }

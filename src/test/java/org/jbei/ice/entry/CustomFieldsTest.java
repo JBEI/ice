@@ -8,8 +8,7 @@ import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
 import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.CustomEntryFieldModel;
-import org.jbei.ice.storage.model.Plasmid;
-import org.jbei.ice.storage.model.Strain;
+import org.jbei.ice.storage.model.Entry;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -44,11 +43,11 @@ public class CustomFieldsTest {
         AccountModel account = AccountCreator.createTestAccount("testCreateField", false);
         Assert.assertNotNull(account);
         final String userId = account.getEmail();
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
         CustomField field = new CustomField(0, strain.getId(), "foo", "bar");
         long id = fields.createField(userId, strain.getId(), field).getId();
-        strain = (Strain) DAOFactory.getEntryDAO().get(strain.getId());
+        strain = DAOFactory.getEntryDAO().get(strain.getId());
         Assert.assertNotNull(strain);
         Assert.assertEquals(1, strain.getParameters().size());
         CustomField created = strain.getParameters().get(0).toDataTransferObject();
@@ -62,7 +61,7 @@ public class CustomFieldsTest {
         AccountModel account = AccountCreator.createTestAccount("testGetField", false);
         Assert.assertNotNull(account);
         final String userId = account.getEmail();
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
         CustomField field = new CustomField(0, strain.getId(), "foo1", "bar1");
         long id = fields.createField(userId, strain.getId(), field).getId();
@@ -77,7 +76,7 @@ public class CustomFieldsTest {
         AccountModel account = AccountCreator.createTestAccount("testUpdateField", false);
         Assert.assertNotNull(account);
         final String userId = account.getEmail();
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
         CustomField field = new CustomField(0, strain.getId(), "Afoo2", "Bbar2");
         long id = fields.createField(userId, strain.getId(), field).getId();
@@ -95,7 +94,7 @@ public class CustomFieldsTest {
         Assert.assertEquals(created.getId(), id);
 
         // check what is associated with entry
-        strain = (Strain) DAOFactory.getEntryDAO().get(strain.getId());
+        strain = DAOFactory.getEntryDAO().get(strain.getId());
         Assert.assertNotNull(strain);
         Assert.assertEquals(1, strain.getParameters().size());
         created = strain.getParameters().get(0).toDataTransferObject();
@@ -109,7 +108,7 @@ public class CustomFieldsTest {
         AccountModel account = AccountCreator.createTestAccount("testGetFieldsForPart", false);
         Assert.assertNotNull(account);
         final String userId = account.getEmail();
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
         HashSet<Long> ids = new HashSet<>();
 
@@ -133,13 +132,13 @@ public class CustomFieldsTest {
         AccountModel account = AccountCreator.createTestAccount("testDeleteField", false);
         Assert.assertNotNull(account);
         final String userId = account.getEmail();
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
         CustomField field = new CustomField(strain.getId(), "foo3", "bar3");
         long id = fields.createField(userId, strain.getId(), field).getId();
 
         // verify custom field creation
-        strain = (Strain) DAOFactory.getEntryDAO().get(strain.getId());
+        strain = DAOFactory.getEntryDAO().get(strain.getId());
         Assert.assertNotNull(strain);
         Assert.assertEquals(1, strain.getParameters().size());
         CustomField created = strain.getParameters().get(0).toDataTransferObject();
@@ -152,7 +151,7 @@ public class CustomFieldsTest {
 
         //verify deletion
         Assert.assertNull(DAOFactory.getParameterDAO().get(id));
-        strain = (Strain) DAOFactory.getEntryDAO().get(strain.getId());
+        strain = DAOFactory.getEntryDAO().get(strain.getId());
         Assert.assertNotNull(strain);
         Assert.assertTrue(strain.getParameters().isEmpty());
     }
@@ -162,7 +161,7 @@ public class CustomFieldsTest {
         // create part
         AccountModel account = AccountCreator.createTestAccount("testGetPartsByFields", false);
         final String userId = account.getEmail();
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
 
         // create fields for strain
@@ -177,7 +176,7 @@ public class CustomFieldsTest {
         Assert.assertEquals(1, results.size());
 
         // create additional entry
-        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid = TestEntryCreator.createTestPlasmid(account);
         Assert.assertNotNull(plasmid);
         long plasmidId = plasmid.getId();
         fields.createField(userId, plasmidId, new CustomField(plasmidId, "type", "promoter"));

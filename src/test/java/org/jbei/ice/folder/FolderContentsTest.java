@@ -14,7 +14,6 @@ import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Folder;
-import org.jbei.ice.storage.model.Strain;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -104,7 +103,7 @@ public class FolderContentsTest {
         HashMap<String, Entry> parts = new HashMap<>();
         List<Long> entryList = new ArrayList<>();
         for (int i = 0; i < size; i += 1) {
-            Strain strain = TestEntryCreator.createTestStrain(account);
+            Entry strain = TestEntryCreator.createTestStrain(account);
             Assert.assertNotNull(strain);
             parts.put(strain.getPartNumber(), strain);
             entryList.add(strain.getId());

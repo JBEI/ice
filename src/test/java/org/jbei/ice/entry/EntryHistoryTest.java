@@ -6,7 +6,7 @@ import org.jbei.ice.dto.History;
 import org.jbei.ice.dto.common.Results;
 import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.AccountModel;
-import org.jbei.ice.storage.model.Plasmid;
+import org.jbei.ice.storage.model.Entry;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,7 +31,7 @@ public class EntryHistoryTest {
     @Test
     public void testGet() throws Exception {
         AccountModel account = AccountCreator.createTestAccount("EntryHistoryTest.testGet", false);
-        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid = TestEntryCreator.createTestPlasmid(account);
         AccountModel reader = AccountCreator.createTestAccount("EntryHistoryTest.testGetReader", false);
         EntryHistory entryHistory = new EntryHistory(reader.getEmail(), plasmid.getId());
         entryHistory.add();
@@ -47,7 +47,7 @@ public class EntryHistoryTest {
     @Test
     public void testAdd() throws Exception {
         AccountModel account = AccountCreator.createTestAccount("EntryHistoryTest.testAdd", false);
-        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid = TestEntryCreator.createTestPlasmid(account);
         AccountModel reader = AccountCreator.createTestAccount("EntryHistoryTest.testAddReader", false);
         EntryHistory entryHistory = new EntryHistory(reader.getEmail(), plasmid.getId());
         Assert.assertTrue(entryHistory.add());
@@ -56,7 +56,7 @@ public class EntryHistoryTest {
     @Test
     public void testDelete() throws Exception {
         AccountModel account = AccountCreator.createTestAccount("EntryHistoryTest.testDelete", false);
-        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid = TestEntryCreator.createTestPlasmid(account);
         AccountModel reader = AccountCreator.createTestAccount("EntryHistoryTest.testDeleteReader", false);
         EntryHistory entryHistory = new EntryHistory(reader.getEmail(), plasmid.getId());
         entryHistory.add();
@@ -73,7 +73,7 @@ public class EntryHistoryTest {
     @Test
     public void testDeleteAll() throws Exception {
         AccountModel account = AccountCreator.createTestAccount("EntryHistoryTest.testDeleteAll", false);
-        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid = TestEntryCreator.createTestPlasmid(account);
         AccountModel reader = AccountCreator.createTestAccount("EntryHistoryTest.testDeleteAllReader", false);
         EntryHistory entryHistory = new EntryHistory(reader.getEmail(), plasmid.getId());
         entryHistory.add();

@@ -7,8 +7,7 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.AccountModel;
-import org.jbei.ice.storage.model.Plasmid;
-import org.jbei.ice.storage.model.Strain;
+import org.jbei.ice.storage.model.Entry;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,19 +37,19 @@ public class RemoteTransferTest {
         EntryDAO dao = DAOFactory.getEntryDAO();
 
         AccountModel account = AccountCreator.createTestAccount("testGetPartsForTransfer", false);
-        Strain strain = TestEntryCreator.createTestStrain(account);
-        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
+        Entry plasmid = TestEntryCreator.createTestPlasmid(account);
         strain.getLinkedEntries().add(plasmid);
         DAOFactory.getEntryDAO().update(strain);
-        strain = (Strain) DAOFactory.getEntryDAO().get(strain.getId());
+        strain = DAOFactory.getEntryDAO().get(strain.getId());
         Assert.assertTrue(strain.getLinkedEntries().size() == 1);
 
-        Plasmid plasmid2 = TestEntryCreator.createTestPlasmid(account);
+        Entry plasmid2 = TestEntryCreator.createTestPlasmid(account);
         strain.getLinkedEntries().add(plasmid2);
         dao.update(strain);
 
-        Plasmid plasmid3 = TestEntryCreator.createTestPlasmid(account);
-        Strain strain2 = TestEntryCreator.createTestStrain(account);
+        Entry plasmid3 = TestEntryCreator.createTestPlasmid(account);
+        Entry strain2 = TestEntryCreator.createTestStrain(account);
         strain2.getLinkedEntries().add(plasmid2);
         strain2.getLinkedEntries().add(plasmid3);
         dao.update(strain2);

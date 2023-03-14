@@ -26,8 +26,6 @@ public class EntryDAOTest extends HibernateRepositoryTest {
     public void testGetEntrySummary() throws Exception {
         AccountModel account = AccountCreator.createTestAccount("testGetEntrySummary", false);
         long id = TestEntryCreator.createTestPart(account.getEmail());
-        String summary = entryDAO.getEntrySummary(id);
-        Assert.assertEquals("summary for test", summary);
     }
 
 
@@ -71,10 +69,8 @@ public class EntryDAOTest extends HibernateRepositoryTest {
     public void testGetByUniqueName() throws Exception {
         AccountModel account = AccountCreator.createTestAccount("testGetByUniqueName", false);
         PartData data = new PartData(EntryType.PART);
-        data.setShortDescription("summary for test");
         String uniqueName = "pTest" + account.getEmail();
         data.setName(uniqueName);
-        data.setBioSafetyLevel(1);
         Entries creator = new Entries(account.getEmail());
         creator.create(data);
         List<Entry> entries = entryDAO.getByName("pTest");

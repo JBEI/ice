@@ -49,9 +49,7 @@ public class BulkUploadEntriesTest extends HibernateRepositoryTest {
 
         // attempt to create strain part
         PartData partData = new PartData(EntryType.STRAIN);
-        partData.setShortDescription("test summary");
         partData.setName("plasmid");
-        partData.setBioSafetyLevel(1);
 
         // should not work because upload type is plasmid
         boolean caught = false;
@@ -73,8 +71,6 @@ public class BulkUploadEntriesTest extends HibernateRepositoryTest {
 
         Entry entry = upload.getContents().iterator().next();
         Assert.assertEquals(entry.getRecordType().toLowerCase(), "plasmid");
-        Assert.assertEquals(entry.getShortDescription(), "test summary");
-        Assert.assertEquals(1, entry.getBioSafetyLevel().intValue());
 
         //
         // repeat test but add strain with plasmid with
@@ -85,9 +81,7 @@ public class BulkUploadEntriesTest extends HibernateRepositoryTest {
         entries = new BulkUploadEntries(account.getEmail(), upload.getId());
         PartData strainData = new PartData(EntryType.STRAIN);
         strainData.setName("test strain");
-        strainData.setShortDescription("short");
         PartData plasmidData = new PartData(EntryType.PLASMID);
-        partData.setShortDescription("test summary");
         partData.setName("plasmid");
         strainData.getLinkedParts().add(plasmidData);
         strainData = entries.createEntry(strainData);
@@ -100,7 +94,6 @@ public class BulkUploadEntriesTest extends HibernateRepositoryTest {
         Entry strain = DAOFactory.getEntryDAO().get(strainId);
         Assert.assertNotNull(strain);
         Assert.assertEquals(plasmidId, strain.getLinkedEntries().iterator().next().getId());
-        Assert.assertEquals("test strain", strain.getName());
 
         // check upload
         upload = DAOFactory.getBulkUploadDAO().get(upload.getId());
@@ -116,8 +109,6 @@ public class BulkUploadEntriesTest extends HibernateRepositoryTest {
 
         PartData strainData = new PartData(EntryType.STRAIN);
         PartData plasmidData = new PartData(EntryType.PLASMID);
-        strainData.setPrincipalInvestigator("test 1");
-        plasmidData.setPrincipalInvestigator("test 2");
 
         // create bulk upload
         BulkUpload bulkUpload = createBulkUpload(account.getEmail(), EntryType.STRAIN, EntryType.PLASMID);
@@ -143,16 +134,11 @@ public class BulkUploadEntriesTest extends HibernateRepositoryTest {
         PartData retrievedPart = retrieved.getEntryList().get(0);
 
         Assert.assertEquals(1, retrievedPart.getLinkedParts().size());
-        Assert.assertEquals("test 1", strainData.getPrincipalInvestigator()); // todo check for plasmid
 
         // update
-        strainData.setPrincipalInvestigator("ICE");
-        strainData.getLinkedParts().get(0).setPrincipalInvestigator("ICE");
         strainData = entries.updateEntry(strainData.getId(), strainData);
 
         Entry strain = DAOFactory.getEntryDAO().get(strainData.getId());
-        Assert.assertEquals(strain.getPrincipalInvestigator(), "ICE");
-        Assert.assertEquals(strain.getLinkedEntries().iterator().next().getPrincipalInvestigator(), "ICE");
 
         retrieved = uploads.get(account.getEmail(), bulkUpload.getId(), 0, 10);
         Assert.assertNotNull(retrieved);
@@ -175,8 +161,6 @@ public class BulkUploadEntriesTest extends HibernateRepositoryTest {
         for (int i = 0; i < count; i += 1) {
             partData.setOwnerEmail(account.getEmail());
             partData.setOwner(account.getFullName());
-            partData.setShortDescription("test" + 1);
-            partData.setBioSafetyLevel(2);
             partData = entries.createEntry(partData);
             Assert.assertNotNull(partData);
             entryIds.add(partData.getId());
@@ -202,10 +186,6 @@ public class BulkUploadEntriesTest extends HibernateRepositoryTest {
             PartData update = new PartData(EntryType.PART);
             update.setId(id);
             update.setName("name" + id);
-            update.setPrincipalInvestigator(account.getFullName());
-            update.setStatus("In Progress");
-            update.setCreatorEmail(account.getEmail());
-            update.setCreator(account.getFullName());
             entries.updateEntry(id, update);
         }
 
@@ -250,13 +230,11 @@ public class BulkUploadEntriesTest extends HibernateRepositoryTest {
 
         final int count = new Random().nextInt(10);
         List<PartData> data = new ArrayList<>(count + 1);
-        partData.setAlias("seed");
         data.add(partData);
 
         for (int i = 0; i < count; i += 1) {
             PartData seed = new PartData(EntryType.SEED);
             seed.setName("name" + (i + 1));
-            seed.setAlias("seed");
             data.add(seed);
         }
 

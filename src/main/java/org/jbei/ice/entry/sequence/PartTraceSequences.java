@@ -5,6 +5,7 @@ import org.jbei.ice.account.Account;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.DNASequence;
 import org.jbei.ice.dto.common.Results;
+import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.entry.EntryAuthorization;
 import org.jbei.ice.logging.Logger;
@@ -274,7 +275,8 @@ public class PartTraceSequences {
         String entrySequenceString = sequence.getSequence();
 
         int entrySequenceLength = entrySequenceString.length();
-        boolean isCircular = (sequence.getEntry() instanceof Plasmid) && ((Plasmid) sequence.getEntry()).getCircular();
+        boolean isCircular = sequence.getEntry().getRecordType().equalsIgnoreCase(EntryType.PLASMID.name());
+        //(sequence.getEntry() instanceof Plasmid) && ((Plasmid) sequence.getEntry()).getCircular();
 
         if (isCircular) {
             entrySequenceString += entrySequenceString;

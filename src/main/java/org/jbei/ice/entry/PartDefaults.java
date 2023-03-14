@@ -38,37 +38,15 @@ public class PartDefaults {
      */
     public PartData get(EntryType type) {
         PartData partData = new PartData(type);
-        PreferencesController preferencesController = new PreferencesController();
-
-        // pi defaults
-        String value = preferencesController.getPreferenceValue(userId, PreferenceKey.PRINCIPAL_INVESTIGATOR.name());
-        if (value != null) {
-            AccountModel piAccount = this.accountDAO.getByEmail(value);
-            if (piAccount == null) {
-                partData.setPrincipalInvestigator(value);
-            } else {
-                partData.setPrincipalInvestigator(piAccount.getFullName());
-                partData.setPrincipalInvestigatorEmail(piAccount.getEmail());
-                partData.setPrincipalInvestigatorId(piAccount.getId());
-            }
-        }
-
-        // funding source defaults
-        value = preferencesController.getPreferenceValue(userId, PreferenceKey.FUNDING_SOURCE.name());
-        if (value != null) {
-            partData.setFundingSource(value);
-        }
 
         // owner and creator details
         if (account != null) {
             partData.setOwner(account.getFullName());
             partData.setOwnerEmail(account.getEmail());
-            partData.setCreator(partData.getOwner());
-            partData.setCreatorEmail(partData.getOwnerEmail());
         }
 
         // set the entry type defaults
-        return EntryUtil.setPartDefaults(partData);
+        return partData;
     }
 
     public String getForLabel(EntryFieldLabel label) {

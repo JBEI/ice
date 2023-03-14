@@ -13,23 +13,14 @@ import org.jbei.ice.entry.sequence.SequenceFormat;
 import org.jbei.ice.group.GroupController;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.AccountDAO;
-import org.jbei.ice.storage.hibernate.dao.EntryDAO;
-import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
-import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
-import org.jbei.ice.storage.model.AccountModel;
-import org.jbei.ice.storage.model.Entry;
-import org.jbei.ice.storage.model.Group;
-import org.jbei.ice.storage.model.Sequence;
+import org.jbei.ice.storage.hibernate.dao.*;
+import org.jbei.ice.storage.model.*;
 import org.jbei.ice.utils.Utils;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -49,6 +40,7 @@ public class EntriesAsCSV {
     private final SequenceDAO sequenceDAO;
     private final AccountDAO accountDAO;
     private final PermissionDAO permissionDAO;
+    private final EntryFieldValueModelDAO entryFieldValueModelDAO;
 
     /**
      * @param formats optional list of formats of sequences to include
@@ -61,6 +53,7 @@ public class EntriesAsCSV {
         this.sequenceDAO = DAOFactory.getSequenceDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
         this.permissionDAO = DAOFactory.getPermissionDAO();
+        this.entryFieldValueModelDAO = DAOFactory.getEntryFieldValueModelDAO();
     }
 
     /**
@@ -160,11 +153,17 @@ public class EntriesAsCSV {
                 line[1] = entry.getPartNumber();
 
                 // write field values
+                List<EntryFieldValueModel> models = entryFieldValueModelDAO.getFieldsForEntry(entryId, Arrays.asList(fields));
+
                 int i = 1;
-                for (EntryFieldLabel field : fields) {
-                    line[i + 1] = EntryUtil.entryFieldToValue(entry, field);
-                    i += 1;
+                for (EntryFieldValueModel model : models) {
+                    line[i + 1] = model.getValue();
                 }
+
+//                for (EntryFieldLabel field : fields) {
+//                    line[i + 1] = EntryUtil.entryFieldToValue(entry, field);
+//                    i += 1;
+//                }
 
                 // write sequence information
                 if (this.includeSequences && sequenceDAO.hasSequence(entryId)) {
@@ -234,7 +233,7 @@ public class EntriesAsCSV {
             for (long entryId : sequenceSet) {
                 for (String format : formats) {
                     InputStreamWrapper wrapper = new PartSequence(userId, Long.toString(entryId))
-                            .toFile(SequenceFormat.fromString(format), true);
+                        .toFile(SequenceFormat.fromString(format), true);
                     putZipEntry(wrapper, zos);
                 }
             }
@@ -292,7 +291,7 @@ public class EntriesAsCSV {
     }
 
     public ByteArrayOutputStream customize(EntrySelection selection, SequenceFormat format, boolean onePerFolder)
-            throws IOException {
+        throws IOException {
         Entries retriever = new Entries(this.userId);
         this.entries = retriever.getEntriesFromSelectionContext(selection);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

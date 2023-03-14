@@ -86,7 +86,7 @@ public class Sequences {
         Sequence sequence = dao.getByEntry(entry);
         if (sequence == null) {
             FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence();
-            featuredDNASequence.setName(entry.getName());
+            featuredDNASequence.setName(entry.getPartNumber());
             return featuredDNASequence;
         }
 

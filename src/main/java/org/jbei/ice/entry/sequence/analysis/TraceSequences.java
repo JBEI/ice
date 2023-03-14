@@ -9,7 +9,10 @@ import org.jbei.ice.search.blast.BlastPlus;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
 import org.jbei.ice.storage.hibernate.dao.TraceSequenceDAO;
-import org.jbei.ice.storage.model.*;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Sequence;
+import org.jbei.ice.storage.model.TraceSequence;
+import org.jbei.ice.storage.model.TraceSequenceAlignment;
 import org.jbei.ice.utils.Utils;
 
 import java.io.*;
@@ -179,7 +182,7 @@ public class TraceSequences {
         String entrySequenceString = sequence.getSequence();
 
         int entrySequenceLength = entrySequenceString.length();
-        boolean isCircular = (sequence.getEntry().getRecordType().equalsIgnoreCase("plasmid")) && ((Plasmid) sequence.getEntry()).getCircular();
+        boolean isCircular = (sequence.getEntry().getRecordType().equalsIgnoreCase("plasmid"));
 
         if (isCircular) {
             entrySequenceString += entrySequenceString;

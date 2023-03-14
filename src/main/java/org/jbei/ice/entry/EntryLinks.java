@@ -200,9 +200,7 @@ public class EntryLinks extends HasEntry {
 
             PartData partData = new PartData(EntryType.nameToType(entry.getRecordType()));
             partData.setId(entry.getId());
-            partData.setName(entry.getName());
             partData.setPartId(entry.getPartNumber());
-            partData.setShortDescription(entry.getShortDescription());
 
             boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
             partData.setHasSequence(hasSequence);

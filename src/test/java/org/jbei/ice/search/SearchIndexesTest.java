@@ -3,11 +3,9 @@ package org.jbei.ice.search;
 import org.jbei.ice.AccountCreator;
 import org.jbei.ice.dto.entry.EntryType;
 import org.jbei.ice.dto.entry.PartData;
-import org.jbei.ice.dto.entry.PlasmidData;
 import org.jbei.ice.dto.search.SearchQuery;
 import org.jbei.ice.dto.search.SearchResults;
 import org.jbei.ice.entry.Entries;
-import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.AccountModel;
@@ -58,18 +56,8 @@ public class SearchIndexesTest {
         Assert.assertNotNull(account);
 
         // create entry
-        PlasmidData plasmidData = new PlasmidData();
-        plasmidData.setCircular(true);
-        plasmidData.setPromoters("pTet");
-        plasmidData.setOriginOfReplication("oRep");
-
         PartData partData = new PartData(EntryType.PLASMID);
-        partData.setBioSafetyLevel(BioSafetyOption.LEVEL_ONE.ordinal());
-        partData.setStatus("Complete");
         partData.setName("testPlasmid");
-        partData.setFundingSource("DOE");
-        partData.setPrincipalInvestigator("Nathan");
-        partData.setPlasmidData(plasmidData);
 
         partData = new Entries(account.getEmail()).create(partData);
         Entry entry = DAOFactory.getEntryDAO().get(partData.getId());

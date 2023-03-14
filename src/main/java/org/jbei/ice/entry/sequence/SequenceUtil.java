@@ -153,9 +153,9 @@ public class SequenceUtil {
         boolean circular = false;
         Entry entry = sequence.getEntry();
         if (entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.name()))
-            circular = ((Plasmid) sequence.getEntry()).getCircular();
+            circular = true;
         FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence(
-                sequence.getSequence(), entry.getName(), circular, features, "");
+            sequence.getSequence(), entry.getPartNumber(), circular, features, "");
         featuredDNASequence.setUri(sequence.getUri());
 
         return featuredDNASequence;

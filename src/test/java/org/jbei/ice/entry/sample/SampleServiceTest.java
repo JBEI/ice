@@ -9,8 +9,8 @@ import org.jbei.ice.dto.sample.SampleType;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateConfiguration;
 import org.jbei.ice.storage.model.AccountModel;
+import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Storage;
-import org.jbei.ice.storage.model.Strain;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -78,7 +78,7 @@ public class SampleServiceTest {
         // create 96 strains
         Map<Long, String> idPartNumberMap = new HashMap<>();
         for (int i = 0; i < 96; i += 1) {
-            Strain strain = TestEntryCreator.createTestStrain(account);
+            Entry strain = TestEntryCreator.createTestStrain(account);
             Assert.assertNotNull(strain);
             idPartNumberMap.put(strain.getId(), strain.getPartNumber());
         }
@@ -211,7 +211,7 @@ public class SampleServiceTest {
         AccountModel account = AccountCreator.createTestAccount("SampleServiceTest.testRetrieveEntrySamples", false);
         String userId = account.getEmail();
 
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         long entryId = strain.getId();
 
         List<PartSample> samplesList = service.retrieveEntrySamples(userId, Long.toString(entryId));
@@ -251,7 +251,7 @@ public class SampleServiceTest {
         String userId = account.getEmail();
 
         // ----- CASE #1 -----
-        Strain strain1 = TestEntryCreator.createTestStrain(account);
+        Entry strain1 = TestEntryCreator.createTestStrain(account);
         PartSample partSample1 = new PartSample();
         partSample1.setLabel("testForShelfScheme1");
 
@@ -288,7 +288,7 @@ public class SampleServiceTest {
 
         // ----- CASE 2 -----
 
-        Strain strain2 = TestEntryCreator.createTestStrain(account);
+        Entry strain2 = TestEntryCreator.createTestStrain(account);
         PartSample partSample2 = new PartSample();
         partSample2.setLabel("testForPlateScheme2");
 
@@ -365,7 +365,7 @@ public class SampleServiceTest {
         AccountModel account = AccountCreator.createTestAccount("SampleServiceTest.testGetSamplesByBarcode", false);
         String userId = account.getEmail();
 
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         PartSample partSample = new PartSample();
         partSample.setLabel("test");
 

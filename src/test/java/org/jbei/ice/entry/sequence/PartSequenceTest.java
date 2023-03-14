@@ -10,7 +10,7 @@ import org.jbei.ice.dto.entry.SequenceInfo;
 import org.jbei.ice.parsers.GeneralParser;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.AccountModel;
-import org.jbei.ice.storage.model.Strain;
+import org.jbei.ice.storage.model.Entry;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ public class PartSequenceTest extends HibernateRepositoryTest {
     @Test
     public void testGet() throws Exception {
         AccountModel account = AccountCreator.createTestAccount("PartSequenceTest.testGet", false);
-        Strain strain = TestEntryCreator.createTestStrain(account);
+        Entry strain = TestEntryCreator.createTestStrain(account);
         PartSequence partSequence = new PartSequence(account.getEmail(), strain.getRecordId());
         FeaturedDNASequence sequence = partSequence.get(true);
         Assert.assertNull(sequence);

@@ -675,21 +675,6 @@ public class PartResource extends RestResource {
         return super.respond(true);
     }
 
-    /**
-     * Updates the specified part field. Should probably be a "PATCH"
-     */
-    @PUT
-    @Path("/{id}/{field}")
-    public Response updateField(@PathParam("id") String partId,
-                                @PathParam("field") String field,
-                                List<String> values) {
-        String userId = requireUserId();
-        log(userId, "updating \"" + field + "\" for entry " + partId);
-        Entries entries = new Entries(userId);
-        entries.updateField(partId, field, values);
-        return super.respond(controller.retrieveEntryDetails(userId, partId));
-    }
-
     @POST
     @Path("/trash")
     @Consumes(MediaType.APPLICATION_JSON)
