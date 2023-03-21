@@ -1,6 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {HttpService} from "../../../services/http.service";
 import {EntryField} from "../../../models/entry-field";
+import {ActivatedRoute} from "@angular/router";
+import Handsontable from "handsontable";
+import {EntryFieldOption} from "../../../models/entry-field-option";
+import {Part} from "../../../models/Part";
+import {BreakpointObserver} from "@angular/cdk/layout";
 
 @Component({
     selector: 'app-upload',
@@ -9,27 +14,114 @@ import {EntryField} from "../../../models/entry-field";
 })
 export class UploadComponent implements OnInit {
 
+    type: string;
+    linkedType: string;
     fields: EntryField[];
+    parts: Part[];
 
-    dataset: any[] = [
-        {id: 1, name: 'Ted Right', address: 'Wall Street'},
-        {id: 2, name: 'Frank Honest', address: 'Pennsylvania Avenue'},
-        {id: 3, name: 'Joan Well', address: 'Broadway'},
-        {id: 4, name: 'Gail Polite', address: 'Bourbon Street'},
-        {id: 5, name: 'Michael Fair', address: 'Lombard Street'},
-        {id: 6, name: 'Mia Fair', address: 'Rodeo Drive'},
-        {id: 7, name: 'Cora Fair', address: 'Sunset Boulevard'},
-        {id: 8, name: 'Jack Right', address: 'Michigan Avenue'},
-    ];
+    hotSettings: Handsontable.GridSettings = {
+        startRows: 20,
+        rowHeaders: true,
+        colWidths: 100,
+        stretchH: 'all',
+        height: 'auto',
+        licenseKey: 'non-commercial-and-evaluation',
+        // colHeaders(index): string {
+        //     return "";
+        // }
+        afterChange: (changes, source) => {
+            console.log(changes, source);
+            if ("edit" === source) {
+                // manual edit
+            } else if ("Autofill.fill" === source) {
+                // drag and fill
 
-    constructor(private http: HttpService) {
-        this.http.get('parts/fields/PLASMID').subscribe((result: EntryField[]) => {
-            console.log(result);
-            this.fields = result;
-        });
+            } else if ("CopyPaste.paste === source") {
+                // copy and paste
+            }
+
+
+            changes?.forEach(([row, col, oldValue, newValue]) => {
+                // Some logic...
+                console.log(row, col, oldValue, newValue);
+            });
+        }
+    };
+    hotid = 'hotid';
+
+    constructor(private route: ActivatedRoute, private http: HttpService, private breakpointObserver: BreakpointObserver) {
+        this.parts = [];
+        window.innerHeight;
     }
 
     ngOnInit(): void {
+        this.type = this.route.snapshot.paramMap.get('type');
+        //.updateSettings(this.hotSettings);
+
+        this.http.get('parts/fields/' + this.type).subscribe((result: EntryField[]) => {
+            this.fields = result;
+
+            // add sequence file
+            this.fields.push({
+                custom: false,
+                entryType: "",
+                fieldInputType: "FILE",
+                fieldType: "",
+                id: 0,
+                options: [],
+                required: false,
+                label: "Sequence File"
+            })
+
+            // value: T, index: number, array: T[]) => void, thisArg?: any
+            // this.hotSettings.colHeaders = function(index: number): string {
+            //     return "<b>a</b>";
+            // }
+        });
+
+        // this.newPart = JSON.parse(sessionStorage.getItem('in-progress-entry'));
+        // if (!this.newPart) {
+        //     this.http.post('parts', {type: this.type.toUpperCase()}).subscribe({
+        //         next: (part: Part) => {
+        //             this.newPart = part;
+        //             sessionStorage.setItem('in-progress-entry', JSON.stringify(this.newPart));
+        //         }
+        //     });
+        // }
+
+
     }
 
+    getFieldLabel(field: EntryField): string {
+        let label = field.label;
+        if (field.required)
+            label += ' <span class=\"text-danger font-12em\">*</span>';
+        return label;
+
+    }
+
+    getSelectOptions(field: EntryField): string[] {
+        if (field.fieldInputType !== 'SELECT')
+            return [];
+
+        const result = [];
+        for (let i = 0; i < field.options.length; i += 1) {
+            const option: EntryFieldOption = field.options[i];
+            result.push(option.value);
+        }
+
+        return result;
+    }
+
+    getFieldType(field: EntryField): any {
+        if (field.fieldInputType === 'SELECT' && field.options.length) {
+            return "dropdown";
+        }
+
+        switch (field.fieldInputType) {
+            case 'BOOLEAN':
+                return "checkbox";
+        }
+        return "text";
+    }
 }

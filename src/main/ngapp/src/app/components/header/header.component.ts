@@ -40,8 +40,8 @@ export class HeaderComponent implements OnInit {
         return false;
     }
 
-    goToUpload(): void {
-        this.router.navigate((['/upload']));
+    goToUpload(type: string = 'part'): void {
+        this.router.navigate((['/upload', type.toLowerCase()]));
     }
 
     goToCreateEntry(type: string = 'part'): void {

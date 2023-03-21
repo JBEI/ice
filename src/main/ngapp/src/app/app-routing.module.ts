@@ -19,7 +19,7 @@ const routes: Routes = [
             path: 'folder/:id', component: FolderComponent
         }]
     },
-    {path: 'upload', component: UploadComponent},
+    {path: 'upload/:type', component: UploadComponent},
     {path: 'configure', component: ConfigureComponent},
     {path: 'entry/:id', component: EntryDetailComponent, resolve: {entry: EntryResolver}},
     {path: 'login', component: LoginComponent},

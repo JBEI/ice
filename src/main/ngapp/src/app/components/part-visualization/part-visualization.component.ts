@@ -2,8 +2,8 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {VectorEditorService} from './vector-editor.service';
 import {HttpService} from "../../services/http.service";
 import {Paging} from "../../models/paging";
-import {Entry} from "../../models/entry";
 import {Sequence} from "../../models/sequence";
+import {Part} from "../../models/Part";
 
 @Component({
     selector: 'app-part-visualization',
@@ -12,7 +12,7 @@ import {Sequence} from "../../models/sequence";
 })
 export class PartVisualizationComponent implements OnInit {
 
-    @Input() entry: Entry;
+    @Input() entry: Part;
     @Input() sequence: Sequence;
     @Output() retrieveSequence: EventEmitter<any> = new EventEmitter<any>();
 

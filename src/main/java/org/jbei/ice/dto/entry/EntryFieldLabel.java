@@ -18,8 +18,6 @@ import java.util.List;
 public enum EntryFieldLabel implements IDataTransferModel {
 
     PI("Principal Investigator", true, FieldInputType.USER_WITH_EMAIL),
-    PI_EMAIL("Principal Investigator Email", false, null),
-    PART_NUMBER("Part Number", false, null),
     FUNDING_SOURCE("Funding Source", false, FieldInputType.LONG_TEXT),
     IP("Intellectual Property", false, FieldInputType.TEXTAREA),
     BIO_SAFETY_LEVEL("BioSafety Level", true, FieldInputType.SELECT),
@@ -51,7 +49,6 @@ public enum EntryFieldLabel implements IDataTransferModel {
     GENERATION("Generation", false, FieldInputType.SELECT),
     SENT_TO_ABRC("Sent to ABRC?", false, FieldInputType.BOOLEAN),
     PLANT_TYPE("Plant Type", false, FieldInputType.SELECT),
-    PARENTS("Parents", false, null),
     EXISTING_PART_NUMBER("Existing Part Number", false, null),
     ORGANISM("Organism", false, FieldInputType.LONG_TEXT),
     FULL_NAME("Full Name", false, FieldInputType.LONG_TEXT),

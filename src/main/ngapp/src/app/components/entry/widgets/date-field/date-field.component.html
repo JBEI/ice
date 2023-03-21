@@ -1,0 +1,20 @@
+<div class="row">
+    <div class="col-2 d-flex">
+        <label [for]="field.label" [ngClass]="{'fw-bold': field.active}">{{field.label}}
+            <span class="text-danger" *ngIf="field.required"
+                  style="font-size: larger">*</span>
+        </label>
+    </div>
+
+    <div class="col">
+        <div class="input-group input-group-sm" [ngClass]="{'w-25': halfWidth}">
+            <input class="form-control" [maxDate]="maxDate" [minDate]="minDate"
+                   [ngClass]="{'is-invalid': validDate || field.isInvalid}" [(ngModel)]="selectedDate"
+                   id="infectionDate" (dateSelect)="dateSelected($event)" (blur)="dateSelected()"
+                   placeholder="mm/dd/yyyy" name="dp" ngbDatepicker #d="ngbDatepicker">
+            <span class="input-group-text" (click)="d.toggle()" type="button">
+                <i class="bi bi-calendar-date"></i>
+            </span>
+        </div>
+    </div>
+</div>

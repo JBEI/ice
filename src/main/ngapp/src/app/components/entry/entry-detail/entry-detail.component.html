@@ -39,7 +39,7 @@
                         </div>
                     </div>
 
-                    <div class="row bg-white border mt-3" style="margin-left: 40px">
+                    <div class="row bg-white border" style="margin-left: 40px">
                         <div class="col pt-2 pb-3">
                             <ng-container *ngIf="entry.fields && entry.fields.length">
                                 <div class="row p-1" *ngFor="let field of entry.fields">
@@ -86,40 +86,15 @@
                         </div>
                     </div>
 
-                    <!--                    <div class="row mt-4">-->
-                    <!--                        <div class="col">-->
-                    <!--                            &lt;!&ndash;                            <div class="container-fluid" style="width: 75vw">&ndash;&gt;-->
-                    <!--                            <ng-container *ngFor="let field of entry.fields; let i = index">-->
-                    <!--                                <app-text-field *ngIf="field.fieldInputType === 'TEXT'"-->
-                    <!--                                                [(field)]="entry.fields[i]"></app-text-field>-->
-                    <!--                                <ng-container *ngIf="field.fieldInputType !== 'TEXT'">-->
-                    <!--                                    <div class="row p-1">-->
-
-                    <!--                                        <div class="col-3 offset-1">-->
-                    <!--                                            {{field.label}}-->
-                    <!--                                        </div>-->
-
-                    <!--                                        <div class="col-8">-->
-                    <!--                                            {{field.value}}-->
-                    <!--                                        </div>-->
-                    <!--                                    </div>-->
-
-                    <!--                                </ng-container>-->
-                    <!--                            </ng-container>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
-
                     <div class="row mt-4">
                         <div class="col px-4">
                             <div>
                                 SEQUENCE
-                                <!--                                <app-part-visualization [entry]="entry"></app-part-visualization>-->
+                                <app-part-visualization [entry]="entry"></app-part-visualization>
                             </div>
                         </div>
 
                     </div>
-
-                    <pre>{{entry | json}}</pre>
 
                 </div>
             </div>

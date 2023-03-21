@@ -41,9 +41,23 @@ import {BooleanFieldComponent} from './components/entry/widgets/boolean-field/bo
 import {FolderActionsComponent} from './components/folder-actions/folder-actions.component';
 import {ConfigureComponent} from './components/configure-component/configure.component';
 import {ShareFolderModalComponent} from './components/modal/share-folder-modal/share-folder-modal.component';
+import {DateFieldComponent} from "./components/entry/widgets/date-field/date-field.component";
 
 // register Handsontable's modules
 registerAllModules();
+
+// import {
+//     registerCellType,
+//     NumericCellType,
+// } from 'handsontable/cellTypes';
+//
+// import {
+//     registerPlugin,
+//     UndoRedo,
+// } from 'handsontable/plugins';
+//
+// registerCellType(NumericCellType);
+// registerPlugin(UndoRedo);
 
 @NgModule({
     declarations: [
@@ -72,7 +86,8 @@ registerAllModules();
         BooleanFieldComponent,
         FolderActionsComponent,
         ConfigureComponent,
-        ShareFolderModalComponent
+        ShareFolderModalComponent,
+        DateFieldComponent
     ],
     imports: [
         BrowserModule,

@@ -110,10 +110,6 @@ public class SearchFieldFactory {
 
             case ALIAS:
                 return "alias";
-
-            case EXISTING_PART_NUMBER:
-            case PART_NUMBER:
-                return "partNumber";
         }
     }
 }

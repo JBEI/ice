@@ -1,28 +1,52 @@
 <div class="container-fluid">
     <div class="row">
-        <div class="bg-white">
-            <div class="px-0 col d-flex">
+        <div class="px-0 col d-flex">
 
-                <div class="border-end bg-white" style="flex:0 0 250px">
-                    <app-main-sidebar-menu></app-main-sidebar-menu>
+            <div class="border-end bg-white" style="flex:0 0 250px">
+                <app-main-sidebar-menu></app-main-sidebar-menu>
+            </div>
+
+            <div class="flex-grow-1">
+                <div class="bg-white border-bottom p-3">
+                    <app-header></app-header>
                 </div>
 
-                <div class="flex-grow-1">
-                    <div class="bg-white border-bottom p-3">
-                        <app-header></app-header>
+                <div class="container">
+
+                    <div class="row">
+                        <div class="col p-3">
+                            <h5 class="text-uppercase fw-bold">New <span class="text-muted">{{type}}</span> entry
+                            </h5>
+                        </div>
+
+                        <div class="col p-3">
+                            <div class="float-end px-4">
+                                <button class="btn btn-sm btn-primary">Save</button>
+                                <button class="btn btn-sm btn-white ms-2">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" *ngIf="fields && fields.length">
+                        <div class="col p-0">
+                            <div>
+
+                                &nbsp;
+                                <hot-table
+                                    [hotId]="hotid"
+                                    [settings]="hotSettings"
+                                    licenseKey="non-commercial-and-evaluation">
+                                    <hot-column *ngFor="let field of fields" [type]="getFieldType(field)"
+                                                [width]="150" [source]="getSelectOptions(field)"
+                                                [allowInvalid]="false"
+                                                [title]="getFieldLabel(field)">
+                                    </hot-column>
+                                </hot-table>
+                            </div>
+                        </div>
                     </div>
 
 
-                    <!--            <hot-table-->
-                    <!--                [data]="dataset"-->
-                    <!--                [colHeaders]="true"-->
-                    <!--                [rowHeaders]="true"-->
-                    <!--                height="auto"-->
-                    <!--                licenseKey="non-commercial-and-evaluation">-->
-
-                    <!--                <hot-column [readOnly]="true" [title]="field.label" *ngFor="let field of fields"></hot-column>-->
-
-                    <!--            </hot-table>-->
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-<div class="input-group input-group-sm" [ngClass]="{'w-50': halfWidth}">
+<div class="input-group input-group-sm" [ngClass]="{'w-25': halfWidth}">
     <input class="form-control" [maxDate]="maxDate" [minDate]="minDate"
            [ngClass]="{'is-invalid': validDate || field.isInvalid}" [(ngModel)]="selectedDate"
            id="infectionDate" (dateSelect)="dateSelected($event)" (blur)="dateSelected()"

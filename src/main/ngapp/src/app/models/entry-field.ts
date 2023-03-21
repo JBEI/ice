@@ -7,4 +7,6 @@ export class EntryField {
     label: string;
     options: EntryFieldOption[];
     required: boolean;
+    fieldType: string;
+    fieldInputType: string;
 }
