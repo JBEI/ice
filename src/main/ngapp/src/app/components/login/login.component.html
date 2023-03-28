@@ -11,18 +11,17 @@
                 <hr class="border-top">
 
                 <div class="pt-3">
-
-                    <div class="alert alert-danger p-2" *ngIf="this.validation.invalidPassword"><i
-                            class="fa fa-fw fa-exclamation-triangle"></i> Invalid login or
+                    <div class="alert alert-danger p-2" *ngIf="submitted && form.invalid"><i
+                        class="fa fa-fw fa-exclamation-triangle"></i> Invalid login or
                         password. Please try again.
                     </div>
 
                     <form id="login-form" [formGroup]="form" (ngSubmit)="loginUser()">
                         <div class="mb-4">
                             <label for="userId" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="userId" formControlName="id"
-                                   name="userId" [ngClass]="{'is-invalid': idIsInvalidAndTouched}"
-                                   required [attr.aria-invalid]="idIsInvalidAndTouched">
+                            <input type="email" class="form-control" id="userId" formControlName="userId"
+                                   name="userId" [ngClass]="{'is-invalid': submitted && f['userId'].errors}"
+                                   required>
                         </div>
 
                         <div class="d-flex align-items-center justify-content-between">
@@ -31,9 +30,8 @@
                             </div>
                         </div>
 
-                        <input type="password" class="form-control" id="password" name="password"
-                               [attr.aria-invalid]="passwordIsInvalidAndTouched" formControlName="password"
-                               [ngClass]="{'is-invalid': passwordIsInvalidAndTouched}" required>
+                        <input type="password" class="form-control" id="password" name="password" required
+                               formControlName="password" [ngClass]="{'is-invalid': submitted && f['password'].errors}">
 
                         <div class="mt-5">
                             <button [disabled]="processing"

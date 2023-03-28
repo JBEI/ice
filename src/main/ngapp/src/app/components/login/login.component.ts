@@ -3,7 +3,7 @@ import {User} from "../../models/User";
 import {HttpService} from "../../services/http.service";
 import {Router} from "@angular/router";
 import {UserService} from "../../services/user.service";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
 
 @Component({
     selector: 'app-login',
@@ -15,15 +15,15 @@ export class LoginComponent implements OnInit {
     loggedInUser: User;
     processing = false;
     remember?: boolean;
-    validation: { invalidPassword: boolean };
-    form = new FormGroup({
-        id: new FormControl('', [Validators.required]),
-        password: new FormControl('', [Validators.required])
-    })
+    form: FormGroup;
+    submitted: boolean;
 
     constructor(private http: HttpService, private router: Router, private userService: UserService) {
-        this.validation = {invalidPassword: false};
         this.loggedInUser = new User();
+        this.form = new FormGroup({
+            userId: new FormControl('', [Validators.required]),
+            password: new FormControl('', [Validators.required])
+        })
     }
 
     ngOnInit(): void {
@@ -57,37 +57,25 @@ export class LoginComponent implements OnInit {
         this.remember = !this.remember;
         if (this.remember) {
             localStorage.setItem('rememberUser', 'yes');
-            console.log('set local storage');
-            console.log(localStorage.getItem('rememberUser'));
         } else {
             localStorage.setItem('rememberUser', '');
         }
     }
 
     loginUser(): void {
-        this.validation.invalidPassword = false;
-        this.loggedInUser.email = this.form.get('id').value;
-        this.loggedInUser.password = this.form.get('password').value;
+        this.submitted = true;
+        console.log(this.form.get('userId').value);
 
-        console.log(this.loggedInUser, this.form.get('id').value);
+        if (this.form.invalid)
+            return;
+
+        this.loggedInUser.email = this.form.get('userId').value;
+        this.loggedInUser.password = this.form.get('password').value;
 
         this.processing = true;
         this.http.post('accesstokens', this.loggedInUser).subscribe({
             next: (result: User) => {
                 this.processing = false;
-
-                // this relies on the user knowing their password before being notified which is highly unlikely
-                // if (result.disabled) {
-                //     console.log('Account is still being vetted');
-                //     return;
-                // }
-
-                // check if password needs to be created and re-direct if so
-                // if (result.usingTemporaryPassword) {
-                //     this.userService.setUser(result);
-                //     this.router.navigate(['/password']);
-                //     return;
-                // }
 
                 // save to session
                 this.loggedInUser = result;
@@ -107,7 +95,7 @@ export class LoginComponent implements OnInit {
                 this.processing = false;
                 console.error(error);
                 if (error.status === 401) {
-                    this.validation.invalidPassword = true;
+                    this.form.setErrors({"invalid": true});
                 }
             }, complete: () => {
 
@@ -115,11 +103,12 @@ export class LoginComponent implements OnInit {
         });
     }
 
-    get idIsInvalidAndTouched() {
-        return this.form.controls.id.invalid && this.form.controls.id.touched
+    onReset(): void {
+        this.submitted = false;
+        this.form.reset();
     }
 
-    get passwordIsInvalidAndTouched() {
-        return this.form.controls.password.invalid && this.form.controls.password.touched
+    get f(): { [key: string]: AbstractControl } {
+        return this.form.controls;
     }
 }
