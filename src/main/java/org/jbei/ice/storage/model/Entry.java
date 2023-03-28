@@ -78,22 +78,17 @@ import java.util.*;
 //            @org.hibernate.search.annotations.Parameter(name = "replacement", value = " ")
 //        })
 //    })
-@Table(name = "entries")
-@SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
-@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "entry")
+@SequenceGenerator(name = "entry_id", sequenceName = "entry_id_seq", allocationSize = 1)
 public class Entry implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
-    @DocumentId
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "entry_id")
     private long id;
 
     @Column(name = "record_id", length = 36, nullable = false, unique = true)
     @KeywordField
     private String recordId;
-
-    @Column(name = "version_id", length = 36, nullable = false)
-    private String versionId;
 
     @Column(name = "record_type", length = 127, nullable = false)
     @KeywordField(name = "type", sortable = Sortable.YES, projectable = Projectable.YES)
@@ -150,10 +145,6 @@ public class Entry implements DataModel {
     @IndexedEmbedded(includeDepth = 1)
     private final Set<Attachment> attachments = new HashSet<>();
 
-    @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "entry")
-    @IndexedEmbedded(includeDepth = 1)
-    private final Set<EntryFieldValueModel> fieldValues = new HashSet<>();
-
     @OneToOne(orphanRemoval = true, mappedBy = "entry")
     @IndexedEmbedded(includeDepth = 1)
     private Sequence sequence;
@@ -172,14 +163,6 @@ public class Entry implements DataModel {
 
     public void setRecordId(String recordId) {
         this.recordId = recordId;
-    }
-
-    public String getVersionId() {
-        return versionId;
-    }
-
-    public void setVersionId(String versionId) {
-        this.versionId = versionId;
     }
 
     public String getRecordType() {

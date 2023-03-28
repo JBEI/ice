@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Represents the results of a processed upload.
- * If the processing is successful, then the wrapped {@link BulkUploadInfo} contains a reference
+ * If the processing is successful, then the wrapped {@link BulkUpload} contains a reference
  * to the upload otherwise the list of fields that failed validation and/or a user friendly error
  * message is added
  *
@@ -18,11 +18,11 @@ public class ProcessedBulkUpload implements IDataTransferModel {
     private boolean success;
     private List<HeaderValue> headers;
     private String userMessage;
-    private final BulkUploadInfo uploadInfo;
+    private final BulkUpload uploadInfo;
 
     public ProcessedBulkUpload() {
         headers = new ArrayList<>();
-        uploadInfo = new BulkUploadInfo();
+        uploadInfo = new BulkUpload();
         success = true;
     }
 
@@ -54,7 +54,7 @@ public class ProcessedBulkUpload implements IDataTransferModel {
         this.userMessage = userMessage;
     }
 
-    public BulkUploadInfo getUploadInfo() {
+    public BulkUpload getUploadInfo() {
         return uploadInfo;
     }
 }

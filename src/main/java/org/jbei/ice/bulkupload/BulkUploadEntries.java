@@ -22,7 +22,7 @@ import org.jbei.ice.storage.hibernate.dao.BulkUploadDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Attachment;
-import org.jbei.ice.storage.model.BulkUpload;
+import org.jbei.ice.storage.model.BulkUploadModel;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.utils.Utils;
 
@@ -45,7 +45,7 @@ public class BulkUploadEntries {
     private final AccountController accountController;
     private final BulkUploadAuthorization authorization;
     private final String userId;
-    private final BulkUpload upload;
+    private final BulkUploadModel upload;
 
     public BulkUploadEntries(String userId, long uploadId) {
         dao = DAOFactory.getBulkUploadDAO();
@@ -230,7 +230,7 @@ public class BulkUploadEntries {
      * Submits a bulk import that has been saved. This action is restricted to the owner of the
      * draft or to administrators.
      */
-    private ProcessedBulkUpload submitBulkImportDraft(String userId, BulkUpload draft,
+    private ProcessedBulkUpload submitBulkImportDraft(String userId, BulkUploadModel draft,
                                                       ProcessedBulkUpload processedBulkUpload) throws PermissionException {
         // validate entries
 //        BulkUploadValidation validation = new BulkUploadValidation(draft);
@@ -247,10 +247,10 @@ public class BulkUploadEntries {
         draft.setLastUpdateTime(new Date());
         draft.setName(userId);
 
-        BulkUpload bulkUpload = dao.update(draft);
-        if (bulkUpload != null) {
+        BulkUploadModel bulkUploadModel = dao.update(draft);
+        if (bulkUploadModel != null) {
             // convert entries to pending
-            dao.setEntryStatus(bulkUpload, Visibility.PENDING);
+            dao.setEntryStatus(bulkUploadModel, Visibility.PENDING);
 
             String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
             if (email != null && !email.isEmpty()) {
@@ -341,11 +341,11 @@ public class BulkUploadEntries {
         entryDAO.update(entry);
     }
 
-    public BulkUploadInfo createOrUpdateEntries(List<PartData> data) {
+    public BulkUpload createOrUpdateEntries(List<PartData> data) {
         // check permissions
         authorization.expectWrite(userId, upload);
 
-        BulkUploadInfo uploadInfo = upload.toDataTransferObject();
+        BulkUpload uploadInfo = upload.toDataTransferObject();
 
         for (PartData datum : data) {
             if (datum == null)

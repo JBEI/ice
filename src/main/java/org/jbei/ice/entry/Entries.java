@@ -45,7 +45,6 @@ public class Entries extends HasEntry {
     private final EntryAuthorization authorization;
     private final SequenceDAO sequenceDAO;
     private final CustomEntryFieldValueDAO entryFieldValueDAO;
-    private final static String CURRENT_MAJOR_VERSION = "6.0";
 
     /**
      * @param userId unique identifier for user creating permissions. Must have write privileges on the entry
@@ -311,7 +310,6 @@ public class Entries extends HasEntry {
         // create entry
         AccountModel account = DAOFactory.getAccountDAO().getByEmail(userId);
         entry.setRecordId(Utils.generateUUID());
-        entry.setVersionId(entry.getRecordId());
         entry.setOwnerEmail(account.getEmail());
         entry.setOwner(account.getFullName());
         entry = createEntry(account, entry, new ArrayList<>());
@@ -342,7 +340,6 @@ public class Entries extends HasEntry {
     private Entry createEntry(AccountModel account, Entry entry, ArrayList<AccessPermission> accessPermissions) {
         if (entry.getRecordId() == null) {
             entry.setRecordId(Utils.generateUUID());
-            entry.setVersionId(entry.getRecordId());
         }
         entry.setCreationTime(Calendar.getInstance().getTime());
         entry.setModificationTime(entry.getCreationTime());
@@ -391,7 +388,6 @@ public class Entries extends HasEntry {
         Entry entry = new Entry();
         entry.setRecordType(part.getType().getName());
         entry.setRecordId(UUID.randomUUID().toString());
-        entry.setVersionId(CURRENT_MAJOR_VERSION);
         entry.setVisibility(Visibility.DRAFT.getValue());
         entry.setCreationTime(new Date());
         AccountModel account = DAOFactory.getAccountDAO().getByEmail(this.userId);

@@ -35,7 +35,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         return root.get(path).in(objects);
     }
 
-    public boolean hasPermission(Entry entry, Folder folder, BulkUpload upload, AccountModel account, Group group,
+    public boolean hasPermission(Entry entry, Folder folder, BulkUploadModel upload, AccountModel account, Group group,
                                  boolean canRead, boolean canWrite) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
@@ -85,7 +85,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    public Permission retrievePermission(Entry entry, Folder folder, BulkUpload upload, AccountModel account, Group group,
+    public Permission retrievePermission(Entry entry, Folder folder, BulkUploadModel upload, AccountModel account, Group group,
                                          boolean canRead, boolean canWrite) {
         try {
             Query<Permission> query = createPermissionQuery(entry, folder, upload, account, group, canRead, canWrite);
@@ -102,7 +102,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    protected Query<Permission> createPermissionQuery(Entry entry, Folder folder, BulkUpload upload,
+    protected Query<Permission> createPermissionQuery(Entry entry, Folder folder, BulkUploadModel upload,
                                                       AccountModel account, Group group, boolean canRead,
                                                       boolean canWrite) {
         CriteriaQuery<Permission> query = getBuilder().createQuery(Permission.class);
@@ -121,7 +121,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         return currentSession().createQuery(query);
     }
 
-    public int removePermission(Entry entry, Folder folder, BulkUpload upload, AccountModel account, Group group,
+    public int removePermission(Entry entry, Folder folder, BulkUploadModel upload, AccountModel account, Group group,
                                 boolean canRead, boolean canWrite) {
         try {
             CriteriaDelete<Permission> delete = getBuilder().createCriteriaDelete(Permission.class);

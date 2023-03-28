@@ -1,8 +1,8 @@
 package org.jbei.ice.folder.collection;
 
 import org.jbei.ice.access.PermissionException;
+import org.jbei.ice.bulkupload.BulkUpload;
 import org.jbei.ice.bulkupload.BulkUploadAuthorization;
-import org.jbei.ice.bulkupload.BulkUploadInfo;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.entry.attachment.Attachments;
 import org.jbei.ice.folder.AbstractFolder;
@@ -11,7 +11,7 @@ import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.BulkUploadDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.AccountModel;
-import org.jbei.ice.storage.model.BulkUpload;
+import org.jbei.ice.storage.model.BulkUploadModel;
 import org.jbei.ice.storage.model.Entry;
 
 import java.util.List;
@@ -53,7 +53,7 @@ public class Collection {
         BulkUploadDAO uploadDAO = DAOFactory.getBulkUploadDAO();
         BulkUploadAuthorization authorization = new BulkUploadAuthorization();
 
-        BulkUpload draft = uploadDAO.get(id);
+        BulkUploadModel draft = uploadDAO.get(id);
         if (draft == null)
             return null;
 
@@ -61,7 +61,7 @@ public class Collection {
         authorization.expectRead(account.getEmail(), draft);
 
         // retrieve the entries associated with the bulk import
-        BulkUploadInfo info = draft.toDataTransferObject();
+        BulkUpload info = draft.toDataTransferObject();
 
         List<Entry> list = uploadDAO.retrieveDraftEntries(id, offset, limit);
         for (Entry entry : list) {

@@ -75,7 +75,7 @@ public class PermissionsController {
 
         // if bulk upload
         if (access.isUpload()) {
-            BulkUpload upload = DAOFactory.getBulkUploadDAO().get(access.getTypeId());
+            BulkUploadModel upload = DAOFactory.getBulkUploadDAO().get(access.getTypeId());
             if (upload == null)
                 throw new IllegalArgumentException("Cannot find upload " + access.getId());
             BulkUploadAuthorization uploadAuthorization = new BulkUploadAuthorization();
@@ -86,7 +86,7 @@ public class PermissionsController {
         return null;
     }
 
-    protected Permission addPermission(AccessPermission access, Entry entry, Folder folder, BulkUpload upload) {
+    protected Permission addPermission(AccessPermission access, Entry entry, Folder folder, BulkUploadModel upload) {
         // account or group
         AccountModel account = null;
         Group group = null;
@@ -151,7 +151,7 @@ public class PermissionsController {
         }
 
         if (access.isUpload()) {
-            BulkUpload upload = DAOFactory.getBulkUploadDAO().get(access.getTypeId());
+            BulkUploadModel upload = DAOFactory.getBulkUploadDAO().get(access.getTypeId());
             if (upload == null)
                 throw new IllegalArgumentException("Could not retrieve upload " + access.getTypeId());
             BulkUploadAuthorization uploadAuthorization = new BulkUploadAuthorization();
@@ -160,7 +160,7 @@ public class PermissionsController {
         }
     }
 
-    private void removePermission(AccessPermission access, Entry entry, Folder folder, BulkUpload upload) {
+    private void removePermission(AccessPermission access, Entry entry, Folder folder, BulkUploadModel upload) {
         // account or group
         AccountModel account = null;
         Group group = null;

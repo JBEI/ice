@@ -109,7 +109,6 @@ public class FolderContents {
                 entry = new Entry();
                 entry.setRecordType(partData.getType().getName());
                 entry.setRecordId(partData.getRecordId());
-                entry.setVersionId(partData.getRecordId());
                 entry.setRecordType(partData.getType().getDisplay());
                 entry.setVisibility(Visibility.REMOTE.getValue());
                 entry.setPartNumber(partData.getPartId());

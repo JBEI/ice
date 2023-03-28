@@ -11,25 +11,25 @@ import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.AccountModel;
-import org.jbei.ice.storage.model.BulkUpload;
+import org.jbei.ice.storage.model.BulkUploadModel;
 import org.jbei.ice.storage.model.Entry;
 
 import java.util.List;
 
 /**
- * Hibernate Data accessor object for retrieving {@link BulkUpload} objects
+ * Hibernate Data accessor object for retrieving {@link BulkUploadModel} objects
  * from the database
  *
  * @author Hector Plahar
  */
-public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
+public class BulkUploadDAO extends HibernateRepository<BulkUploadModel> {
 
-    public List<BulkUpload> retrieveByAccount(AccountModel account) {
+    public List<BulkUploadModel> retrieveByAccount(AccountModel account) {
         try {
-            CriteriaQuery<BulkUpload> query = getBuilder().createQuery(BulkUpload.class);
-            Root<BulkUpload> from = query.from(BulkUpload.class);
+            CriteriaQuery<BulkUploadModel> query = getBuilder().createQuery(BulkUploadModel.class);
+            Root<BulkUploadModel> from = query.from(BulkUploadModel.class);
             query.where(getBuilder().equal(from.get("account"), account),
-                    getBuilder().notEqual(from.get("status"), BulkUploadStatus.PENDING_APPROVAL));
+                getBuilder().notEqual(from.get("status"), BulkUploadStatus.PENDING_APPROVAL));
             return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -37,10 +37,10 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         }
     }
 
-    public List<BulkUpload> retrieveByStatus(BulkUploadStatus status) {
+    public List<BulkUploadModel> retrieveByStatus(BulkUploadStatus status) {
         try {
-            CriteriaQuery<BulkUpload> query = getBuilder().createQuery(BulkUpload.class);
-            Root<BulkUpload> from = query.from(BulkUpload.class);
+            CriteriaQuery<BulkUploadModel> query = getBuilder().createQuery(BulkUploadModel.class);
+            Root<BulkUploadModel> from = query.from(BulkUploadModel.class);
             query.where(getBuilder().equal(from.get("status"), status));
             return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
@@ -52,11 +52,11 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
     public int retrieveSavedDraftCount(long draftId) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
-            Root<BulkUpload> from = query.from(BulkUpload.class);
-            Join<BulkUpload, Entry> contents = from.join("contents");
+            Root<BulkUploadModel> from = query.from(BulkUploadModel.class);
+            Join<BulkUploadModel, Entry> contents = from.join("contents");
 
             query.select(getBuilder().countDistinct(contents.get("id"))).where(getBuilder()
-                    .equal(from.get("id"), draftId));
+                .equal(from.get("id"), draftId));
             return currentSession().createQuery(query).uniqueResult().intValue();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -64,11 +64,11 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         }
     }
 
-    public List<Long> getEntryIds(BulkUpload upload) {
+    public List<Long> getEntryIds(BulkUploadModel upload) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
-            Root<BulkUpload> from = query.from(BulkUpload.class);
-            Join<BulkUpload, Entry> contents = from.join("contents");
+            Root<BulkUploadModel> from = query.from(BulkUploadModel.class);
+            Join<BulkUploadModel, Entry> contents = from.join("contents");
 
             query.select(contents.get("id")).where(getBuilder().equal(from.get("id"), upload.getId()));
             return currentSession().createQuery(query).list();
@@ -81,11 +81,11 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
     public List<Entry> retrieveDraftEntries(long id, int start, int limit) {
         try {
             CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
-            Root<BulkUpload> from = query.from(BulkUpload.class);
-            Join<BulkUpload, Entry> contents = from.join("contents");
+            Root<BulkUploadModel> from = query.from(BulkUploadModel.class);
+            Join<BulkUploadModel, Entry> contents = from.join("contents");
             query.select(contents)
-                    .where(getBuilder().equal(from.get("id"), id))
-                    .orderBy(getBuilder().asc(contents.get("id")));
+                .where(getBuilder().equal(from.get("id"), id))
+                .orderBy(getBuilder().asc(contents.get("id")));
             return currentSession().createQuery(query).setFirstResult(start).setMaxResults(limit).list();
         } catch (HibernateException e) {
             Logger.error(e);
@@ -93,7 +93,7 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         }
     }
 
-    public int setEntryStatus(BulkUpload upload, Visibility status) {
+    public int setEntryStatus(BulkUploadModel upload, Visibility status) {
         try {
             List<Long> entryIds = getEntryIds(upload);
             if (entryIds.isEmpty())
@@ -119,7 +119,7 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
     }
 
     @Override
-    public BulkUpload get(long id) {
-        return super.get(BulkUpload.class, id);
+    public BulkUploadModel get(long id) {
+        return super.get(BulkUploadModel.class, id);
     }
 }

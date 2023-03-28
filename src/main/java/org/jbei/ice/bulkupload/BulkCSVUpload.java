@@ -10,7 +10,7 @@ import org.jbei.ice.dto.sample.SampleType;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
-import org.jbei.ice.storage.model.BulkUpload;
+import org.jbei.ice.storage.model.BulkUploadModel;
 import org.jbei.ice.storage.model.CustomEntryFieldModel;
 import org.jbei.ice.storage.model.Entry;
 
@@ -38,7 +38,7 @@ public class BulkCSVUpload {
         this.inputStream = inputStream;
         this.invalidFields = new LinkedList<>();
         this.uploadId = uploadId;
-        BulkUpload upload = DAOFactory.getBulkUploadDAO().get(uploadId);
+        BulkUploadModel upload = DAOFactory.getBulkUploadDAO().get(uploadId);
         if (upload == null)
             throw new IllegalArgumentException("Invalid bulk upload \"" + uploadId + "\"");
         this.addType = EntryType.nameToType(upload.getImportType());

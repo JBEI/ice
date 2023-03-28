@@ -3,23 +3,23 @@ package org.jbei.ice.bulkupload;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.access.PermissionsController;
 import org.jbei.ice.account.Account;
 import org.jbei.ice.account.AccountController;
 import org.jbei.ice.dto.ConfigurationKey;
-import org.jbei.ice.dto.access.AccessPermission;
 import org.jbei.ice.dto.entry.*;
 import org.jbei.ice.entry.attachment.Attachments;
 import org.jbei.ice.entry.sequence.PartSequence;
 import org.jbei.ice.executor.IceExecutorService;
-import org.jbei.ice.group.GroupController;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.BulkUploadDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
-import org.jbei.ice.storage.model.*;
+import org.jbei.ice.storage.model.AccountModel;
+import org.jbei.ice.storage.model.Attachment;
+import org.jbei.ice.storage.model.BulkUploadModel;
+import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.utils.Utils;
 
 import java.io.ByteArrayInputStream;
@@ -62,8 +62,8 @@ public class BulkUploads {
      * returns null if no
      * @throws PermissionException user performing action doesn't have privileges
      */
-    public BulkUploadInfo rename(String userId, long id, String name) {
-        BulkUpload upload = dao.get(id);
+    public BulkUpload rename(String userId, long id, String name) {
+        BulkUploadModel upload = dao.get(id);
         if (upload == null)
             return null;
 
@@ -86,40 +86,29 @@ public class BulkUploads {
      * @param info   bulk upload data
      * @return created upload
      */
-    public BulkUploadInfo create(String userId, BulkUploadInfo info) {
+    public BulkUpload create(String userId, BulkUpload info) {
+        // validate type
+        if (EntryType.nameToType(info.getType()) == null)
+            throw new IllegalArgumentException("Cannot create upload of type: " + info.getType());
+
         AccountModel account = accountController.getByEmail(userId);
-        BulkUpload upload = new BulkUpload();
+        BulkUploadModel upload = new BulkUploadModel();
         upload.setName(info.getName());
         upload.setAccount(account);
         upload.setCreationTime(new Date());
         upload.setLastUpdateTime(upload.getCreationTime());
         if (info.getStatus() == BulkUploadStatus.BULK_EDIT) {
-            // only one instance of bulk edit is allowed to remain
-            clearBulkEdits(userId);
             upload.setStatus(BulkUploadStatus.BULK_EDIT);
         } else
             upload.setStatus(BulkUploadStatus.IN_PROGRESS);
 
         upload.setImportType(info.getType());
-
-        // set default permissions
-        GroupController groupController = new GroupController();
-        ArrayList<Group> publicGroups = groupController.getAllPublicGroupsForAccount(account);
-        for (Group group : publicGroups) {
-            Permission permission = new Permission();
-            permission.setCanRead(true);
-            permission.setUpload(upload);
-            permission.setGroup(group);
-            permission = DAOFactory.getPermissionDAO().create(permission);
-            upload.getPermissions().add(permission);
-        }
-
         upload = dao.create(upload);
 
+        // list of entries associated with this upload (if available at this time)
         if (info.getEntryList() != null) {
             for (PartData data : info.getEntryList()) {
                 Entry entry = entryDAO.get(data.getId());
-                // todo if entry is in another bulk upload, then update will fail
                 if (entry == null)
                     continue;
 
@@ -132,35 +121,13 @@ public class BulkUploads {
     }
 
     public void updateLinkType(String userId, long id, EntryType linkType) {
-        BulkUpload upload = dao.get(id);
+        BulkUploadModel upload = dao.get(id);
         if (upload == null)
             throw new IllegalArgumentException("Could not retrieve upload with id " + id);
 
         authorization.expectWrite(userId, upload);
         upload.setLinkType(linkType.getName());
         dao.update(upload);
-    }
-
-    /**
-     * Removes any bulk edits belonging to the specified user
-     *
-     * @param userId unique identifier for user whose bulk edits are to be removed
-     */
-    private void clearBulkEdits(String userId) {
-        AccountModel account = DAOFactory.getAccountDAO().getByEmail(userId);
-        if (account == null)
-            return;
-
-        List<BulkUpload> userEdits = dao.retrieveByAccount(account);
-        if (userEdits == null || userEdits.isEmpty())
-            return;
-
-        for (BulkUpload upload : userEdits) {
-            if (upload.getStatus() != BulkUploadStatus.BULK_EDIT)
-                continue;
-            upload.getContents().clear();
-            dao.delete(upload);
-        }
     }
 
     /**
@@ -171,19 +138,19 @@ public class BulkUploads {
      * @param userId account for user making request; expected to be an administrator
      * @return list of bulk imports pending verification
      */
-    public HashMap<String, ArrayList<BulkUploadInfo>> getPendingImports(String userId) {
+    public HashMap<String, ArrayList<BulkUpload>> getPendingImports(String userId) {
         // check for admin privileges
         authorization.expectAdmin(userId);
 
-        HashMap<String, ArrayList<BulkUploadInfo>> infoList = new HashMap<>();
-        List<BulkUpload> results;
+        HashMap<String, ArrayList<BulkUpload>> infoList = new HashMap<>();
+        List<BulkUploadModel> results;
 
         results = dao.retrieveByStatus(BulkUploadStatus.PENDING_APPROVAL);
         if (results == null || results.isEmpty())
             return infoList;
 
-        for (BulkUpload draft : results) {
-            BulkUploadInfo info = new BulkUploadInfo();
+        for (BulkUploadModel draft : results) {
+            BulkUpload info = new BulkUpload();
             AccountModel draftAccount = draft.getAccount();
             String userEmail = draftAccount.getEmail();
             Account account = new Account();
@@ -201,7 +168,7 @@ public class BulkUploads {
             info.setName(draft.getName());
 
             // add to list
-            ArrayList<BulkUploadInfo> userList = infoList.computeIfAbsent(userEmail, k -> new ArrayList<>());
+            ArrayList<BulkUpload> userList = infoList.computeIfAbsent(userEmail, k -> new ArrayList<>());
             userList.add(info);
         }
 
@@ -219,8 +186,8 @@ public class BulkUploads {
      * @return data transfer object with the retrieved bulk import data and associated entries
      * @throws PermissionException if user doesn't have read permissions for specified bulk import
      */
-    public BulkUploadInfo get(String userId, long id, int offset, int limit) {
-        BulkUpload draft = dao.get(id);
+    public BulkUpload get(String userId, long id, int offset, int limit) {
+        BulkUploadModel draft = dao.get(id);
         if (draft == null)
             return null;
 
@@ -228,7 +195,7 @@ public class BulkUploads {
         authorization.expectRead(account.getEmail(), draft);
 
         // retrieve the entries associated with the bulk import
-        BulkUploadInfo info = draft.toDataTransferObject();
+        BulkUpload info = draft.toDataTransferObject();
 
         List<Entry> list = dao.retrieveDraftEntries(id, offset, limit);
         for (Entry entry : list) {
@@ -281,18 +248,18 @@ public class BulkUploads {
      * @param userAccountId account identifier for user whose saved drafts are being requested
      * @return list of draft infos representing saved drafts.
      */
-    public ArrayList<BulkUploadInfo> retrieveByUser(String requesterId, String userAccountId) {
+    public ArrayList<BulkUpload> retrieveByUser(String requesterId, String userAccountId) {
         AccountModel userAccount = accountController.getByEmail(userAccountId);
-        List<BulkUpload> results = dao.retrieveByAccount(userAccount);
-        ArrayList<BulkUploadInfo> infoArrayList = new ArrayList<>();
+        List<BulkUploadModel> results = dao.retrieveByAccount(userAccount);
+        ArrayList<BulkUpload> infoArrayList = new ArrayList<>();
 
-        for (BulkUpload draft : results) {
+        for (BulkUploadModel draft : results) {
             boolean isOwner = userAccountId.equals(requesterId);
             boolean isAdmin = accountController.isAdministrator(requesterId);
             if (!isOwner && !isAdmin)
                 continue;
 
-            BulkUploadInfo draftInfo = draft.toDataTransferObject();
+            BulkUpload draftInfo = draft.toDataTransferObject();
             draftInfo.setCount(dao.retrieveSavedDraftCount(draft.getId()));
             infoArrayList.add(draftInfo);
         }
@@ -300,15 +267,15 @@ public class BulkUploads {
         return infoArrayList;
     }
 
-    public ArrayList<BulkUploadInfo> getPendingUploads(String userId) {
+    public ArrayList<BulkUpload> getPendingUploads(String userId) {
         if (!accountController.isAdministrator(userId))
             return null;
 
-        List<BulkUpload> results = dao.retrieveByStatus(BulkUploadStatus.PENDING_APPROVAL);
-        ArrayList<BulkUploadInfo> infoArrayList = new ArrayList<>();
+        List<BulkUploadModel> results = dao.retrieveByStatus(BulkUploadStatus.PENDING_APPROVAL);
+        ArrayList<BulkUpload> infoArrayList = new ArrayList<>();
 
-        for (BulkUpload draft : results) {
-            BulkUploadInfo info = draft.toDataTransferObject();
+        for (BulkUploadModel draft : results) {
+            BulkUpload info = draft.toDataTransferObject();
             info.setCount(dao.retrieveSavedDraftCount(draft.getId()));
             infoArrayList.add(info);
         }
@@ -325,8 +292,8 @@ public class BulkUploads {
      * @return deleted bulk import
      * @throws PermissionException if lacking permissions
      */
-    public BulkUploadInfo deleteDraftById(String userId, long draftId) throws PermissionException {
-        BulkUpload draft = dao.get(draftId);
+    public BulkUpload deleteDraftById(String userId, long draftId) throws PermissionException {
+        BulkUploadModel draft = dao.get(draftId);
         if (draft == null)
             return null;
 
@@ -337,7 +304,7 @@ public class BulkUploads {
         BulkUploadDeleteTask task = new BulkUploadDeleteTask(userId, draftId);
         IceExecutorService.getInstance().runTask(task);
 
-        BulkUploadInfo draftInfo = draft.toDataTransferObject();
+        BulkUpload draftInfo = draft.toDataTransferObject();
         Account account = draft.getAccount().toDataTransferObject();
         draftInfo.setAccount(account);
         return draftInfo;
@@ -352,11 +319,11 @@ public class BulkUploads {
         boolean isAdmin = accountController.isAdministrator(account.getEmail());
         if (!isAdmin) {
             Logger.warn(account.getEmail() + " attempting to revert submitted bulk upload "
-                    + uploadId + " without admin privs");
+                + uploadId + " without admin privs");
             return false;
         }
 
-        BulkUpload upload = dao.get(uploadId);
+        BulkUploadModel upload = dao.get(uploadId);
         if (upload == null) {
             Logger.warn("Could not retrieve bulk upload " + uploadId + " for reversal");
             return false;
@@ -381,72 +348,21 @@ public class BulkUploads {
         }
 
         // retrieve bulk upload in question (at this point it is owned by system)
-        BulkUpload bulkUpload = dao.get(id);
-        if (bulkUpload == null) {
+        BulkUploadModel bulkUploadModel = dao.get(id);
+        if (bulkUploadModel == null) {
             Logger.error("Could not retrieve bulk upload with id \"" + id + "\" for approval");
             return false;
         }
 
-        // get permissions for bulk upload and set it to the individual entries
-        PermissionsController permissionsController = new PermissionsController();
-        ArrayList<AccessPermission> permissions = new ArrayList<>();
-        for (Permission permission : bulkUpload.getPermissions()) {
-            AccessPermission accessPermission = permission.toDataTransferObject();
-            // read or write access
-            if (accessPermission.getType() == AccessPermission.Type.READ_UPLOAD)
-                accessPermission.setType(AccessPermission.Type.READ_ENTRY);
-            else
-                accessPermission.setType(AccessPermission.Type.WRITE_ENTRY);
-            permissions.add(accessPermission);
-        }
-
-        // go through passed contents
-        // TODO : this needs to go into a task that auto updates
-        for (Entry entry : bulkUpload.getContents()) {
-            entry.setVisibility(Visibility.OK.getValue());
-            Set<Entry> linked = entry.getLinkedEntries();
-            Entry plasmid = null;
-            if (linked != null && !linked.isEmpty()) {
-                plasmid = (Entry) linked.toArray()[0];
-                plasmid.setVisibility(Visibility.OK.getValue());
-            }
-
-            // set permissions
-            for (AccessPermission accessPermission : permissions) {
-                accessPermission.setTypeId(entry.getId());
-
-                permissionsController.addPermission(userId, accessPermission);
-                if (plasmid != null) {
-                    accessPermission.setTypeId(plasmid.getId());
-                    permissionsController.addPermission(userId, accessPermission);
-                }
-            }
-
-            updateEntry(entry);
-            if (plasmid != null)
-                updateEntry(plasmid);
-        }
-
         // when done approving, delete the bulk upload record but not the entries associated with it.
-        bulkUpload.getContents().clear();
-        dao.delete(bulkUpload);
+        bulkUploadModel.getContents().clear();
+        dao.delete(bulkUploadModel);
         return true;
-    }
-
-    private void updateEntry(Entry entry) {
-        if (entry == null) {
-            return;
-        }
-
-        entry.setModificationTime(Calendar.getInstance().getTime());
-        if (entry.getVisibility() == null)
-            entry.setVisibility(Visibility.OK.getValue());
-        entryDAO.update(entry);
     }
 
     public SequenceInfo addSequence(String userId, long bulkUploadId, long entryId, String sequenceString,
                                     String fileName) {
-        BulkUpload upload = dao.get(bulkUploadId);
+        BulkUploadModel upload = dao.get(bulkUploadId);
         if (upload == null)
             return null;
 
@@ -464,7 +380,7 @@ public class BulkUploads {
 
     public AttachmentInfo addAttachment(String userId, long bulkUploadId, long entryId, InputStream fileInputStream,
                                         String fileName) {
-        BulkUpload upload = dao.get(bulkUploadId);
+        BulkUploadModel upload = dao.get(bulkUploadId);
         if (upload == null)
             return null;
 
@@ -472,7 +388,7 @@ public class BulkUploads {
 
         String fileId = Utils.generateUUID();
         File attachmentFile = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-                Attachments.attachmentDirName, fileId).toFile();
+            Attachments.attachmentDirName, fileId).toFile();
 
         try {
             FileUtils.copyInputStreamToFile(fileInputStream, attachmentFile);
@@ -489,7 +405,7 @@ public class BulkUploads {
     }
 
     public boolean deleteAttachment(String userId, long bulkUploadId, long entryId) {
-        BulkUpload upload = dao.get(bulkUploadId);
+        BulkUploadModel upload = dao.get(bulkUploadId);
         if (upload == null)
             return false;
 
@@ -515,7 +431,7 @@ public class BulkUploads {
 
     public boolean deleteEntry(String userId, long uploadId, long entryId) {
         try {
-            BulkUpload upload = dao.get(uploadId);
+            BulkUploadModel upload = dao.get(uploadId);
             Entry entry = new EntryDAO().get(entryId);
             authorization.expectWrite(userId, upload);
             upload.getContents().remove(entry);
@@ -524,77 +440,6 @@ public class BulkUploads {
             Logger.error(e);
             return false;
         }
-    }
-
-    public List<AccessPermission> getUploadPermissions(String userId, long uploadId) {
-        List<AccessPermission> permissions = new ArrayList<>();
-        BulkUpload upload = dao.get(uploadId);
-        if (upload == null)
-            return permissions;
-
-        authorization.expectWrite(userId, upload);
-
-        if (upload.getPermissions() != null) {
-            for (Permission permission : upload.getPermissions())
-                permissions.add(permission.toDataTransferObject());
-        }
-
-        return permissions;
-    }
-
-    /**
-     * Adds specified access permission to the bulk upload.
-     *
-     * @param userId   unique identifier of user making the request. Must be an admin or owner of the upload
-     * @param uploadId unique identifier for bulk upload
-     * @param access   details about the permission to the added
-     * @return added permission with identifier that can be used to remove/delete the permission
-     * @throws IllegalArgumentException if the upload cannot be located using its identifier
-     */
-    public AccessPermission addPermission(String userId, long uploadId, AccessPermission access) {
-        BulkUpload upload = dao.get(uploadId);
-        if (upload == null)
-            throw new IllegalArgumentException("Could not locate bulk upload with id " + uploadId);
-
-        access.setTypeId(uploadId);
-        Permission permission = new PermissionsController().addPermission(userId, access);
-        upload.getPermissions().add(permission);
-        dao.update(upload);
-        return permission.toDataTransferObject();
-    }
-
-    /**
-     * Removes specified permission from bulk upload
-     *
-     * @param userId       unique identifier of user making the request. Must be an admin or owner of the bulk upload
-     * @param uploadId     unique identifier for bulk upload
-     * @param permissionId unique identifier for permission that has been previously added to upload
-     * @return true if deletion is successful
-     * @throws IllegalArgumentException if upload or permission cannot be located by their identifiers
-     */
-    public boolean deletePermission(String userId, long uploadId, long permissionId) {
-        BulkUpload upload = dao.get(uploadId);
-        if (upload == null)
-            throw new IllegalArgumentException("Could not locate bulk upload with id " + uploadId);
-
-        authorization.expectWrite(userId, upload);
-        Permission toDelete = null;
-
-        if (upload.getPermissions() != null) {
-            for (Permission permission : upload.getPermissions()) {
-                if (permission.getId() == permissionId) {
-                    toDelete = permission;
-                    break;
-                }
-            }
-        }
-
-        if (toDelete == null)
-            throw new IllegalArgumentException("Could not locate permission for deletion");
-
-        upload.getPermissions().remove(toDelete);
-        DAOFactory.getPermissionDAO().delete(toDelete);
-        return dao.update(upload) != null;
     }
 
     /**

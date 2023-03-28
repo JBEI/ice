@@ -6,7 +6,6 @@ import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.bulkupload.*;
-import org.jbei.ice.dto.access.AccessPermission;
 import org.jbei.ice.dto.entry.*;
 import org.jbei.ice.entry.PartDefaults;
 import org.jbei.ice.entry.sequence.PartSequence;
@@ -17,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Rest API for interacting with bulk upload resources
@@ -27,7 +25,7 @@ import java.util.List;
 @Path("/uploads")
 public class BulkUploadResource extends RestResource {
 
-    private final BulkUploads controller = new BulkUploads();
+    private final BulkUploads bulkUploads = new BulkUploads();
 
     /**
      * Retrieves specified bulk upload resource including
@@ -40,12 +38,12 @@ public class BulkUploadResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public BulkUploadInfo read(@PathParam("id") long id,
-                               @DefaultValue("0") @QueryParam("offset") int offset,
-                               @DefaultValue("50") @QueryParam("limit") int limit) {
+    public BulkUpload read(@PathParam("id") long id,
+                           @DefaultValue("0") @QueryParam("offset") int offset,
+                           @DefaultValue("50") @QueryParam("limit") int limit) {
         String userId = requireUserId();
         Logger.info(userId + ": retrieving bulk import with id \"" + id + "\"");
-        return controller.get(userId, id, offset, limit);
+        return bulkUploads.get(userId, id, offset, limit);
     }
 
     /**
@@ -61,53 +59,8 @@ public class BulkUploadResource extends RestResource {
             @QueryParam("token") String token,
             @DefaultValue("8") @QueryParam("limit") int limit) {
         requireUserId();
-        ArrayList<String> results = controller.getMatchingPartNumbersForLinks(uploadType, token, limit);
+        ArrayList<String> results = bulkUploads.getMatchingPartNumbersForLinks(uploadType, token, limit);
         return super.respond(results);
-    }
-
-    /**
-     * Retrieves permissions associated with an upload
-     *
-     * @param id unique identifier for the upload
-     * @return retrieved permissions for specified upload if user has required permissions
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}/permissions")
-    public Response getUploadPermissions(@PathParam("id") long id) {
-        String userId = requireUserId();
-        List<AccessPermission> permissionList = controller.getUploadPermissions(userId, id);
-        return super.respond(permissionList);
-    }
-
-    /**
-     * Add upload permission
-     *
-     * @param id               unique identifier for the upload
-     * @param accessPermission model object for permissions applied to upload
-     * @return Response with the added permission
-     */
-    @POST
-    @Path("/{id}/permissions")
-    public Response addPermission(@PathParam("id") long id,
-                                  AccessPermission accessPermission) {
-        String userId = requireUserId();
-        AccessPermission permission = controller.addPermission(userId, id, accessPermission);
-        return super.respond(permission);
-    }
-
-    /**
-     * @param id
-     * @param permissionId
-     * @return Response with success or failure of permissions delete
-     */
-    @DELETE
-    @Path("/{id}/permissions/{pid}")
-    public Response removePermission(@PathParam("id") long id,
-                                     @PathParam("pid") long permissionId) {
-        String userId = requireUserId();
-        boolean success = controller.deletePermission(userId, id, permissionId);
-        return super.respond(success);
     }
 
     @POST
@@ -122,8 +75,8 @@ public class BulkUploadResource extends RestResource {
             String fileName = contentDispositionHeader.getFileName();
             String userId = requireUserId();
             String sequence = Utils.getString(fileInputStream);
-            SequenceInfo sequenceInfo = controller.addSequence(userId, uploadId, entryId,
-                    sequence, fileName);
+            SequenceInfo sequenceInfo = bulkUploads.addSequence(userId, uploadId, entryId,
+                sequence, fileName);
             if (sequenceInfo == null) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
@@ -144,8 +97,8 @@ public class BulkUploadResource extends RestResource {
                                          @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
         String fileName = contentDispositionHeader.getFileName();
         String userId = requireUserId();
-        AttachmentInfo attachmentInfo = controller.addAttachment(userId, uploadId,
-                entryId, fileInputStream, fileName);
+        AttachmentInfo attachmentInfo = bulkUploads.addAttachment(userId, uploadId,
+            entryId, fileInputStream, fileName);
         if (attachmentInfo == null) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
@@ -162,7 +115,7 @@ public class BulkUploadResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public BulkUploadInfo updateList(@PathParam("id") long id, BulkUploadInfo info) {
+    public BulkUpload updateList(@PathParam("id") long id, BulkUpload info) {
         String userId = requireUserId();
         BulkUploadEntries entries = new BulkUploadEntries(userId, id);
         return entries.createOrUpdateEntries(info.getEntryList());
@@ -177,7 +130,7 @@ public class BulkUploadResource extends RestResource {
         if (entryType == null)
             throw new WebApplicationException();
 
-        controller.updateLinkType(userId, id, entryType);
+        bulkUploads.updateLinkType(userId, id, entryType);
 
         PartDefaults partDefaults = new PartDefaults(userId);
         PartData partData = partDefaults.get(entryType);
@@ -193,7 +146,7 @@ public class BulkUploadResource extends RestResource {
     @Path("/pending")
     public Response getPendingUploads() {
         String userId = requireUserId();
-        HashMap<String, ArrayList<BulkUploadInfo>> pending = controller.getPendingImports(userId);
+        HashMap<String, ArrayList<BulkUpload>> pending = bulkUploads.getPendingImports(userId);
         return Response.status(Response.Status.OK).entity(pending).build();
     }
 
@@ -205,11 +158,11 @@ public class BulkUploadResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/name")
-    public Response updateName(@PathParam("id") long id, BulkUploadInfo info) {
+    public Response updateName(@PathParam("id") long id, BulkUpload info) {
         String userId = getUserId();
         Logger.info(userId + ": updating bulk upload name for " + info.getId() + " with value " + info.getName());
         BulkUploads uploads = new BulkUploads();
-        BulkUploadInfo result = uploads.rename(userId, id, info.getName());
+        BulkUpload result = uploads.rename(userId, id, info.getName());
         if (result == null) {
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
@@ -226,7 +179,7 @@ public class BulkUploadResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/status")
-    public Response updateStatus(@PathParam("id") long id, BulkUploadInfo info) {
+    public Response updateStatus(@PathParam("id") long id, BulkUpload info) {
         String userId = requireUserId();
         Logger.info(userId + ": updating bulk upload status for \"" + info.getId() + "\" to " + info.getStatus());
         BulkUploadEntries entries = new BulkUploadEntries(userId, id);
@@ -276,10 +229,10 @@ public class BulkUploadResource extends RestResource {
      */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public BulkUploadInfo create(BulkUploadInfo info) {
+    public BulkUpload create(BulkUpload info) {
         String userId = requireUserId();
         Logger.info(userId + ": creating bulk upload draft");
-        return controller.create(userId, info);
+        return bulkUploads.create(userId, info);
     }
 
     /**
@@ -287,10 +240,10 @@ public class BulkUploadResource extends RestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<BulkUploadInfo> query() {
+    public ArrayList<BulkUpload> query() {
         String userId = getUserId();
         Logger.info(userId + ": retrieving bulk upload drafts");
-        return controller.retrieveByUser(userId, userId);
+        return bulkUploads.retrieveByUser(userId, userId);
     }
 
     /**
@@ -332,7 +285,7 @@ public class BulkUploadResource extends RestResource {
     public Response deleteEntry(@PathParam("id") long uploadId,
                                 @PathParam("entryId") long entryId) {
         String userId = getUserId();
-        if (controller.deleteEntry(userId, uploadId, entryId)) {
+        if (bulkUploads.deleteEntry(userId, uploadId, entryId)) {
             return Response.ok().build();
         }
         return Response.serverError().build();
@@ -365,7 +318,7 @@ public class BulkUploadResource extends RestResource {
     public Response deleteEntryAttachment(@PathParam("id") long uploadId,
                                           @PathParam("entryId") long entryId) {
         String userId = getUserId();
-        if (controller.deleteAttachment(userId, uploadId, entryId)) {
+        if (bulkUploads.deleteAttachment(userId, uploadId, entryId)) {
             return Response.ok().build();
         }
         return Response.serverError().build();

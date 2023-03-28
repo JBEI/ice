@@ -5,7 +5,7 @@ import org.jbei.ice.executor.Task;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.BulkUploadDAO;
-import org.jbei.ice.storage.model.BulkUpload;
+import org.jbei.ice.storage.model.BulkUploadModel;
 import org.jbei.ice.storage.model.Entry;
 
 
@@ -28,7 +28,7 @@ public class BulkUploadDeleteTask extends Task {
     public void execute() {
         BulkUploadDAO dao = DAOFactory.getBulkUploadDAO();
 
-        BulkUpload upload = dao.get(bulkUploadId);
+        BulkUploadModel upload = dao.get(bulkUploadId);
         if (upload == null) {
             Logger.error("Could not locate bulk upload " + bulkUploadId + " for deletion");
             return;

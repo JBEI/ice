@@ -30,7 +30,7 @@ public class Permission implements DataModel {
 
     @ManyToOne
     @JoinColumn(name = "group_id")
-    private org.jbei.ice.storage.model.Group group;
+    private Group group;
 
     @Column(name = "can_read")
     private boolean canRead;
@@ -41,16 +41,16 @@ public class Permission implements DataModel {
     @ManyToOne
     @JoinColumn(name = "entry_id")
 //    @ContainedIn
-    private org.jbei.ice.storage.model.Entry entry;
+    private Entry entry;
 
     @ManyToOne
     @JoinColumn(name = "folder_id")
 //    @ContainedIn
-    private org.jbei.ice.storage.model.Folder folder;
+    private Folder folder;
 
     @ManyToOne
     @JoinColumn(name = "upload_id")
-    private org.jbei.ice.storage.model.BulkUpload upload;
+    private BulkUploadModel upload;
 
     // access verification token
     @Column(name = "secret")
@@ -78,7 +78,7 @@ public class Permission implements DataModel {
         this.account = account;
     }
 
-    public org.jbei.ice.storage.model.Group getGroup() {
+    public Group getGroup() {
         return group;
     }
 
@@ -86,11 +86,11 @@ public class Permission implements DataModel {
         this.group = group;
     }
 
-    public org.jbei.ice.storage.model.BulkUpload getUpload() {
+    public BulkUploadModel getUpload() {
         return upload;
     }
 
-    public void setUpload(BulkUpload upload) {
+    public void setUpload(BulkUploadModel upload) {
         this.upload = upload;
     }
 
@@ -110,7 +110,7 @@ public class Permission implements DataModel {
         this.canWrite = canWrite;
     }
 
-    public org.jbei.ice.storage.model.Entry getEntry() {
+    public Entry getEntry() {
         return entry;
     }
 
@@ -118,7 +118,7 @@ public class Permission implements DataModel {
         this.entry = entry;
     }
 
-    public org.jbei.ice.storage.model.Folder getFolder() {
+    public Folder getFolder() {
         return folder;
     }
 

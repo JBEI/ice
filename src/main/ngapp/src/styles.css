@@ -1,7 +1,7 @@
+@import '~handsontable/dist/handsontable.full.min.css';
+@import '~open-vector-editor/umd/main.css';
 @import '~bootstrap/dist/css/bootstrap.css';
 @import "~bootstrap-icons/font/bootstrap-icons.css";
-@import '~open-vector-editor/umd/main.css';
-@import '~handsontable/dist/handsontable.full.css';
 
 html body {
     font-family: "Helvetica Neue", Arial, "Noto Sans", sans-serif;

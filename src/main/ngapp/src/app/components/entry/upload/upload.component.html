@@ -13,16 +13,32 @@
 
                 <div class="container">
 
-                    <div class="row">
-                        <div class="col p-3">
-                            <h5 class="text-uppercase fw-bold">New <span class="text-muted">{{type}}</span> entry
-                            </h5>
+                    <div class="row p-3">
+                        <div class="col">
+                            <h5 class="fw-bold"><span class="text-uppercase text-muted">{{type}}</span> ENTRY<br>
+                                <small class="text-muted fst-italic fw-normal" style="margin-top: -5px">saving
+                                    ...</small></h5>
                         </div>
 
-                        <div class="col p-3">
-                            <div class="float-end px-4">
-                                <button class="btn btn-sm btn-primary">Save</button>
-                                <button class="btn btn-sm btn-white ms-2">Cancel</button>
+                        <div class="col">
+                            <!--                            <button class="btn btn-sm btn-link">Link</button>-->
+                            <div ngbDropdown class="d-inline-block">
+                                <button type="button" class="btn btn-sm btn-white" ngbDropdownToggle>
+                                    Toggle dropdown
+                                </button>
+                                <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                                    <button ngbDropdownItem>Action - 1</button>
+                                    <button ngbDropdownItem>Another Action</button>
+                                    <button ngbDropdownItem>Something else is here</button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col">
+                            <div class="float-end">
+                                <button class="btn btn-sm btn-primary">Submit</button>
+                                <button class="btn btn-sm btn-white ms-2">Reset</button>
                             </div>
                         </div>
                     </div>
@@ -31,7 +47,6 @@
                         <div class="col p-0">
                             <div>
 
-                                &nbsp;
                                 <hot-table
                                     [hotId]="hotid"
                                     [settings]="hotSettings"

@@ -17,6 +17,9 @@ public enum EntryType {
     }
 
     public static EntryType nameToType(String name) {
+        if (name == null)
+            return null;
+
         name = name.trim();
 
         if ("arabidopsis".equalsIgnoreCase(name)) // ice-150: workaround for existing records

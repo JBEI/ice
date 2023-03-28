@@ -5,7 +5,7 @@ import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.access.PermissionsController;
 import org.jbei.ice.account.Account;
 import org.jbei.ice.account.AccountController;
-import org.jbei.ice.bulkupload.BulkUploadInfo;
+import org.jbei.ice.bulkupload.BulkUpload;
 import org.jbei.ice.bulkupload.BulkUploads;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.entry.Visibility;
@@ -133,8 +133,8 @@ public class FolderController {
 
     public ArrayList<FolderDetails> getBulkUploadDrafts(String userId) {
         ArrayList<FolderDetails> folders = new ArrayList<>();
-        ArrayList<BulkUploadInfo> list = bulkUploads.retrieveByUser(userId, userId);
-        for (BulkUploadInfo info : list) {
+        ArrayList<BulkUpload> list = bulkUploads.retrieveByUser(userId, userId);
+        for (BulkUpload info : list) {
             FolderDetails details = new FolderDetails();
             details.setName(info.getName());
             details.setCount(info.getCount());
@@ -154,8 +154,8 @@ public class FolderController {
      */
     public ArrayList<FolderDetails> getPendingBulkUploads(String userId) {
         ArrayList<FolderDetails> folders = new ArrayList<>();
-        ArrayList<BulkUploadInfo> list = bulkUploads.getPendingUploads(userId);
-        for (BulkUploadInfo info : list) {
+        ArrayList<BulkUpload> list = bulkUploads.getPendingUploads(userId);
+        for (BulkUpload info : list) {
             FolderDetails details = new FolderDetails();
             String name = info.getAccount() != null ? info.getAccount().getEmail() : info.getName();
             details.setName(name);
@@ -240,7 +240,7 @@ public class FolderController {
         switch (type) {
             case UPLOAD:
                 BulkUploads controller = new BulkUploads();
-                BulkUploadInfo info = controller.deleteDraftById(userId, folderId);
+                BulkUpload info = controller.deleteDraftById(userId, folderId);
                 if (info == null) {
                     Logger.error("Could not locate bulk upload id " + folderId + " for deletion");
                     return null;

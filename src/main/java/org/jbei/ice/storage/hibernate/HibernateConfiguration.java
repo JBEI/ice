@@ -162,7 +162,7 @@ public class HibernateConfiguration {
         configuration.addAnnotatedClass(Folder.class);
         configuration.addAnnotatedClass(ParameterModel.class);
         configuration.addAnnotatedClass(AnnotationLocation.class);
-        configuration.addAnnotatedClass(BulkUpload.class);
+        configuration.addAnnotatedClass(BulkUploadModel.class);
         configuration.addAnnotatedClass(Permission.class);
         configuration.addAnnotatedClass(Message.class);
         configuration.addAnnotatedClass(Preference.class);

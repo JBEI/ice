@@ -29,7 +29,6 @@ public class InfoToModelFactory {
         else
             entry.setRecordId(info.getRecordId());
 
-        entry.setVersionId(entry.getRecordId());
         if (info.getCreationTime() == 0)
             entry.setCreationTime(new Date());
         else
