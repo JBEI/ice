@@ -23,12 +23,17 @@
                             "src/assets"
                         ],
                         "styles": [
-                            "node_modules/bootstrap/dist/css/bootstrap.min.css",
-                            "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-                            "node_modules/open-vector-editor/umd/main.css",
-                            "node_modules/handsontable/dist/handsontable.full.min.css",
+                            "bootstrap/dist/css/bootstrap.min.css",
+                            "bootstrap-icons/font/bootstrap-icons.css",
+                            "open-vector-editor/umd/main.css",
+                            "handsontable/dist/handsontable.full.min.css",
                             "src/styles.css"
                         ],
+                        "stylePreprocessorOptions": {
+                            "includePaths": [
+                                "./node_modules"
+                            ]
+                        },
                         "scripts": [
                             "node_modules/open-vector-editor/umd/open-vector-editor.min.js"
                         ],

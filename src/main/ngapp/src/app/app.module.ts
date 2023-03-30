@@ -42,6 +42,7 @@ import {FolderActionsComponent} from './components/folder-actions/folder-actions
 import {ConfigureComponent} from './components/configure-component/configure.component';
 import {ShareFolderModalComponent} from './components/modal/share-folder-modal/share-folder-modal.component';
 import {DateFieldComponent} from "./components/entry/widgets/date-field/date-field.component";
+import {NgOptimizedImage} from "@angular/common";
 
 // register Handsontable's modules
 registerAllModules();
@@ -98,7 +99,8 @@ registerAllModules();
         NgbNavModule,
         HttpClientModule,
         HotTableModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        NgOptimizedImage
     ],
     providers: [EntryResolver, EntryFieldsResolver],
     bootstrap: [AppComponent]

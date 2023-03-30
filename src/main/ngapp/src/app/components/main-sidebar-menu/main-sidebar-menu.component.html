@@ -1,11 +1,22 @@
 <div class="vh-100 px-2" *ngIf="user && user.sessionId">
 
-    <img src="assets/img/img.png" alt="" width="210px" class="mt-3 cursor-pointer" (click)="goHome()">
+    <img src="assets/img/img.png" alt="" width="210px" class="mt-3 cursor-pointer" (click)="goHome()" height="33">
 
     <br><br>
 
-    <div *ngFor="let collection of collections">
-        <a class="d-flex justify-content-between list-group-item-action cursor-pointer rounded"
+    <div class="list-group">
+        <a href="#" class="list-group-item list-group-item-action active">
+            Cras justo odio
+        </a>
+        <a href="#" class="list-group-item list-group-item-action">Dapibus ac facilisis in</a>
+        <a href="#" class="list-group-item list-group-item-action">Morbi leo risus</a>
+        <a href="#" class="list-group-item list-group-item-action">Porta ac consectetur ac</a>
+        <a href="#" class="list-group-item list-group-item-action disabled">Vestibulum at eros</a>
+    </div>
+
+    <div class="list-group">
+        <a *ngFor="let collection of collections"
+           class="d-flex justify-content-between list-group-item-action list-group-item-action rounded"
            (click)="selectCollection(collection)" [routerLink]="'/collection/' + collection.name"
            [ngClass]="{'bg-light fw-bold': selectedOption && (collection.name === selectedOption)}"
            style="font-size: .92rem; font-weight: 400; padding: 0.75rem 0.75rem">
