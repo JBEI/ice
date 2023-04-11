@@ -4,10 +4,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.account.Account;
-import org.jbei.ice.account.AccountController;
-import org.jbei.ice.account.Accounts;
-import org.jbei.ice.account.PreferencesController;
+import org.jbei.ice.account.*;
 import org.jbei.ice.dto.AccountResults;
 import org.jbei.ice.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.dto.entry.PartData;
@@ -56,7 +53,7 @@ public class UserResource extends RestResource {
         log(userId, "retrieving available accounts");
         try {
             Accounts accounts = new Accounts();
-            AccountResults result = accounts.getAvailableAccounts(userId, offset, limit, asc, sort, filter);
+            AccountResults result = accounts.getAvailable(userId, offset, limit, asc, sort, filter);
             return super.respond(result);
         } catch (PermissionException pe) {
             return super.respond(Response.Status.UNAUTHORIZED);
@@ -174,7 +171,8 @@ public class UserResource extends RestResource {
     public Account update(@PathParam("id") long userId,
                           Account transfer) {
         String user = requireUserId();
-        return controller.updateAccount(user, userId, transfer);
+        Accounts accounts = new Accounts();
+        return accounts.updateAccount(user, userId, transfer);
     }
 
     @POST
@@ -182,7 +180,8 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/password")
     public Response resetPassword(Account transfer) {
-        boolean success = controller.resetPassword(transfer.getEmail());
+        AccountPasswords passwords = new AccountPasswords();
+        boolean success = passwords.reset(transfer.getEmail());
         if (!success) {
             return super.respond(Response.Status.NOT_FOUND);
         }
@@ -199,7 +198,8 @@ public class UserResource extends RestResource {
     public Account updatePassword(@PathParam("id") long userId, Account transfer) {
         String user = getUserId();
         log(user, "changing password for user " + userId);
-        return controller.updatePassword(user, userId, transfer);
+        AccountPasswords passwords = new AccountPasswords();
+        return passwords.updatePassword(user, userId, transfer);
     }
 
     /**
@@ -210,7 +210,8 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response createNewUser(@DefaultValue("true") @QueryParam("sendEmail") boolean sendEmail, Account account) {
         try {
-            Account created = controller.createNewAccount(account, sendEmail);
+            Accounts accounts = new Accounts();
+            Account created = accounts.create(account, sendEmail);
             return super.respond(created);
         } catch (UtilityException e) {
             Logger.error(e);

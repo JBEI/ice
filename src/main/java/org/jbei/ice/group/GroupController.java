@@ -1,13 +1,14 @@
 package org.jbei.ice.group;
 
+import org.jbei.ice.access.Authorization;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.account.Account;
-import org.jbei.ice.account.AccountController;
 import org.jbei.ice.account.AccountType;
 import org.jbei.ice.dto.group.GroupType;
 import org.jbei.ice.dto.group.UserGroup;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.GroupDAO;
 import org.jbei.ice.storage.model.AccountModel;
 import org.jbei.ice.storage.model.Group;
@@ -24,12 +25,13 @@ public class GroupController {
     public static final String PUBLIC_GROUP_DESCRIPTION = "All users are members of this group";
     public static final String PUBLIC_GROUP_UUID = "8746a64b-abd5-4838-a332-02c356bbeac0";
 
-    private final AccountController accountController;
     private final GroupDAO dao;
+    private final AccountDAO accountDAO;
+    private final Authorization
 
     public GroupController() {
-        dao = new GroupDAO();
-        accountController = new AccountController();
+        this.dao = DAOFactory.getGroupDAO();
+        this.accountDAO = DAOFactory.getAccountDAO();
     }
 
     /**
@@ -53,7 +55,7 @@ public class GroupController {
     }
 
     public Set<String> retrieveAccountGroupUUIDs(String userId) {
-        AccountModel account = accountController.getByEmail(userId);
+        AccountModel account = this.accountDAO.getByEmail(userId);
         Set<String> uuids = new HashSet<>();
         if (account != null) {
             uuids.addAll(dao.getMemberGroupUUIDs(account));
