@@ -4,28 +4,20 @@
 
     <br><br>
 
-    <div class="list-group">
-        <a href="#" class="list-group-item list-group-item-action active">
-            Cras justo odio
-        </a>
-        <a href="#" class="list-group-item list-group-item-action">Dapibus ac facilisis in</a>
-        <a href="#" class="list-group-item list-group-item-action">Morbi leo risus</a>
-        <a href="#" class="list-group-item list-group-item-action">Porta ac consectetur ac</a>
-        <a href="#" class="list-group-item list-group-item-action disabled">Vestibulum at eros</a>
-    </div>
-
-    <div class="list-group">
-        <a *ngFor="let collection of collections"
-           class="d-flex justify-content-between list-group-item-action list-group-item-action rounded"
-           (click)="selectCollection(collection)" [routerLink]="'/collection/' + collection.name"
-           [ngClass]="{'bg-light fw-bold': selectedOption && (collection.name === selectedOption)}"
-           style="font-size: .92rem; font-weight: 400; padding: 0.75rem 0.75rem">
-            <div class="ps-3">
-                <i class="pe-2 text-primary bi" [ngClass]="collection.icon"></i>
-                {{collection.display}}
-            </div>
-            <!--            <i class="bi bi-chevron-right" *ngIf="selectedOption && (collection.name === selectedOption.name)"></i>-->
-        </a>
+    <div>
+        <div class="list-group">
+            <a *ngFor="let collection of collections"
+               class="d-flex justify-content-between list-group-item-action list-group-item-action rounded"
+               (click)="selectCollection(collection)" [routerLink]="'/collection/' + collection.name"
+               [ngClass]="{'bg-light fw-bold': selectedOption && (collection.name === selectedOption)}"
+               style="font-size: .92rem; font-weight: 400; padding: 0.75rem 0.75rem">
+                <div class="ps-3">
+                    <i class="pe-2 text-primary bi" [ngClass]="collection.icon"></i>
+                    {{collection.display}}
+                </div>
+                <!--            <i class="bi bi-chevron-right" *ngIf="selectedOption && (collection.name === selectedOption.name)"></i>-->
+            </a>
+        </div>
     </div>
 
     <br><br>
