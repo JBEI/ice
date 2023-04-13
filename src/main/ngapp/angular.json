@@ -24,8 +24,8 @@
                         ],
                         "styles": [
                             "bootstrap/dist/css/bootstrap.min.css",
-                            "bootstrap-icons/font/bootstrap-icons.css",
                             "node_modules/open-vector-editor/umd/main.css",
+                            "bootstrap-icons/font/bootstrap-icons.css",
                             "handsontable/dist/handsontable.full.min.css",
                             "src/styles.css"
                         ],
