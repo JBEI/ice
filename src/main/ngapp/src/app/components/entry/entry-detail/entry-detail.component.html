@@ -11,9 +11,9 @@
                     <app-header></app-header>
                 </div>
 
-                <div class="container">
+                <div class="container" *ngIf="entry">
 
-                    <div class="row px-4 pt-4 pb-3 mx-2">
+                    <div class="row px-4 pt-4 pb-3">
                         <div class="col">
                             <div class="d-flex justify-content-between">
                                 <div>
@@ -33,13 +33,29 @@
                                         <i class="bi bi-arrow-90deg-up"></i> Strain
                                     </a>
 
-                                    <button class="btn btn-sm btn-white ms-1 mt-3">Actions</button>
+                                    <div ngbDropdown class="d-inline-block">
+                                        <button class="btn btn-sm btn-white ms-1 mt-3" ngbDropdownToggle>Actions
+                                        </button>
+
+                                        <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                                            <div ngbDropdownItem>Option 1</div>
+                                            <div ngbDropdownItem>Option 2</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row bg-white border" style="margin-left: 40px">
+                    <div class="row bg-white mx-4 rounded-top">
+                        <div class="col">
+                            <div class="pt-1 float-end">
+                                <i class="bi bi-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row bg-white mx-4">
                         <div class="col pt-2 pb-3">
                             <ng-container *ngIf="entry.fields && entry.fields.length">
                                 <div class="row p-1" *ngFor="let field of entry.fields">
@@ -87,9 +103,9 @@
                     </div>
 
                     <div class="row mt-4">
-                        <div class="col px-4">
-                            <div>
-                                SEQUENCE
+                        <div class="col">
+                            <div class="mx-4">
+                                <b>SEQUENCE</b>
                                 <app-part-visualization [entry]="entry"></app-part-visualization>
                             </div>
                         </div>

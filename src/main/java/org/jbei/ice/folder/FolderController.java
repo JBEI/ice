@@ -62,7 +62,7 @@ public class FolderController {
      */
     public ArrayList<FolderDetails> getAvailableFolders(String userId) {
         Set<Folder> folders = new HashSet<>(dao.getFoldersByType(FolderType.PUBLIC));
-        boolean isAdmin = accountController.isAdministrator(userId);
+        boolean isAdmin = authorization.isAdmin(userId);
 
         ArrayList<FolderDetails> list = new ArrayList<>();
         for (Folder folder : folders) {
@@ -257,7 +257,7 @@ public class FolderController {
                 if (folder == null)
                     return null;
 
-                if (!accountController.isAdministrator(userId) && !folder.getOwnerEmail().equalsIgnoreCase(userId)) {
+                if (!authorization.isAdmin(userId) && !folder.getOwnerEmail().equalsIgnoreCase(userId)) {
                     String errorMsg = userId + ": insufficient permissions to delete folder " + folderId;
                     Logger.warn(errorMsg);
                     throw new PermissionException(errorMsg);
@@ -282,7 +282,7 @@ public class FolderController {
             return null;
         Folder folder = new Folder(folderDetails.getName());
         Account owner = folderDetails.getOwner();
-        if (owner != null && !StringUtils.isEmpty(owner.getEmail()) && accountController.isAdministrator(userId))
+        if (owner != null && !StringUtils.isEmpty(owner.getEmail()) && authorization.isAdmin(userId))
             folder.setOwnerEmail(owner.getEmail());
         else
             folder.setOwnerEmail(userId);
@@ -358,7 +358,7 @@ public class FolderController {
     }
 
     public List<FolderDetails> getTransferredFolders(String userId) {
-        if (!accountController.isAdministrator(userId))
+        if (!authorization.isAdmin(userId))
             return new ArrayList<>();
 
         List<Folder> folders = dao.getFoldersByType(FolderType.TRANSFERRED);
@@ -366,7 +366,7 @@ public class FolderController {
     }
 
     public List<FolderDetails> getSampleFolders(String userId) {
-        if (!accountController.isAdministrator(userId))
+        if (!authorization.isAdmin(userId))
             return new ArrayList<>();
 
         List<Folder> folders = DAOFactory.getSampleCreateModelDAO().getFoldersByStatus(SampleRequestStatus.PENDING);

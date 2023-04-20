@@ -2,7 +2,7 @@ package org.jbei.ice.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.account.AccountController;
+import org.jbei.ice.account.AccountAuthorization;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.Setting;
 import org.jbei.ice.logging.Logger;
@@ -34,9 +34,11 @@ public class ConfigurationSettings {
     private static final String BLAST_FTP_DIR = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.13.0/";
 
     private final ConfigurationDAO dao;
+    private final AccountAuthorization authorization;
 
     public ConfigurationSettings() {
         dao = DAOFactory.getConfigurationDAO();
+        this.authorization = new AccountAuthorization();
     }
 
     public Setting getSystemVersion(String url) {
@@ -60,7 +62,7 @@ public class ConfigurationSettings {
 
     public ArrayList<Setting> retrieveSystemSettings(String userId) {
         ArrayList<Setting> settings = new ArrayList<>();
-        if (!new AccountController().isAdministrator(userId))
+        if (!this.authorization.isAdministrator(userId))
             return settings;
 
         for (ConfigurationKey key : ConfigurationKey.values()) {
@@ -72,7 +74,7 @@ public class ConfigurationSettings {
 
     public List<Setting> getSampleRequestSettings(String userId) {
         List<Setting> settings = new ArrayList<>();
-        if (!new AccountController().isAdministrator(userId))
+        if (!this.authorization.isAdministrator(userId))
             return settings;
 
         settings.add(getConfigValue(ConfigurationKey.SAMPLE_CREATE_APPROVAL_MESSAGE));
@@ -100,8 +102,7 @@ public class ConfigurationSettings {
     }
 
     public Setting updateSetting(String userId, Setting setting, String url) {
-        AccountController accountController = new AccountController();
-        if (!accountController.isAdministrator(userId))
+        if (!this.authorization.isAdministrator(userId))
             throw new PermissionException("Cannot update system setting without admin privileges");
 
         ConfigurationKey key = ConfigurationKey.valueOf(setting.getKey());
@@ -119,8 +120,7 @@ public class ConfigurationSettings {
 
     // update the setting automatically. Currently works only for blast installations
     public Setting autoUpdateSetting(String userId, Setting setting) {
-        AccountController accountController = new AccountController();
-        if (!accountController.isAdministrator(userId))
+        if (!this.authorization.isAdministrator(userId))
             throw new PermissionException("Cannot auto update system setting without admin privileges");
 
         ConfigurationModel configuration = dao.get(setting.getKey());

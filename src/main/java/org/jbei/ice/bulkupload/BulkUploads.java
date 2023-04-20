@@ -4,7 +4,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.account.Account;
-import org.jbei.ice.account.AccountController;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.entry.*;
 import org.jbei.ice.entry.attachment.Attachments;
@@ -40,14 +39,12 @@ public class BulkUploads {
     private final BulkUploadDAO dao;
     private final EntryDAO entryDAO;
     private final BulkUploadAuthorization authorization;
-    private final AccountController accountController;
     private final Attachments attachments;
 
     public BulkUploads() {
         dao = DAOFactory.getBulkUploadDAO();
         entryDAO = DAOFactory.getEntryDAO();
         authorization = new BulkUploadAuthorization();
-        accountController = new AccountController();
         attachments = new Attachments();
     }
 
@@ -91,7 +88,7 @@ public class BulkUploads {
         if (EntryType.nameToType(info.getType()) == null)
             throw new IllegalArgumentException("Cannot create upload of type: " + info.getType());
 
-        AccountModel account = accountController.getByEmail(userId);
+        AccountModel account = DAOFactory.getAccountDAO().getByEmail(userId);
         BulkUploadModel upload = new BulkUploadModel();
         upload.setName(info.getName());
         upload.setAccount(account);
@@ -191,7 +188,7 @@ public class BulkUploads {
         if (draft == null)
             return null;
 
-        AccountModel account = accountController.getByEmail(userId);
+        AccountModel account = DAOFactory.getAccountDAO().getByEmail(userId);
         authorization.expectRead(account.getEmail(), draft);
 
         // retrieve the entries associated with the bulk import
@@ -249,13 +246,13 @@ public class BulkUploads {
      * @return list of draft infos representing saved drafts.
      */
     public ArrayList<BulkUpload> retrieveByUser(String requesterId, String userAccountId) {
-        AccountModel userAccount = accountController.getByEmail(userAccountId);
+        AccountModel userAccount = DAOFactory.getAccountDAO().getByEmail(userAccountId);
         List<BulkUploadModel> results = dao.retrieveByAccount(userAccount);
         ArrayList<BulkUpload> infoArrayList = new ArrayList<>();
 
         for (BulkUploadModel draft : results) {
             boolean isOwner = userAccountId.equals(requesterId);
-            boolean isAdmin = accountController.isAdministrator(requesterId);
+            boolean isAdmin = authorization.isAdmin(requesterId);
             if (!isOwner && !isAdmin)
                 continue;
 
@@ -268,7 +265,7 @@ public class BulkUploads {
     }
 
     public ArrayList<BulkUpload> getPendingUploads(String userId) {
-        if (!accountController.isAdministrator(userId))
+        if (!authorization.isAdmin(userId))
             return null;
 
         List<BulkUploadModel> results = dao.retrieveByStatus(BulkUploadStatus.PENDING_APPROVAL);
@@ -298,7 +295,7 @@ public class BulkUploads {
             return null;
 
         AccountModel draftAccount = draft.getAccount();
-        if (!userId.equals(draftAccount.getEmail()) && !accountController.isAdministrator(userId))
+        if (!userId.equals(draftAccount.getEmail()) && !authorization.isAdmin(userId))
             throw new PermissionException("No permissions to delete draft " + draftId);
 
         BulkUploadDeleteTask task = new BulkUploadDeleteTask(userId, draftId);
@@ -316,7 +313,7 @@ public class BulkUploads {
     }
 
     boolean revertSubmitted(AccountModel account, long uploadId) {
-        boolean isAdmin = accountController.isAdministrator(account.getEmail());
+        boolean isAdmin = authorization.isAdmin(account.getEmail());
         if (!isAdmin) {
             Logger.warn(account.getEmail() + " attempting to revert submitted bulk upload "
                 + uploadId + " without admin privs");
@@ -342,7 +339,7 @@ public class BulkUploads {
 
     boolean approveBulkImport(String userId, long id) {
         // only admins allowed
-        if (!accountController.isAdministrator(userId)) {
+        if (!authorization.isAdmin(userId)) {
             Logger.warn("Only administrators can approve bulk imports");
             return false;
         }

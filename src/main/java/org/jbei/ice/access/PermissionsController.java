@@ -1,6 +1,6 @@
 package org.jbei.ice.access;
 
-import org.jbei.ice.account.AccountController;
+import org.jbei.ice.account.AccountAuthorization;
 import org.jbei.ice.bulkupload.BulkUploadAuthorization;
 import org.jbei.ice.dto.access.AccessPermission;
 import org.jbei.ice.dto.folder.FolderAuthorization;
@@ -30,7 +30,7 @@ import java.util.Set;
  */
 public class PermissionsController {
 
-    private final AccountController accountController;
+    private final AccountAuthorization authorization;
     private final GroupController groupController;
     private final FolderDAO folderDAO;
     private final PermissionDAO dao;
@@ -38,7 +38,7 @@ public class PermissionsController {
     private final AccountDAO accountDAO;
 
     public PermissionsController() {
-        accountController = new AccountController();
+        authorization = new AccountAuthorization();
         groupController = new GroupController();
         folderDAO = DAOFactory.getFolderDAO();
         dao = DAOFactory.getPermissionDAO();
@@ -242,10 +242,10 @@ public class PermissionsController {
     }
 
     public boolean hasWritePermission(String userId, Folder folder) {
-        if (accountController.isAdministrator(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId))
+        if (authorization.isAdministrator(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId))
             return true;
 
-        AccountModel account = accountController.getByEmail(userId);
+        AccountModel account = accountDAO.getByEmail(userId);
         return dao.hasSetWriteFolderPermission(folder, account);
     }
 
@@ -312,7 +312,7 @@ public class PermissionsController {
      * @return true if action permission was scheduled to be propagated
      */
     public boolean propagateFolderPermissions(String userId, Folder folder, boolean add) {
-        if (!accountController.isAdministrator(userId) && !userId.equalsIgnoreCase(folder.getOwnerEmail()))
+        if (!authorization.isAdministrator(userId) && !userId.equalsIgnoreCase(folder.getOwnerEmail()))
             return false;
 
         // retrieve folder permissions
@@ -336,7 +336,7 @@ public class PermissionsController {
         if (permissions == null)
             return null;
 
-        AccountModel account = accountController.getByEmail(userId);
+        AccountModel account = accountDAO.getByEmail(userId);
 
         for (AccessPermission access : permissions) {
             Permission permission = new Permission();

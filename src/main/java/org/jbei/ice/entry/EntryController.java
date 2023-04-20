@@ -74,7 +74,7 @@ public class EntryController extends HasEntry {
             return null;
 
         authorization.canRead(userId, entry);
-        AccountModel account = accountController.getByEmail(userId);
+        AccountModel account = DAOFactory.getAccountDAO().getByEmail(userId);
         Comment comment = new Comment();
         comment.setAccount(account);
         comment.setEntry(entry);

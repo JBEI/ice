@@ -23,11 +23,20 @@ export class PartVisualizationComponent implements OnInit {
     names: any;
     editor: any;
     feedback: any = {};
+    loadingSequence: boolean;
 
     constructor(private http: HttpService, private vectorEditor: VectorEditorService) {
     }
 
     ngOnInit(): void {
+        if (!this.sequence) {
+            this.loadingSequence = true;
+            this.http.get('parts/' + this.entry.id + '/sequence').subscribe((result: Sequence) => {
+                console.log(result);
+                this.sequence = result;
+                this.loadingSequence = false;
+            });
+        }
         // if (this.design && this.design.id) {
         //     this.http.get('designs/' + this.design.id + '/part-sources').subscribe((result) => {
         //         this.partSources = result;

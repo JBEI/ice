@@ -3,7 +3,6 @@ package org.jbei.ice.entry.sequence;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.account.AccountController;
 import org.jbei.ice.account.TokenHash;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.FeaturedDNASequence;
@@ -164,7 +163,7 @@ public class Sequences {
      * @param fileInputStream input stream of zip file
      */
     public List<String> bulkUpdate(String userId, InputStream fileInputStream) throws IOException {
-        if (!new AccountController().isAdministrator(userId))
+        if (!this.authorization.isAdmin(userId))
             throw new PermissionException("Must have admin privileges to use this feature");
 
         List<String> errors = new ArrayList<>();

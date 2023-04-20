@@ -1,8 +1,8 @@
 package org.jbei.ice;
 
 import org.jbei.ice.account.Account;
-import org.jbei.ice.account.AccountController;
 import org.jbei.ice.account.AccountType;
+import org.jbei.ice.account.Accounts;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.model.AccountModel;
@@ -27,7 +27,7 @@ public class AccountCreator {
         account.setFirstName("TEST_FNAME");
         account.setLastName("TEST");
         account.setEmail(email);
-        account = new AccountController().createNewAccount(account, false);
+        account = new Accounts().create(account, false);
 
         Assert.assertNotNull(account.getPassword());
         accountModel = dao.getByEmail(email);

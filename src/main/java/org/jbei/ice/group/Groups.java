@@ -3,6 +3,7 @@ package org.jbei.ice.group;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.account.Account;
+import org.jbei.ice.account.AccountAuthorization;
 import org.jbei.ice.account.AccountController;
 import org.jbei.ice.account.AccountType;
 import org.jbei.ice.dto.common.Results;
@@ -34,17 +35,17 @@ public class Groups {
     private final GroupDAO dao;
     private final AccountDAO accountDAO;
     private final String userId;
-    private final AccountController accountController;
     private final RemoteClientModelDAO remoteClientModelDAO;
     private final RemotePartnerDAO remotePartnerDAO;
+    private final AccountAuthorization authorization;
 
     public Groups(String userId) {
         this.userId = userId;
         this.dao = DAOFactory.getGroupDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
-        this.accountController = new AccountController();
         this.remoteClientModelDAO = DAOFactory.getRemoteClientModelDAO();
         this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
+        this.authorization = new AccountAuthorization();
     }
 
     /**
@@ -61,7 +62,7 @@ public class Groups {
         AccountModel account = accountDAO.getByEmail(this.userId);
 
         // TODO : account authorization
-        if (!accountController.isAdministrator(account.getEmail()) && account.getId() != userIdAccount.getId())
+        if (!this.authorization.isAdministrator(account.getEmail()) && account.getId() != userIdAccount.getId())
             return null;
 
         List<Group> result = dao.retrieveMemberGroups(account);
@@ -113,7 +114,7 @@ public class Groups {
         if (userGroup.getType() == null)
             userGroup.setType(GroupType.PRIVATE);
 
-        if (userGroup.getType() == GroupType.PUBLIC && !accountController.isAdministrator(userId)) {
+        if (userGroup.getType() == GroupType.PUBLIC && !this.authorization.isAdministrator(userId)) {
             String errMsg = "Non admin '" + userId + "' attempting to create public group";
             Logger.error(errMsg);
             throw new PermissionException(errMsg);
@@ -188,7 +189,7 @@ public class Groups {
             return null;
 
         if (group.getType() == GroupType.PUBLIC) {
-            if (!accountController.isAdministrator(userId))
+            if (!this.authorization.isAdministrator(userId))
                 throw new PermissionException("Administrative privileges required");
         } else if (!userId.equalsIgnoreCase(group.getOwner().getEmail())) {
             AccountModel account = accountDAO.getByEmail(this.userId);
@@ -217,7 +218,7 @@ public class Groups {
             return false;
         }
 
-        if (group.getType() == GroupType.PUBLIC && !accountController.isAdministrator(userId)) {
+        if (group.getType() == GroupType.PUBLIC && !this.authorization.isAdministrator(userId)) {
             String errMsg = "Non admin " + userId + " attempting to update public group";
             Logger.error(errMsg);
             throw new PermissionException(errMsg);

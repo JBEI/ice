@@ -109,6 +109,7 @@ export class CreateNewEntryComponent implements OnInit {
             hasErrors = hasErrors ? true : field.isInvalid;
         }
 
+        // do not make call to backend if any field has an error
         if (hasErrors)
             return;
 
@@ -117,10 +118,13 @@ export class CreateNewEntryComponent implements OnInit {
         // submit to the backend
         this.http.post('parts/' + this.newPart.id, this.newPart).subscribe({
             next: (result: Part) => {
+                // remove entry in progress from session
                 sessionStorage.removeItem('in-progress-entry');
+
+                // navigate to the just created entry
                 this.router.navigate(["entry", result.id]);
             }, error: (error: any) => {
-
+                // todo : notify user of error creating entry
             }, complete: () => {
             }
         })

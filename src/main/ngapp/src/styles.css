@@ -1,3 +1,6 @@
+@import url("bootstrap/dist/css/bootstrap.min.css");
+@import url("bootstrap-icons/font/bootstrap-icons.css");
+
 html body {
     font-family: "Helvetica Neue", Arial, "Noto Sans", sans-serif;
     background-color: #f1f5f9;
@@ -148,5 +151,14 @@ html body {
 .field-value:hover i {
     cursor: pointer;
     color: rebeccapurple;
+}
+
+div > .field-value i {
+    display: none;
+}
+
+div:hover > .field-value i {
+    display: inline-block;
+    color: #cccccc !important;
 }
 

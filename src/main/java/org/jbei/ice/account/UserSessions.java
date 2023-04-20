@@ -98,13 +98,13 @@ public class UserSessions {
             Logger.error("Account for userId returned by session (\"" + userId + "\") cannot be found");
             return null;
         }
-        AccountController accountController = new AccountController();
 
-        if (!requestingUser.equalsIgnoreCase(userId) && !accountController.isAdministrator(requestingUser))
+        AccountAuthorization authorization = new AccountAuthorization();
+        if (!requestingUser.equalsIgnoreCase(userId) && !authorization.isAdministrator(requestingUser))
             throw new PermissionException();
 
         Account accountTransfer = account.toDataTransferObject();
-        accountTransfer.setAdmin(accountController.isAdministrator(userId));
+        accountTransfer.setAdmin(authorization.isAdministrator(userId));
         return accountTransfer;
     }
 }

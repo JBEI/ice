@@ -1,8 +1,8 @@
 package org.jbei.ice.group;
 
-import org.jbei.ice.access.Authorization;
 import org.jbei.ice.access.PermissionException;
 import org.jbei.ice.account.Account;
+import org.jbei.ice.account.AccountAuthorization;
 import org.jbei.ice.account.AccountType;
 import org.jbei.ice.dto.group.GroupType;
 import org.jbei.ice.dto.group.UserGroup;
@@ -27,11 +27,12 @@ public class GroupController {
 
     private final GroupDAO dao;
     private final AccountDAO accountDAO;
-    private final Authorization
+    private final AccountAuthorization authorization;
 
     public GroupController() {
         this.dao = DAOFactory.getGroupDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
+        this.authorization = new AccountAuthorization();
     }
 
     /**
@@ -51,7 +52,7 @@ public class GroupController {
 
     private boolean canAccessGroup(String userId, Group group) {
         boolean isOwner = group.getOwner() != null && group.getOwner().getEmail().equalsIgnoreCase(userId);
-        return isOwner || accountController.isAdministrator(userId);
+        return isOwner || authorization.isAdministrator(userId);
     }
 
     public Set<String> retrieveAccountGroupUUIDs(String userId) {
@@ -73,7 +74,7 @@ public class GroupController {
 
     // create group without parent
     public UserGroup createGroup(String userId, UserGroup info) {
-        if (info.getType() == GroupType.PUBLIC && !accountController.isAdministrator(userId)) {
+        if (info.getType() == GroupType.PUBLIC && !authorization.isAdministrator(userId)) {
             String errMsg = "Non admin " + userId + " attempting to create public group";
             Logger.error(errMsg);
             return null;
@@ -82,7 +83,7 @@ public class GroupController {
         if (info.getType() == null)
             info.setType(GroupType.PRIVATE);
 
-        AccountModel account = accountController.getByEmail(userId);
+        AccountModel account = accountDAO.getByEmail(userId);
 
         Group group = new Group();
         group.setLabel(info.getLabel());
@@ -92,11 +93,11 @@ public class GroupController {
         group = save(group);
 
         for (Account accountTransfer : info.getMembers()) {
-            AccountModel memberAccount = accountController.getByEmail(accountTransfer.getEmail());
+            AccountModel memberAccount = accountDAO.getByEmail(accountTransfer.getEmail());
             if (memberAccount == null)
                 continue;
             memberAccount.getGroups().add(group);
-            accountController.save(memberAccount);
+            accountDAO.create(memberAccount);
         }
 
         info = group.toDataTransferObject();
@@ -121,7 +122,8 @@ public class GroupController {
 
         if (group.getMembers() != null) {
             for (AccountModel member : group.getMembers()) {
-                accountController.removeMemberFromGroup(group.getId(), member.getEmail());
+                // todo
+//                accountController.removeMemberFromGroup(group.getId(), member.getEmail());
             }
         }
 
@@ -144,7 +146,7 @@ public class GroupController {
     }
 
     public List<Group> getMatchingGroups(String userId, String query, int limit) {
-        AccountModel account = accountController.getByEmail(userId);
+        AccountModel account = accountDAO.getByEmail(userId);
         if (account == null)
             return null;
         return dao.getMatchingGroups(account, query, limit);

@@ -1,6 +1,6 @@
 package org.jbei.ice.net;
 
-import org.jbei.ice.account.AccountController;
+import org.jbei.ice.account.AccountAuthorization;
 import org.jbei.ice.config.ConfigurationSettings;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.web.RegistryPartner;
@@ -63,7 +63,7 @@ public class WoRController {
      * @param partnerUrl url identifier for partner
      */
     public boolean removeWebPartner(String userId, String partnerUrl) {
-        if (!new AccountController().isAdministrator(userId))
+        if (!new AccountAuthorization().isAdministrator(userId))
             return false;
 
         RemotePartner partner = dao.getByUrl(partnerUrl);
@@ -75,7 +75,7 @@ public class WoRController {
     }
 
     public boolean updateWebPartner(String userId, String url, RegistryPartner partner) {
-        if (!new AccountController().isAdministrator(userId))
+        if (!new AccountAuthorization().isAdministrator(userId))
             return false;
 
         Logger.info(userId + ": updating partner (" + url + ") to " + partner.toString());

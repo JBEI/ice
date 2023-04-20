@@ -2,7 +2,7 @@ package org.jbei.ice.manuscript;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.account.AccountController;
+import org.jbei.ice.account.AccountAuthorization;
 import org.jbei.ice.dto.common.Results;
 import org.jbei.ice.dto.folder.FolderDetails;
 import org.jbei.ice.dto.folder.FolderType;
@@ -30,7 +30,7 @@ public class Manuscripts {
         this.userId = userId;
         this.dao = DAOFactory.getManuscriptModelDAO();
         this.folderDAO = DAOFactory.getFolderDAO();
-        if (!new AccountController().isAdministrator(userId))
+        if (!new AccountAuthorization().isAdministrator(userId))
             throw new PermissionException("Admin feature");
     }
 

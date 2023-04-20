@@ -1,7 +1,7 @@
 package org.jbei.ice.net;
 
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.account.AccountController;
+import org.jbei.ice.account.AccountAuthorization;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.FeaturedDNASequence;
 import org.jbei.ice.dto.common.Results;
@@ -153,8 +153,7 @@ public class RemoteEntries {
      * @throws PermissionException if user making request is not an administrator
      */
     public void transferEntries(String userId, long remoteId, EntrySelection selection) {
-        AccountController accountController = new AccountController();
-        if (!accountController.isAdministrator(userId))
+        if (!new AccountAuthorization().isAdministrator(userId))
             throw new PermissionException("Administrative privileges required to transfer entries");
         TransferTask task = new TransferTask(userId, remoteId, selection);
         IceExecutorService.getInstance().runTask(task);

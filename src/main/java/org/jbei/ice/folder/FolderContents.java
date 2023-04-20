@@ -194,7 +194,7 @@ public class FolderContents {
      */
     public boolean removeFolderContents(String userId, long folderId, EntrySelection selection, boolean move) {
         // remove entries from specified folder
-        boolean isAdministrator = accountController.isAdministrator(userId);
+        boolean isAdministrator = folderAuthorization.isAdmin(userId);
         Folder folder = folderDAO.get(folderId);
 
         if (folder.getType() == FolderType.PUBLIC && !isAdministrator) {
@@ -479,7 +479,7 @@ public class FolderContents {
      */
     private List<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
         List<AccessPermission> permissions = permissionsController.retrieveSetFolderPermission(folder, false);
-        if (accountController.isAdministrator(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId)) {
+        if (folderAuthorization.isAdmin(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId)) {
             return permissions;
         }
 

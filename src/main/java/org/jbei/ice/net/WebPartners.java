@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.jbei.ice.access.AccessTokens;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.account.AccountController;
+import org.jbei.ice.account.AccountAuthorization;
 import org.jbei.ice.account.TokenHash;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.web.RegistryPartner;
@@ -29,13 +29,13 @@ public class WebPartners {
     private final RemotePartnerDAO dao;
     private final TokenHash tokenHash;
     private RemoteContact remoteContact;
-    private final AccountController accountController;
+    private final AccountAuthorization authorization;
 
     public WebPartners() {
         this.dao = DAOFactory.getRemotePartnerDAO();
         this.tokenHash = new TokenHash();
         this.remoteContact = new RemoteContact();
-        this.accountController = new AccountController();
+        this.authorization = new AccountAuthorization();
     }
 
     public WebPartners(RemoteContact remoteContact) {
@@ -196,7 +196,7 @@ public class WebPartners {
     }
 
     public boolean remove(String userId, long id) {
-        if (!accountController.isAdministrator(userId))
+        if (!authorization.isAdmin(userId))
             throw new PermissionException(userId + " is not an admin");
 
         RemotePartner partner = dao.get(id);
@@ -246,7 +246,7 @@ public class WebPartners {
         if (!isInWebOfRegistries())
             return null;
 
-        if (!accountController.isAdministrator(userId))
+        if (!authorization.isAdmin(userId))
             throw new PermissionException(userId + " is not an admin");
 
         RemotePartner partner = dao.get(id);
@@ -313,7 +313,7 @@ public class WebPartners {
         if (!isInWebOfRegistries())
             return null;
 
-        if (!accountController.isAdministrator(userId))
+        if (!authorization.isAdministrator(userId))
             throw new PermissionException(userId + " is not an admin");
 
         RemotePartner existing = dao.get(id);
@@ -342,7 +342,7 @@ public class WebPartners {
             return null;
 
         // check for admin privileges before granting request
-        if (!accountController.isAdministrator(userId))
+        if (!authorization.isAdministrator(userId))
             throw new PermissionException("Non admin attempting to add remote partner " + partner.getUrl());
 
         if (StringUtils.isEmpty(partner.getUrl()))

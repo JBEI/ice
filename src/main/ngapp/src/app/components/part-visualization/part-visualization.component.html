@@ -37,9 +37,16 @@
 <!--            </tr>-->
 <!--        </table>-->
 
-<div id="part-preview-root" style="margin-top: 7px; height: 550px" class="bg-white">
+<div id="part-preview-root" style="height: 550px" class="bg-white">
+    {{loadingSequence}}
     <div style="padding: 15px">
-        <img src="assets/img/loader-mini.gif"> &nbsp; <i class="opacity_6">Loading sequence visualization...</i>
+        <ng-container *ngIf="loadingSequence">
+            <img src="assets/img/loader-mini.gif"> &nbsp; <i class="opacity_6">Loading sequence visualization...</i>
+        </ng-container>
+
+        <ng-container *ngIf="!loadingSequence">
+            <span>No sequence information associated with this entry</span>
+        </ng-container>
     </div>
 </div>
 

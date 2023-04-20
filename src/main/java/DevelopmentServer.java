@@ -30,7 +30,7 @@ public class DevelopmentServer {
                 Servlets.servlet("Jersey REST Servlet", ServletContainer.class)
                     .addInitParam("jersey.config.server.provider.packages", "org.jbei.ice.services.rest")
                     .addInitParam("jersey.config.server.provider.scanning.recursive", "false")
-                    .addInitParam("javax.ws.rs.Application", "org.jbei.ice.services.rest.multipart.IceApplication")
+                    .addInitParam("jakarta.ws.rs.core.Application", "org.jbei.ice.services.rest.multipart.IceApplication")
                     .setAsyncSupported(true)
                     .setEnabled(true)
                     .addMapping("/rest/*")

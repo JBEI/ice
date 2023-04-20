@@ -3,7 +3,7 @@ package org.jbei.ice.entry.sample;
 import com.opencsv.CSVWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.account.AccountController;
+import org.jbei.ice.account.AccountAuthorization;
 import org.jbei.ice.account.AccountType;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.StorageLocation;
@@ -32,9 +32,11 @@ import java.util.*;
 public class RequestRetriever {
 
     private final RequestDAO dao;
+    private final AccountAuthorization authorization;
 
     public RequestRetriever() {
         this.dao = DAOFactory.getRequestDAO();
+        this.authorization = new AccountAuthorization();
     }
 
     public UserSamples getUserSamples(String userId, SampleRequestStatus status, int start, int limit, String sort,
@@ -54,7 +56,7 @@ public class RequestRetriever {
 
     public UserSamples getFolderRequests(String userId, int start, int limit, String sort, boolean asc, String folderNameFilter) {
         // admin feature
-        if (!new AccountController().isAdministrator(userId))
+        if (this.authorization.isAdministrator(userId))
             throw new PermissionException("Admin privileges required for this action");
 
         List<SampleCreateModel> models = DAOFactory.getSampleCreateModelDAO().list(start, limit, sort, asc, folderNameFilter);
@@ -106,7 +108,7 @@ public class RequestRetriever {
 
 
     public SampleRequest updateStatus(String userId, long requestId, SampleRequestStatus newStatus, boolean isFolder) {
-        if (!new AccountController().isAdministrator(userId)) {
+        if (!this.authorization.isAdministrator(userId)) {
             throw new PermissionException("Admin privileges required for this action");
         }
 

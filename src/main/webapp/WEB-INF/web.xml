@@ -33,7 +33,7 @@
             <param-value>false</param-value>
         </init-param>
         <init-param>
-            <param-name>javax.ws.rs.Application</param-name>
+            <param-name>jakarta.ws.rs.core.Application</param-name>
             <param-value>org.jbei.ice.services.rest.multipart.IceApplication</param-value>
         </init-param>
     </servlet>

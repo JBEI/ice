@@ -1,6 +1,6 @@
 package org.jbei.ice.account.authentication;
 
-import org.jbei.ice.account.AccountController;
+import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.AccountModel;
 
 /**
@@ -12,9 +12,8 @@ import org.jbei.ice.storage.model.AccountModel;
 public class UserIdAuthentication implements IAuthentication {
 
     @Override
-    public String authenticates(String userId, String password) throws AuthenticationException {
-        AccountController retriever = new AccountController();
-        AccountModel account = retriever.getByEmail(userId);
+    public String authenticates(String userId, String password) {
+        AccountModel account = DAOFactory.getAccountDAO().getByEmail(userId);
         if (account == null)
             return null;
         return account.getEmail();

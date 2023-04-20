@@ -2,7 +2,7 @@ package org.jbei.ice.search;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.account.AccountController;
+import org.jbei.ice.account.AccountAuthorization;
 import org.jbei.ice.dto.search.*;
 import org.jbei.ice.executor.IceExecutorService;
 import org.jbei.ice.logging.Logger;
@@ -77,7 +77,7 @@ public class SearchIndexes {
      * @throws IllegalArgumentException on unsupported index type
      */
     public void rebuildIndexes(String userId, IndexType type) {
-        if (!new AccountController().isAdministrator(userId)) {
+        if (!new AccountAuthorization().isAdministrator(userId)) {
             Logger.warn(userId + " attempting to rebuild search index " + type + " without admin privs");
             throw new PermissionException("Administrative privileges required to perform this action");
         }

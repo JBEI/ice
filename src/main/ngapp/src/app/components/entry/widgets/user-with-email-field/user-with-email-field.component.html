@@ -1,6 +1,6 @@
 <div class="row">
 
-    <div class="col-2">
+    <div class="col-2 ">
         <span [ngClass]="{'fw-bold': field.active}">
             <span [ngClass]="{'text-muted': !inEditMode}">{{field.label}}</span>
             <span class="text-danger" *ngIf="field.required && inEditMode" style="font-size: larger">*</span>

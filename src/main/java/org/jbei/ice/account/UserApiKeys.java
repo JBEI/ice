@@ -24,10 +24,12 @@ public class UserApiKeys {
 
     private final String userId;
     private final ApiKeyDAO apiKeyDAO;
+    private final AccountAuthorization authorization;
 
     public UserApiKeys(String userId) {
         this.userId = userId;
         this.apiKeyDAO = DAOFactory.getApiKeyDAO();
+        this.authorization = new AccountAuthorization();
     }
 
     /**
@@ -83,8 +85,7 @@ public class UserApiKeys {
     public Results<AccessKey> getKeys(int limit, int offset, String sortField, boolean asc, boolean getAvailable) {
         Results<AccessKey> accessKeyResults = new Results<>();
         List<ApiKey> results;
-        AccountController accountController = new AccountController();
-        boolean isAdmin = accountController.isAdministrator(this.userId);
+        boolean isAdmin = this.authorization.isAdministrator(this.userId);
 
         if (getAvailable) {
             if (!isAdmin)
@@ -97,7 +98,7 @@ public class UserApiKeys {
 
         for (ApiKey key : results) {
             AccessKey accessKey = key.toDataTransferObject();
-            AccountModel account = accountController.getByEmail(key.getOwnerEmail());
+            AccountModel account = DAOFactory.getAccountDAO().getByEmail(key.getOwnerEmail());
             accessKey.setAccount(account.toDataTransferObject());
             accessKeyResults.getData().add(accessKey);
         }
@@ -127,8 +128,7 @@ public class UserApiKeys {
             return false;
 
         if (!this.userId.equalsIgnoreCase(key.getOwnerEmail())) {
-            AccountController accountController = new AccountController();
-            boolean isAdmin = accountController.isAdministrator(this.userId);
+            boolean isAdmin = this.authorization.isAdministrator(this.userId);
             if (!isAdmin)
                 throw new PermissionException("Cannot delete key you did not create without administrative privileges");
         }
@@ -147,7 +147,7 @@ public class UserApiKeys {
 
         // must be admin or owner to update
         if (!this.userId.equalsIgnoreCase(key.getOwnerEmail()))
-            if (!new AccountController().isAdministrator(userId))
+            if (!this.authorization.isAdministrator(userId))
                 throw new PermissionException("Invalid privileges to update access key");
 
         key.setAllowDelegate(apiKey.isAllowDelegate());

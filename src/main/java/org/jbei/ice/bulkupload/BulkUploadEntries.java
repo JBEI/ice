@@ -2,7 +2,6 @@ package org.jbei.ice.bulkupload;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.account.AccountController;
 import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.bulkupload.EditMode;
 import org.jbei.ice.dto.entry.EntryFieldLabel;
@@ -42,7 +41,6 @@ public class BulkUploadEntries {
     private final BulkUploadDAO dao;
     private final EntryDAO entryDAO;
     private final Entries entries;
-    private final AccountController accountController;
     private final BulkUploadAuthorization authorization;
     private final String userId;
     private final BulkUploadModel upload;
@@ -51,7 +49,6 @@ public class BulkUploadEntries {
         dao = DAOFactory.getBulkUploadDAO();
         entryDAO = DAOFactory.getEntryDAO();
         entries = new Entries(userId);
-        accountController = new AccountController();
         authorization = new BulkUploadAuthorization();
         this.userId = userId;
         this.upload = dao.get(uploadId);
@@ -80,7 +77,7 @@ public class BulkUploadEntries {
         partData.setVisibility(Visibility.DRAFT);
 
         if (StringUtils.isEmpty(partData.getOwnerEmail())) {
-            AccountModel account = accountController.getByEmail(userId);
+            AccountModel account = DAOFactory.getAccountDAO().getByEmail(userId);
             partData.setOwner(account.getFullName());
             partData.setOwnerEmail(account.getEmail());
         }
@@ -152,7 +149,7 @@ public class BulkUploadEntries {
             linkedEntry = InfoToModelFactory.infoToEntry(linkedPartData);
             if (linkedEntry != null) {
                 linkedEntry.setVisibility(Visibility.DRAFT.getValue());
-                AccountModel account = accountController.getByEmail(userId);
+                AccountModel account = DAOFactory.getAccountDAO().getByEmail(userId);
                 linkedEntry.setOwner(account.getFullName());
                 linkedEntry.setOwnerEmail(account.getEmail());
                 linkedEntry = entryDAO.create(linkedEntry);
@@ -274,7 +271,7 @@ public class BulkUploadEntries {
      * such as the unique identifier for the part, if one was created
      */
     BulkUploadAutoUpdate createOrUpdateEntry(BulkUploadAutoUpdate autoUpdate) {
-        AccountModel account = accountController.getByEmail(userId);
+        AccountModel account = DAOFactory.getAccountDAO().getByEmail(userId);
 
         // todo : split out update from bulk edit
         // for bulk edit, drafts will not exist
