@@ -251,7 +251,7 @@ public class FileResource extends RestResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadSequence(@FormDataParam("file") InputStream fileInputStream,
-                                   @FormDataParam("entryRecordId") String recordId,
+                                   @QueryParam("entryRecordId") String recordId,
                                    @FormDataParam("entryType") String entryType,
                                    @FormDataParam("extractHierarchy") @DefaultValue("false") boolean extractHierarchy,
                                    @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {

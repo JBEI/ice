@@ -23,7 +23,7 @@
                             "src/assets"
                         ],
                         "styles": [
-                            "handsontable/dist/handsontable.full.min.css",
+                            "node_modules/handsontable/dist/handsontable.full.min.css",
                             "src/styles.css",
                             "node_modules/open-vector-editor/umd/main.css"
                         ],

@@ -38,14 +38,17 @@
 <!--        </table>-->
 
 <div id="part-preview-root" style="height: 550px" class="bg-white">
-    {{loadingSequence}}
     <div style="padding: 15px">
         <ng-container *ngIf="loadingSequence">
-            <img src="assets/img/loader-mini.gif"> &nbsp; <i class="opacity_6">Loading sequence visualization...</i>
+            <img alt="loading..." src="assets/img/loader-mini.gif"> &nbsp; <i class="opacity_6">Loading sequence
+            visualization...</i>
         </ng-container>
 
         <ng-container *ngIf="!loadingSequence">
             <span>No sequence information associated with this entry</span>
+            <div>
+                <input type="file" (change)="selectSequenceFile($event)" accept=".gb, .fa, .fasta, .fas"/>
+            </div>
         </ng-container>
     </div>
 </div>

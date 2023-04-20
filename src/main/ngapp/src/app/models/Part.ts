@@ -10,6 +10,7 @@ export class Part {
     type: string;
     shortDescription: string;
     partId: string;
+    recordId: string;
     visible: string;
     hasSample: boolean;
     hasSequence: boolean;

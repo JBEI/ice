@@ -4,6 +4,8 @@ import {HttpService} from "../../services/http.service";
 import {Paging} from "../../models/paging";
 import {Sequence} from "../../models/sequence";
 import {Part} from "../../models/Part";
+import {UploadService} from "../../services/upload.service";
+import {HttpEventType, HttpResponse} from "@angular/common/http";
 
 @Component({
     selector: 'app-part-visualization',
@@ -25,7 +27,7 @@ export class PartVisualizationComponent implements OnInit {
     feedback: any = {};
     loadingSequence: boolean;
 
-    constructor(private http: HttpService, private vectorEditor: VectorEditorService) {
+    constructor(private http: HttpService, private vectorEditor: VectorEditorService, private upload: UploadService) {
     }
 
     ngOnInit(): void {
@@ -35,47 +37,8 @@ export class PartVisualizationComponent implements OnInit {
                 console.log(result);
                 this.sequence = result;
                 this.loadingSequence = false;
-            });
-        }
-        // if (this.design && this.design.id) {
-        //     this.http.get('designs/' + this.design.id + '/part-sources').subscribe((result) => {
-        //         this.partSources = result;
-        //         if (this.entry.id) {
-        //             // remove the partSource from list only if we are viewing a new sequence that is not saved on the server
-        //             if (this.sequence.partSource) {
-        //                 const index = this.partSources.indexOf(this.sequence.partSource);
-        //                 if (index !== -1) {
-        //                     this.partSources.splice(index, 1);
-        //                 }
-        //             }
-        //         }
-        //
-        //         // validate
-        //         this.validatePartSource();
-        //     });
-        //
-        //     this.http.get('designs/' + this.design.id + '/names').subscribe((result) => {
-        //         this.names = result;
-        //         // remove current part name
-        //         if (this.entry.name) {
-        //             const index = this.names.indexOf(this.entry.name);
-        //             if (index !== -1) {
-        //                 this.names.splice(index, 1);
-        //             }
-        //         }
-        //     });
-        // }
-
-        // visualize sequence for current part
-        // const sid = this.sequence.id;
-        if (!this.sequence) {
-            if (!this.entry.hasSequence)
-                return;
-
-            this.http.get('parts/' + this.entry.id + '/sequence').subscribe((result: Sequence) => {
-                this.sequence = result;
                 this.showSequenceVisualization(this.sequence);
-            })
+            });
         } else {
             this.showSequenceVisualization(this.sequence);
         }
@@ -174,5 +137,30 @@ export class PartVisualizationComponent implements OnInit {
 
     selectPartClick(): void {
         // this.selectClick(this.part);
+    }
+
+    selectSequenceFile(event): void {
+        this.uploadSequenceFile(event.target.files);
+    }
+
+    uploadSequenceFile(files: FileList): void {
+        if (files.length === 0) {
+            console.log('No file selected!');
+            return;
+        }
+
+        const url = '/file/sequence?entryRecordId=' + this.entry.recordId;
+
+        this.upload.uploadFile(url, files)
+            .subscribe(event => {
+                if (event.type === HttpEventType.UploadProgress) {
+                } else if (event instanceof HttpResponse) {
+                    const data: any = event.body; // {id, runTime,completionTime, runId, resultFileName}
+                    console.log('server response', data);
+                    if (data && data.entryId == this.entry.id && data.sequence) {
+                        this.sequence = data.sequence;
+                    }
+                }
+            });
     }
 }

@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {UserService} from "./user.service";
+import {environment} from "../../environments/environment";
 
 @Injectable({
     providedIn: 'root'
@@ -32,7 +33,8 @@ export class UploadService {
             reportProgress: true,
         };
 
-        const req = new HttpRequest('POST', url, formData, options);
+        console.log(url);
+        const req = new HttpRequest('POST', environment.apiUrl + url, formData, options);
         return this.http.request(req);
     }
 
