@@ -1,0 +1,20 @@
+<div class="modal-header border-bottom-0">
+    <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close(false)">
+    </button>
+</div>
+
+<div class="modal-body pt-0">
+    <div>
+        <span *ngIf="resourceName"> Delete {{resourceName}}<span
+            *ngIf="resourceIdentifier"> "{{resourceIdentifier}}"?</span></span>
+        <span *ngIf="!resourceName">Confirm delete</span>
+        <div class="font-11">
+            This action cannot be undone
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-light" (click)="activeModal.close(false)">Cancel</button>
+    <button class="btn btn-danger" (click)="deleteConfirmed()">Delete</button>
+</div>
