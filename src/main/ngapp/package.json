@@ -22,7 +22,7 @@
         "@angular/platform-browser": "^15.2.8",
         "@angular/platform-browser-dynamic": "^15.2.8",
         "@angular/router": "^15.2.8",
-        "@handsontable/angular": "^12.3.1",
+        "@handsontable/angular": "^12.3.3",
         "@ng-bootstrap/ng-bootstrap": "^14.1.0",
         "@perfectmemory/ngx-contextmenu": "^15.1.1",
         "@popperjs/core": "^2.11.7",
