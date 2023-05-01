@@ -44,7 +44,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Resource for accessing files both locally and remotely
@@ -318,7 +317,7 @@ public class FileResource extends RestResource {
         List<EntryFieldLabel> entryFieldLabels = new ArrayList<>();
         try {
             if (fields != null && !fields.isEmpty()) {
-                entryFieldLabels.addAll(fields.stream().map(EntryFieldLabel::fromString).collect(Collectors.toList()));
+                entryFieldLabels.addAll(fields.stream().map(EntryFieldLabel::fromString).toList());
             }
         } catch (Exception e) {
             Logger.error(e);
@@ -347,7 +346,8 @@ public class FileResource extends RestResource {
         String userId = requireUserId();
         try {
             Entries entries = new Entries(userId);
-            return super.respond(entries.validateEntries(fileInputStream, checkName));
+            String filename = contentDispositionHeader.getFileName();
+            return super.respond(entries.process(fileInputStream, filename, checkName));
         } catch (IOException e) {
             Logger.error(e);
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);

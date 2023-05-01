@@ -6,6 +6,8 @@ import {Sequence} from "../../models/sequence";
 import {Part} from "../../models/Part";
 import {UploadService} from "../../services/upload.service";
 import {HttpEventType, HttpResponse} from "@angular/common/http";
+import {ConfirmActionComponent} from "../shared/confirm-action/confirm-action.component";
+import {NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
     selector: 'app-part-visualization',
@@ -27,14 +29,14 @@ export class PartVisualizationComponent implements OnInit {
     feedback: any = {};
     loadingSequence: boolean;
 
-    constructor(private http: HttpService, private vectorEditor: VectorEditorService, private upload: UploadService) {
+    constructor(private http: HttpService, private vectorEditor: VectorEditorService, private upload: UploadService,
+                private modalService: NgbModal) {
     }
 
     ngOnInit(): void {
         if (!this.sequence) {
             this.loadingSequence = true;
             this.http.get('parts/' + this.entry.id + '/sequence').subscribe((result: Sequence) => {
-                console.log(result);
                 this.sequence = result;
                 this.loadingSequence = false;
                 this.showSequenceVisualization(this.sequence);
@@ -162,5 +164,22 @@ export class PartVisualizationComponent implements OnInit {
                     }
                 }
             });
+    }
+
+    deleteSequence(): void {
+        const options: NgbModalOptions = {backdrop: 'static', size: 'sm'};
+        const modalRef = this.modalService.open(ConfirmActionComponent, options);
+        modalRef.componentInstance.resourceName = "sequence";
+        modalRef.componentInstance.resourceIdentifier = this.sequence.identifier;
+        modalRef.result.then((confirmed) => {
+            if (confirmed) {
+                this.deleteSequenceOnServer();
+            }
+        });
+    }
+
+    private deleteSequenceOnServer(): void {
+        console.log("delete");
+        this.sequence = undefined;
     }
 }

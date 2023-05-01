@@ -28,12 +28,17 @@ import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
 import org.jbei.ice.utils.Utils;
+import org.jbei.ice.utils.ZipExtractor;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * @author Hector Plahar
@@ -199,13 +204,53 @@ public class Entries extends HasEntry {
         }
     }
 
+    private List<ParsedEntryId> processZipFile(InputStream inputStream) throws IOException {
+        ZipExtractor zipExtractor = new ZipExtractor();
+        Path extractedFilesDir = zipExtractor.extract(inputStream);
+
+        // get csv file
+        Path csvFile = getCsvFile(extractedFilesDir);
+        if (csvFile == null)
+            throw new IOException("Cannot find csv file in directory");
+
+        // process csv file
+
+
+        deletePathFiles(extractedFilesDir);
+        return new ArrayList<>();
+    }
+
+    private Path getCsvFile(Path directory) {
+        try (Stream<Path> stream = Files.walk(directory)) {
+            for (Path path : stream.toList()) {
+                if (path.endsWith(".csv"))
+                    return path;
+            }
+            return null;
+        } catch (IOException e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
+    private void deletePathFiles(Path path) throws IOException {
+        Files.walk(path)
+            .sorted(Comparator.reverseOrder())
+            .map(Path::toFile)
+            .forEach(File::delete);
+    }
+
     /**
      * Validate list of entries in a csv file either via names or partnumbers
      *
      * @param stream    csv file input stream
      * @param checkName whether to check names or part numbers
      */
-    public List<ParsedEntryId> validateEntries(InputStream stream, boolean checkName) throws IOException {
+    public List<ParsedEntryId> process(InputStream stream, String fileName, boolean checkName) throws IOException {
+        if (fileName.endsWith(".zip")) {
+            return processZipFile(stream);
+        }
+
         List<ParsedEntryId> accepted = new ArrayList<>();
         EntryAuthorization authorization = new EntryAuthorization();
 

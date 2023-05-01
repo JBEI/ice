@@ -37,7 +37,35 @@
 <!--            </tr>-->
 <!--        </table>-->
 
-<div id="part-preview-root" style="height: 550px" class="bg-white">
+<!--<div class="loading style-2">-->
+<!--    <div class="loading-wheel"></div>-->
+<!--</div>-->
+
+<!--<div class="overlay">-->
+<!--    <div class="overlay__inner">-->
+<!--        <div class="overlay__content"><span class="spinner"></span></div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<div class="d-flex justify-content-end">
+    <span class="opacity_hover mx-2" (click)="deleteSequence()">Delete <i class="bi bi-trash"></i></span>
+    <span class="opacity_hover mx-2" (click)="deleteSequence()">Open <i class="bi bi-arrows-angle-expand"></i></span>
+    <div ngbDropdown class="opacity_hover mx-2">
+        <span ngbDropdownToggle>Download</span>
+
+        <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+            <div class="small" ngbDropdownItem>Genbank</div>
+            <div class="small" ngbDropdownItem>FASTA</div>
+            <div class="small" ngbDropdownItem>SBOL</div>
+            <div class="small" ngbDropdownItem>GFF3</div>
+        </div>
+    </div>
+
+    <span class="opacity_hover mx-2" (click)="deleteSequence()">Auto Annotate</span>
+</div>
+
+<div id="part-preview-root" style="height: 550px" class="bg-white shadow-sm">
+
     <div style="padding: 15px">
         <ng-container *ngIf="loadingSequence">
             <img alt="loading..." src="assets/img/loader-mini.gif"> &nbsp; <i class="opacity_6">Loading sequence

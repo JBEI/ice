@@ -3,8 +3,9 @@ import {HttpService} from "../../../services/http.service";
 import {Paging} from "../../../models/paging";
 import {ActivatedRoute} from "@angular/router";
 import {FolderDetails} from "../../../models/folder-details";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
 import {ShareFolderModalComponent} from "../../modal/share-folder-modal/share-folder-modal.component";
+import {UploadToFolderModalComponent} from "../../modal/upload-to-folder-modal/upload-to-folder-modal.component";
 
 @Component({
     selector: 'app-folder',
@@ -42,6 +43,15 @@ export class FolderComponent implements OnInit {
 
     shareFolder(): void {
         const modalRef = this.modalService.open(ShareFolderModalComponent);
+        modalRef.componentInstance.folder = this.folderDetails;
+        modalRef.result.then((result) => {
+
+        });
+    }
+
+    showUploadModal(): void {
+        const options: NgbModalOptions = {backdrop: 'static', size: 'md'};
+        const modalRef = this.modalService.open(UploadToFolderModalComponent, options);
         modalRef.componentInstance.folder = this.folderDetails;
         modalRef.result.then((result) => {
 
