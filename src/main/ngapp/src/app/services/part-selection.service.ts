@@ -21,7 +21,7 @@ export class PartSelectionService {
         return this.selectedParts.length > 0;
     }
 
-    select(part: Part): void {
+    select(part: Part, available: number): void {
         if (!part.id)
             return;
 
@@ -32,7 +32,7 @@ export class PartSelectionService {
             this.selectedParts.push(part.id);
         }
 
-        console.log('selected',);
+        this.allSelection = (this.selectedParts.length === available);
     }
 
     isSelected(part: Part): boolean {

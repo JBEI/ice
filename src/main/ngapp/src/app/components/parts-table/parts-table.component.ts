@@ -115,7 +115,7 @@ export class PartsTableComponent implements OnInit {
     }
 
     select(part: Part): void {
-        this.selection.select(part);
+        this.selection.select(part, this.paging.available);
     }
 
     pageCounts(currentPage, resultCount, maxPageCount = 15): string {
