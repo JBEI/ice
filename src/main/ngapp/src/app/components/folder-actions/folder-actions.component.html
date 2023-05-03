@@ -20,7 +20,7 @@
 
     <div>
         <div class="btn-group btn-group-sm">
-            <button type="button" class="btn btn-white border" [disabled]="!hasSelection()">Add to
+            <button type="button" class="btn btn-white border" [disabled]="!hasSelection()" (click)="showAddTo()">Add to
             </button>
             <button type="button" class="btn btn-white border" [disabled]="!hasSelection()">Remove from
             </button>

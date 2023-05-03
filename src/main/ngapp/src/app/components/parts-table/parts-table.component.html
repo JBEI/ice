@@ -44,15 +44,6 @@
                 {{field.value || '&nbsp'}}
             </td>
 
-            <!--            <td>-->
-            <!--                <div title="{{part.name}}" class="text-truncate" style="width: 350px">{{part.name}}</div>-->
-            <!--                <div *ngIf="part.shortDescription" title="{{part.shortDescription}}"-->
-            <!--                     class="small text-muted text-truncate" style="width: 350px">-->
-            <!--                    {{part.shortDescription}}-->
-            <!--                </div>-->
-            <!--                <i *ngIf="!part.shortDescription" class="small text-muted">No description provided</i>-->
-            <!--            </td>-->
-
             <td style="vertical-align: middle; white-space: nowrap">
                 <i *ngIf="part.hasSample" class="fa fa-flask fa-fw dark-gray"
                    style="color: #555; font-size: 14px;"></i>
@@ -80,7 +71,7 @@
         </tbody>
     </table>
 
-    <div class="d-flex justify-content-between">
+    <div class="d-flex justify-content-between pt-2">
         <ngb-pagination [collectionSize]="paging.available" [pageSize]="paging.limit" [(page)]="paging.currentPage"
                         [boundaryLinks]="true" [maxSize]="5" (pageChange)="pageChange($event)" size="sm">
             <ng-template ngbPaginationFirst><i

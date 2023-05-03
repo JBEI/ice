@@ -61,7 +61,6 @@
                                                                     {{folder.count | number}} entries
                                                                     <div
                                                                         class="mt-1">{{folder.creationTime | date}}</div>
-                                                                    <!--                                                                                                        <pre>{{folder | json}}</pre>-->
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -76,7 +75,7 @@
 
                                                     <br>
 
-                                                    <div class="bg-white p-3 rounded-bottom">
+                                                    <div class="bg-white px-3 pt-3 rounded-bottom">
                                                         <app-parts-table
                                                             [collection]="selectedOption.name"></app-parts-table>
                                                     </div>
