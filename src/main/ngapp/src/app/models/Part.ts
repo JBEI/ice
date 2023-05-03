@@ -18,6 +18,5 @@ export class Part {
 
     linkedParts: Part[];
     parents: Part[];
-    customFields: CustomField[];
     fields: CustomField[];
 }
