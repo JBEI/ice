@@ -45,6 +45,8 @@ import {DateFieldComponent} from "./components/entry/widgets/date-field/date-fie
 import {NgOptimizedImage} from "@angular/common";
 import {ConfirmActionComponent} from "./components/shared/confirm-action/confirm-action.component";
 import {UploadToFolderModalComponent} from './components/modal/upload-to-folder-modal/upload-to-folder-modal.component';
+import {AddToFolderModalComponent} from './components/modal/add-to-folder-modal/add-to-folder-modal.component';
+import {FilterPipe} from './filters/filter.pipe';
 
 // register Handsontable's modules
 registerAllModules();
@@ -92,7 +94,9 @@ registerAllModules();
         ShareFolderModalComponent,
         DateFieldComponent,
         ConfirmActionComponent,
-        UploadToFolderModalComponent
+        UploadToFolderModalComponent,
+        AddToFolderModalComponent,
+        FilterPipe
     ],
     imports: [
         BrowserModule,
