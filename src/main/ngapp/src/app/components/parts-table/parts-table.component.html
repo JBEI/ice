@@ -2,103 +2,106 @@
     No available parts
 </div>
 
-<div *ngIf="parts && parts.length">
-    <table class="table border-bottom table-hover table-bordered" [ngClass]="{'opacity-25':paging.processing}">
-        <thead class="text-uppercase text-muted bg-light font-80em">
-        <tr>
-            <th scope="col"><i class="bi font-12em cursor-pointer" (click)="selection.selectAll()"
-                               [ngClass]="{'bi-dash-square': selection.hasAtLeastOneSelected(),
+<div class="bg-white px-3 pt-3 rounded-bottom">
+    <div *ngIf="parts && parts.length">
+        <table class="table border-bottom table-hover table-bordered" [ngClass]="{'opacity-25':paging.processing}">
+            <thead class="text-uppercase text-muted bg-light font-80em">
+            <tr>
+                <th scope="col"><i class="bi font-12em cursor-pointer" (click)="selection.selectAll()"
+                                   [ngClass]="{'bi-dash-square': selection.hasAtLeastOneSelected(),
             'bi-check-square': selection.allSelected(), 'bi-square': !selection.hasAtLeastOneSelected() && !selection.allSelected()}"></i>
-            </th>
-            <th scope="col">Type</th>
-            <th scope="col">Part ID</th>
-            <th scope="col" *ngFor="let field of parts[0].fields">{{field.fieldType}}</th>
-            <th scope="col">&nbsp;</th>
-            <th scope="col" class="cursor-pointer" (click)="sort('created')">Created
-                <i class="bi float-end" [ngClass]="{'bi-sort-up': paging.asc, 'bi-sort-down': !paging.asc}"></i>
-            </th>
-        </tr>
-        </thead>
+                </th>
+                <th scope="col">Type</th>
+                <th scope="col">Part ID</th>
+                <th scope="col" *ngFor="let field of parts[0].fields">{{field.fieldType}}</th>
+                <th scope="col">&nbsp;</th>
+                <th scope="col" class="cursor-pointer" (click)="sort('created')">Created
+                    <i class="bi float-end" [ngClass]="{'bi-sort-up': paging.asc, 'bi-sort-down': !paging.asc}"></i>
+                </th>
+            </tr>
+            </thead>
 
-        <tbody>
-        <tr *ngFor="let part of parts"
-            [ngClass]="{'row-disabled':part.visible !== 'OK', 'table-primary': isSelected(part)}" class="">
+            <tbody>
+            <tr *ngFor="let part of parts"
+                [ngClass]="{'row-disabled':part.visible !== 'OK', 'table-primary': isSelected(part)}" class="">
 
-            <td style="width: 43px" class="cursor-pointer align-middle">
-                <i class="bi text-muted" (click)="select(part)"
-                   [ngClass]="{'bi-square':!isSelected(part), 'bi-check-square':isSelected(part)}">
-                </i>
-            </td>
+                <td style="width: 43px" class="cursor-pointer align-middle">
+                    <i class="bi text-muted" (click)="select(part)"
+                       [ngClass]="{'bi-square':!isSelected(part), 'bi-check-square':isSelected(part)}">
+                    </i>
+                </td>
 
-            <td class="font-90em text-uppercase text-black-50 font-weight-bold align-middle">
-                <i class="bi bi-trash text-danger" *ngIf="part.visible==='DELETED'"></i>
-                <div class="text-muted fw-bold small">{{part.type}}</div>
-                <i class="bi bi-cloud" *ngIf="part.visible==='REMOTE'" style="color: #c9e6f2"></i>
-            </td>
+                <td class="font-90em text-uppercase text-black-50 font-weight-bold align-middle">
+                    <i class="bi bi-trash text-danger" *ngIf="part.visible==='DELETED'"></i>
+                    <div class="text-muted fw-bold small">{{part.type}}</div>
+                    <i class="bi bi-cloud" *ngIf="part.visible==='REMOTE'" style="color: #c9e6f2"></i>
+                </td>
 
-            <td style="width: 120px" class="align-middle">
-                <a [href]="'entry/' + part.id">{{part.partId}}</a>
-            </td>
+                <td style="width: 120px" class="align-middle">
+                    <a [href]="'entry/' + part.id">{{part.partId}}</a>
+                </td>
 
-            <td *ngFor="let field of part.fields">
-                {{field.value || '&nbsp'}}
-            </td>
+                <td *ngFor="let field of part.fields">
+                    {{field.value || '&nbsp'}}
+                </td>
 
-            <td style="vertical-align: middle; white-space: nowrap">
-                <i *ngIf="part.hasSample" class="fa fa-flask fa-fw dark-gray"
-                   style="color: #555; font-size: 14px;"></i>
-                <i *ngIf="!part.hasSample" class="fa fa-square fa-fw"
-                   style="opacity: 0; font-size: 14px;"></i>
+                <td style="vertical-align: middle; white-space: nowrap">
+                    <i *ngIf="part.hasSample" class="fa fa-flask fa-fw dark-gray"
+                       style="color: #555; font-size: 14px;"></i>
+                    <i *ngIf="!part.hasSample" class="fa fa-square fa-fw"
+                       style="opacity: 0; font-size: 14px;"></i>
 
-                <img *ngIf="part.hasSequence" src="assets/img/dna.svg" width="16px"
-                     style="margin-left: 2px; margin-right: 3px"/>
-                <i *ngIf="!part.hasSequence" class="bi bi-square"
-                   style="opacity: 0; font-size: 14px"></i>
+                    <img *ngIf="part.hasSequence" src="assets/img/dna.svg" width="16px"
+                         style="margin-left: 2px; margin-right: 3px"/>
+                    <i *ngIf="!part.hasSequence" class="bi bi-square"
+                       style="opacity: 0; font-size: 14px"></i>
 
-                <span *ngIf="part.linkedParts.length || part.parents.length">
+                    <span *ngIf="part.linkedParts.length || part.parents.length">
                     <span class="opacity_hover link-sup">{{part.parents.length}}</span>
                     <span class="bi bi-link"></span>
                     <span class="opacity_hover link-sub">{{part.linkedParts.length}}</span>
                 </span>
 
-                <i *ngIf="!part.linkedParts.length && !part.parents.length" class="bi bi-square"
-                   style="opacity: 0; font-size: 14px;"></i>
-            </td>
-            <td style="width: 130px; white-space: nowrap; vertical-align: middle;">
-                {{part.creationTime | date}}
-            </td>
-        </tr>
-        </tbody>
-    </table>
+                    <i *ngIf="!part.linkedParts.length && !part.parents.length" class="bi bi-square"
+                       style="opacity: 0; font-size: 14px;"></i>
+                </td>
+                <td style="width: 130px; white-space: nowrap; vertical-align: middle;">
+                    {{part.creationTime | date}}
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
-    <div class="d-flex justify-content-between pt-2">
-        <ngb-pagination [collectionSize]="paging.available" [pageSize]="paging.limit" [(page)]="paging.currentPage"
-                        [boundaryLinks]="true" [maxSize]="5" (pageChange)="pageChange($event)" size="sm">
-            <ng-template ngbPaginationFirst><i
-                class="fa fa-fw fa-angle-double-left"></i> First
-            </ng-template>
-            <ng-template ngbPaginationPrevious><i
-                class="fa fa-fw fa-angle-left"></i>Prev
-            </ng-template>
-            <!--                            <ng-template ngbPaginationNumber let-p><button class="btn btn-sm btn-white">{{p}}</button></ng-template>-->
-            <ng-template ngbPaginationNext>Next<i
-                class="fa fa-fw fa-angle-right"></i></ng-template>
-            <ng-template ngbPaginationLast>Last<i
-                class="fa fa-fw fa-angle-double-right"></i>
-            </ng-template>
-        </ngb-pagination>
+        <div class="d-flex justify-content-between pt-2">
+            <ngb-pagination [collectionSize]="paging.available" [pageSize]="paging.limit" [(page)]="paging.currentPage"
+                            [boundaryLinks]="true" [maxSize]="5" (pageChange)="pageChange($event)" size="sm">
+                <ng-template ngbPaginationFirst><i
+                    class="fa fa-fw fa-angle-double-left"></i> First
+                </ng-template>
+                <ng-template ngbPaginationPrevious><i
+                    class="fa fa-fw fa-angle-left"></i>Prev
+                </ng-template>
+                <!--                            <ng-template ngbPaginationNumber let-p><button class="btn btn-sm btn-white">{{p}}</button></ng-template>-->
+                <ng-template ngbPaginationNext>Next<i
+                    class="fa fa-fw fa-angle-right"></i></ng-template>
+                <ng-template ngbPaginationLast>Last<i
+                    class="fa fa-fw fa-angle-double-right"></i>
+                </ng-template>
+            </ngb-pagination>
 
-        <strong class="small" [ngClass]="{'text-muted': this.paging.processing}">
-            {{pageNumber | number}} - {{pageCount | number}} of {{paging.available}}
-        </strong>
+            <strong class="small" [ngClass]="{'text-muted': this.paging.processing}">
+                {{pageNumber | number}} - {{pageCount | number}} of {{paging.available}}
+            </strong>
 
-        <div>
-            <small class="text-muted pull-right">Show:
-                <select class="btn btn-white btn-sm" (change)="pageChange(1)" [(ngModel)]="paging.limit"
-                        [disabled]="paging.processing">
-                    <option [value]="option" *ngFor="let option of pagingOptions">{{option}}</option>
-                </select>
-            </small>
+            <div>
+                <small class="text-muted pull-right">Show:
+                    <select class="btn btn-white btn-sm" (change)="pageChange(1)" [(ngModel)]="paging.limit"
+                            [disabled]="paging.processing">
+                        <option [value]="option" *ngFor="let option of pagingOptions">{{option}}</option>
+                    </select>
+                </small>
+            </div>
         </div>
     </div>
 </div>
+

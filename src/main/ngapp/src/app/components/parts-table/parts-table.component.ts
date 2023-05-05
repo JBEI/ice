@@ -2,9 +2,9 @@ import {Component, EventEmitter, Input, OnInit, Output, SimpleChanges} from '@an
 import {Part} from "../../models/Part";
 import {Paging} from "../../models/paging";
 import {HttpService} from "../../services/http.service";
-import {FolderDetails} from "../../models/folder-details";
 import {Result} from "../../models/result";
 import {PartSelectionService} from "../../services/part-selection.service";
+import {Folder} from "../../models/folder";
 
 @Component({
     selector: 'app-parts-table',
@@ -72,7 +72,7 @@ export class PartsTableComponent implements OnInit {
 
     getFolderEntries(): void {
         this.paging.processing = true;
-        this.http.get('folders/' + this.folderId + '/entries', this.paging).subscribe((result: FolderDetails) => {
+        this.http.get('folders/' + this.folderId + '/entries', this.paging).subscribe((result: Folder) => {
             this.parts = result.entries;
             this.paging.processing = false;
             this.paging.available = result.count;

@@ -8,49 +8,15 @@
                     {{collectionName | titlecase}}  <i class="bi bi-chevron-right font-80em"></i>
                     {{folderDetails.folderName}}
                     <div ngbDropdown class="d-inline-block" #myDrop="ngbDropdown">
-                        <button class="btn" ngbDropdownAnchor (focus)="myDrop.open()">
-                        </button>
+                        <button class="btn p-0" ngbDropdownAnchor (focus)="myDrop.open()"></button>
                         <div ngbDropdownMenu aria-labelledby="dropdownManual">
-                            <button ngbDropdownItem class="small">Create Samples</button>
-                            <button ngbDropdownItem class="small">Promote Folder</button>
-                            <button ngbDropdownItem class="small">Transfer Folder</button>
-                            <button ngbDropdownItem class="small">Accept Folder</button>
+                            <button ngbDropdownItem class="small" (click)="navigateToFolder(folder)"
+                                    *ngFor="let folder of userFolders">{{folder.folderName}}</button>
                         </div>
                     </div>
                 </h2>
 
-
-                <div class="d-inline-block">
-                    <button type="button" class="btn btn-sm" [ngClass]="{'text-muted': false}"
-                            (click)="shareFolder()">
-                        <!--                            [disabled]="!selectedFolderId"-->
-                        <i class="bi bi-people-fill"></i>
-                    </button>
-                </div>
-
-                <div class="d-inline-block ps-2 pe-2">
-                    <button class="btn btn-sm btn-white border" [ngbTooltip]="'Add to folder'" [disabled]="true">
-                        <i class="bi bi-folder-plus"></i>
-                    </button>
-
-                    <button class="btn btn-sm btn-white border ms-2" [ngbTooltip]="'Remove from folder'"
-                            [disabled]="true">
-                        <i class="bi bi-folder-minus"></i>
-                    </button>
-
-                    <button class="btn btn-sm btn-white border ms-2" [ngbTooltip]="'Move from folder'"
-                            [disabled]="true">
-                        <i class="bi bi-folder-symlink-fill"></i>
-                    </button>
-
-                </div>
-
-
                 <div *ngIf="folderDetails.canEdit">
-                    <!--                                                            <button type="button" class="btn btn-white"-->
-                    <!--                                                                    [disabled]="!selectedFolderId|| !selectedFolder.canEdit">-->
-                    <!--                                                                <i class="bi bi-people-fill"></i> Share-->
-                    <!--                                                            </button>-->
                     <button type="button" class="btn btn-white border font-95em" [ngClass]="{'text-muted': false}"
                             (click)="shareFolder()">
                         <!--                            [disabled]="!selectedFolderId"-->
@@ -75,8 +41,9 @@
 
     <div class="row">
 
-        <div class="col bg-white p-3 rounded-bottom">
-
+        <div class="col">
+            <app-folder-actions></app-folder-actions>
+            <br>
             <app-parts-table [folderId]="folderDetails.id"></app-parts-table>
         </div>
     </div>

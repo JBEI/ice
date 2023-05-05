@@ -1,11 +1,12 @@
 import {Component, OnInit} from '@angular/core';
 import {HttpService} from "../../../services/http.service";
 import {Paging} from "../../../models/paging";
-import {ActivatedRoute} from "@angular/router";
-import {FolderDetails} from "../../../models/folder-details";
+import {ActivatedRoute, Router} from "@angular/router";
 import {NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
 import {ShareFolderModalComponent} from "../../modal/share-folder-modal/share-folder-modal.component";
 import {UploadToFolderModalComponent} from "../../modal/upload-to-folder-modal/upload-to-folder-modal.component";
+import {Folder} from "../../../models/folder";
+import {FolderService} from "../../../services/folder.service";
 
 @Component({
     selector: 'app-folder',
@@ -15,10 +16,12 @@ import {UploadToFolderModalComponent} from "../../modal/upload-to-folder-modal/u
 export class FolderComponent implements OnInit {
 
     paging: Paging = new Paging('created');
-    folderDetails: FolderDetails;
+    folderDetails: Folder;
     collectionName: string;
+    userFolders: Folder[];
 
-    constructor(private http: HttpService, private activatedRoute: ActivatedRoute, private modalService: NgbModal) {
+    constructor(private http: HttpService, private activatedRoute: ActivatedRoute, private modalService: NgbModal,
+                private folders: FolderService, private router: Router) {
     }
 
     ngOnInit(): void {
@@ -31,11 +34,16 @@ export class FolderComponent implements OnInit {
 
         // get the folder name
         this.collectionName = this.activatedRoute.parent.snapshot.params.name;
+
+        // retrieve user folders
+        this.folders.getUserFolders().subscribe(result => {
+            this.userFolders = result;
+        });
     }
 
     getFolderEntries(folderId: number): void {
         this.paging.processing = true;
-        this.http.get('folders/' + folderId + '/entries', this.paging).subscribe((result: FolderDetails) => {
+        this.http.get('folders/' + folderId + '/entries', this.paging).subscribe((result: Folder) => {
             this.folderDetails = result;
             this.paging.processing = false;
         });
@@ -56,5 +64,9 @@ export class FolderComponent implements OnInit {
         modalRef.result.then((result) => {
 
         });
+    }
+
+    navigateToFolder(folder: Folder): void {
+        this.router.navigate((['collection', this.collectionName, 'folder', folder.id]));
     }
 }
