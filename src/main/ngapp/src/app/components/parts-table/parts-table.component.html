@@ -1,9 +1,9 @@
-<div *ngIf="!parts || !parts.length" class="text-black-50 fst-italic p-3 font-12em">
+<div *ngIf="!parts || !parts.length" class="text-black-50 fst-italic p-3 font-12em bg-white px-3 pt-3 rounded">
     No available parts
 </div>
 
-<div class="bg-white px-3 pt-3 rounded-bottom">
-    <div *ngIf="parts && parts.length">
+<div class="bg-white px-3 pt-3 rounded-bottom" *ngIf="parts && parts.length">
+    <div>
         <table class="table border-bottom table-hover table-bordered" [ngClass]="{'opacity-25':paging.processing}">
             <thead class="text-uppercase text-muted bg-light font-80em">
             <tr>
