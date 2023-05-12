@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {CustomField} from "../../../../models/custom-field";
 import {Part} from "../../../../models/Part";
+import {EntryFieldService} from "../../../../services/entry-field.service";
 
 @Component({
     selector: 'app-textarea-field',
@@ -11,16 +12,15 @@ export class TextareaFieldComponent implements OnInit {
 
     @Input() field: CustomField;
     @Input() part: Part;
-    @Input() inEditMode: boolean = false;
 
-    constructor() {
+    constructor(private fieldService: EntryFieldService) {
     }
 
     ngOnInit(): void {
     }
 
     switchEditMode(): void {
-        this.inEditMode = !this.inEditMode;
+        this.fieldService.setQuickEdit(this.field);
     }
 
     textInputFocusOut(field: CustomField): void {

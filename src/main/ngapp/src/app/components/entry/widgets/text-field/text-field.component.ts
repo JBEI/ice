@@ -13,16 +13,21 @@ export class TextFieldComponent implements OnInit {
     @Input() field: CustomField;
     @Input() longText: Boolean;
     @Input() part: Part;
-    @Input() inEditMode: boolean = false;
 
-    constructor(private fields: EntryFieldService) {
+    updating: boolean;
+
+    constructor(private fieldService: EntryFieldService) {
     }
 
     ngOnInit(): void {
     }
 
     switchEditMode(): void {
-        this.inEditMode = !this.inEditMode;
+        this.fieldService.setQuickEdit(this.field);
+    }
+
+    cancelEdit(): void {
+        this.field.editMode = undefined;
     }
 
     textInputFocusOut(field: CustomField): void {
@@ -36,8 +41,10 @@ export class TextFieldComponent implements OnInit {
     }
 
     updateField(): void {
-        this.fields.updateField(this.part.id, this.field).subscribe(result => {
-            this.inEditMode = !this.inEditMode;
+        this.updating = true;
+        this.fieldService.updateField(this.part.id, this.field).subscribe(result => {
+            this.field.editMode = undefined;
+            this.updating = false;
         })
     }
 }

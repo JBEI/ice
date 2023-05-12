@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {CustomField} from "../../../../models/custom-field";
 import {Part} from "../../../../models/Part";
+import {EntryFieldService} from "../../../../services/entry-field.service";
 
 @Component({
     selector: 'app-select-field',
@@ -11,16 +12,16 @@ export class SelectFieldComponent implements OnInit {
 
     @Input() field: CustomField;
     @Input() part: Part;
-    @Input() inEditMode: boolean = false;
+    updating: boolean;
 
-    constructor() {
+    constructor(private fieldService: EntryFieldService) {
     }
 
     ngOnInit(): void {
     }
 
     switchEditMode(): void {
-        this.inEditMode = !this.inEditMode;
+        this.fieldService.setQuickEdit(this.field);
     }
 
     displayForValue(): string {
@@ -39,5 +40,13 @@ export class SelectFieldComponent implements OnInit {
 
     textInputFocusIn(field: CustomField): void {
         field.active = true;
+    }
+
+    updateField(): void {
+        this.updating = true;
+        this.fieldService.updateField(this.part.id, this.field).subscribe(result => {
+            this.field.editMode = undefined;
+            this.updating = false;
+        })
     }
 }

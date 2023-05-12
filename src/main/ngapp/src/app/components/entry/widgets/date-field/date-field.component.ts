@@ -16,7 +16,6 @@ export class DateFieldComponent {
     @Input() halfWidth: boolean = true;
     @Input() value: number;  // optional input. set if we are displaying existing record
     @Input() field: CustomField;
-    @Input() inEditMode: boolean = false;
 
     @Input() part: Part;
 
@@ -55,6 +54,4 @@ export class DateFieldComponent {
 
         this.newDateSelected.emit(this.dates.parseDateString(ngbDate));
     }
-
-
 }

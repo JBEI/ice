@@ -33,43 +33,39 @@
 
                                         <ng-container *ngIf="field.fieldInputType === 'TEXT' || !field.fieldInputType
                                     || field.fieldInputType === 'LONG_TEXT'">
-                                            <app-text-field [field]="field" [part]="newPart" [inEditMode]="true"
+                                            <app-text-field [field]="field" [part]="newPart"
                                                             [longText]="field.fieldInputType === 'LONG_TEXT'"></app-text-field>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'SELECT'">
-                                            <app-select-field [field]="field" [part]="newPart"
-                                                              [inEditMode]="true"></app-select-field>
+                                            <app-select-field [field]="field" [part]="newPart"></app-select-field>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'DATE'">
-                                            <app-date-field [field]="field" [part]="newPart"
-                                                            [inEditMode]="true"></app-date-field>
+                                            <app-date-field [field]="field" [part]="newPart"></app-date-field>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'USER_WITH_EMAIL'">
-                                            <app-user-with-email-field [field]="field" [inEditMode]="true"
+                                            <app-user-with-email-field [field]="field"
                                                                        [part]="newPart"></app-user-with-email-field>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'TEXTAREA'">
-                                            <app-textarea-field [field]="field" [part]="newPart"
-                                                                [inEditMode]="true"></app-textarea-field>
+                                            <app-textarea-field [field]="field" [part]="newPart"></app-textarea-field>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'BOOLEAN'">
-                                            <app-boolean-field [field]="field" [part]="newPart"
-                                                               [inEditMode]="true"></app-boolean-field>
+                                            <app-boolean-field [field]="field" [part]="newPart"></app-boolean-field>
                                         </ng-container>
 
 
                                         <ng-container *ngIf="field.fieldInputType === 'MULTI_TEXT'">
-                                            <app-multi-text-field [field]="field" [inEditMode]="true"
+                                            <app-multi-text-field [field]="field"
                                                                   [part]="newPart"></app-multi-text-field>
                                         </ng-container>
 
@@ -90,8 +86,8 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col">
+                    <div class="row pt-4">
+                        <div class="col p-0">
                             <app-footer></app-footer>
                         </div>
                     </div>

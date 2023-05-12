@@ -9,7 +9,7 @@
     <div class="col" [id]="field.label">
         <i class="bi" style="font-size: x-large" (click)="toggleField()"
            [ngClass]="{'bi-toggle2-on text-success': field.value === 'true', 'bi-toggle2-off': field.value === 'false'
-           || !field.value, 'cursor-pointer': inEditMode}"></i>
+           || !field.value, 'cursor-pointer': field.editMode}"></i>
     </div>
 
 </div>

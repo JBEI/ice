@@ -19,4 +19,5 @@ export class CustomField {
     // ui helper fields
     active: boolean;
     isInvalid: boolean;
+    editMode: string;           // FULL or QUICK
 }

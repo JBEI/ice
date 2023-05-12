@@ -69,4 +69,8 @@ export class FolderComponent implements OnInit {
     navigateToFolder(folder: Folder): void {
         this.router.navigate((['collection', this.collectionName, 'folder', folder.id]));
     }
+
+    goToCollection(collectionName: string): void {
+        this.router.navigate(['collection', this.collectionName]);
+    }
 }

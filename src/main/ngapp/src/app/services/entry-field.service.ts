@@ -14,4 +14,8 @@ export class EntryFieldService {
     updateField(partId: number, field: CustomField): Observable<any> {
         return this.http.put("parts/" + partId + "/fields/" + field.id, field);
     }
+
+    setQuickEdit(field: CustomField): void {
+        field.editMode = 'QUICK';
+    }
 }

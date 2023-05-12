@@ -38,7 +38,7 @@
                                         </button>
 
                                         <div ngbDropdownMenu aria-labelledby="actionDropDownOptions">
-                                            <div ngbDropdownItem class="small">Edit</div>
+                                            <div ngbDropdownItem class="small" (click)="editAction()">Edit</div>
                                             <div ngbDropdownItem class="small">Delete</div>
                                             <div ngbDropdownItem class="small">Export</div>
 
@@ -76,7 +76,7 @@
                                     </div>
 
                                     <div class="cursor-pointer fs-5" (click)="expandCollapseMetaData()">
-                                        <i class="bi bi-chevron-down"
+                                        <i class="bi "
                                            [ngClass]="{'bi-chevron-down': !expandMetaData, 'bi-chevron-up': expandMetaData}"></i>
                                     </div>
                                 </div>

@@ -1,18 +1,18 @@
 <div class="row">
-    <div class="col-2 d-flex">
+    <div class="col-2 text-nowrap">
         <label [for]="field.label" [ngClass]="{'fw-bold': field.active}">
-            <span [ngClass]="{'text-muted': !inEditMode}">{{field.label}}</span>
-            <span class="text-danger" *ngIf="field.required && inEditMode" style="font-size: larger">*</span>
+            <span [ngClass]="{'text-muted': !field.editMode}">{{field.label}}</span>
+            <span class="text-danger" *ngIf="field.required && field.editMode" style="font-size: larger">*</span>
         </label>
     </div>
 
     <div class="col" [id]="field.label">
-        <div class="field-value" *ngIf="!inEditMode">
+        <div class="field-value" *ngIf="!field.editMode">
             {{field.value}} <i class="bi bi-pencil" (click)="switchEditMode()"></i>
         </div>
 
         <textarea style="height: 70px;" class="form-control form-control-sm"
-                  (focusout)="textInputFocusOut(field)" *ngIf="inEditMode"
+                  (focusout)="textInputFocusOut(field)" *ngIf="field.editMode"
                   [ngClass]="{'is-invalid': field.isInvalid}" [(ngModel)]="field.value"
                   (focusin)="textInputFocusIn(field)"></textarea>
     </div>

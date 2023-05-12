@@ -1,53 +1,4 @@
-<!--<div class="container">-->
-
-
-<!--        <table class="table viz-table" *ngIf="params">-->
-<!--            <tr>-->
-<!--                <td class="cursor_pointer" style="width: 45px; vertical-align: middle; border-right: 2px solid #ddd"-->
-<!--                    (click)="showTableResults()" ngbTooltip="Back to list">-->
-<!--                    <i class="fa fa-fw fa-arrow-left" style="font-size: 22px"></i>-->
-<!--                </td>-->
-<!--                <td *ngIf="!feedback.deSelected">-->
-<!--                    <label for="partSource">Part Source <span class="required">*</span></label> &nbsp;-->
-<!--                    <input id="partSource" type="text" [(ngModel)]="sequence.partSource" style="width: 250px"-->
-<!--                           [ngClass]="{'has-error': feedback.invalidPartSource}" (ngModelChange)="validatePartSource()">-->
-<!--                    <i class="fa fa-fw fa-exclamation-triangle red" *ngIf="feedback.invalidPartSource"-->
-<!--                       ngbTooltip="Part source exists in design"></i>-->
-<!--                </td>-->
-<!--                <td>&nbsp;</td>-->
-
-<!--                <td style="width: 30px; vertical-align: middle">-->
-<!--                    <i [ngClass]="{'opacity_4': params.start === 0, 'cursor-hover': params.start}"-->
-<!--                       class="fa fa-chevron-left" style="font-size: 20px" (click)="pagePartVisualization(true)"></i>-->
-<!--                </td>-->
-<!--                <td style="vertical-align: middle; width: 30px; white-space: nowrap">-->
-<!--                    <small>-->
-<!--                        {{params.start + 1 | number}} / {{params.available | number}}-->
-<!--                    </small>-->
-<!--                </td>-->
-<!--                <td style="width: 30px; vertical-align: middle">-->
-<!--                    <i class="fa fa-chevron-right" style="font-size: 20px" (click)="pagePartVisualization(false)"-->
-<!--                       [ngClass]="{'opacity_4': params.start === params.available - 1,-->
-<!--                   'cursor-hover': params.start < params.available - 1}"></i>-->
-<!--                </td>-->
-<!--                <td style="width: 50px" class="cursor_pointer" (click)="selectPartClick()">-->
-<!--                    <i class="fa fa-fw" style="font-size: 25px"-->
-<!--                       [ngClass]="{'fa-check-square-o green': !feedback.deSelected, 'fa-square-o': feedback.deSelected}"></i>-->
-<!--                </td>-->
-<!--            </tr>-->
-<!--        </table>-->
-
-<!--<div class="loading style-2">-->
-<!--    <div class="loading-wheel"></div>-->
-<!--</div>-->
-
-<!--<div class="overlay">-->
-<!--    <div class="overlay__inner">-->
-<!--        <div class="overlay__content"><span class="spinner"></span></div>-->
-<!--    </div>-->
-<!--</div>-->
-
-<div class="d-flex justify-content-end">
+<div class="d-flex justify-content-end" *ngIf="sequence">
     <span class="opacity_hover mx-2" (click)="deleteSequence()">Delete <i class="bi bi-trash"></i></span>
     <span class="opacity_hover mx-2" (click)="deleteSequence()">Open <i class="bi bi-arrows-angle-expand"></i></span>
     <div ngbDropdown class="opacity_hover mx-2">
@@ -73,12 +24,15 @@
         </ng-container>
 
         <ng-container *ngIf="!loadingSequence">
-            <span>No sequence information associated with this entry</span>
             <div>
-                <input type="file" (change)="selectSequenceFile($event)" accept=".gb, .fa, .fasta, .fas"/>
+                No sequence information associated with this entry. To add a sequence, please use one of the options
+                below
+            </div>
+
+            <div class="pt-4">
+                <input type="file" (change)="selectSequenceFile($event)"
+                       accept=".gb, .fa, .fasta, .fas, .gen, .genbank"/>
             </div>
         </ng-container>
     </div>
 </div>
-
-<!--</div>-->

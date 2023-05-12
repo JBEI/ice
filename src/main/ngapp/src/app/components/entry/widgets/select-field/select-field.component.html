@@ -2,20 +2,20 @@
 
     <div class="col-2">
         <span [ngClass]="{'fw-bold': field.active}">
-            <span [ngClass]="{'text-muted': !inEditMode}">{{field.label}}</span>
-            <span class="text-danger" *ngIf="field.required && inEditMode" style="font-size: larger">*</span>
+            <span [ngClass]="{'text-muted': !field.editMode}">{{field.label}}</span>
+            <span class="text-danger" *ngIf="field.required && field.editMode" style="font-size: larger">*</span>
         </span>
     </div>
 
     <div class="col">
-        <div class="field-value" *ngIf="!inEditMode">
+        <div class="field-value" *ngIf="!field.editMode">
             {{displayForValue()}} <i class="bi bi-pencil" (click)="switchEditMode()"></i>
         </div>
 
         <select class="form-select form-select-sm w-25" id="inputGroupSelect01"
                 [ngClass]="{'is-invalid': field.isInvalid}"
                 (focusout)="textInputFocusOut(field)" [(ngModel)]="field.value"
-                (focusin)="textInputFocusIn(field)" *ngIf="field.fieldInputType === 'SELECT' && inEditMode">
+                (focusin)="textInputFocusIn(field)" *ngIf="field.fieldInputType === 'SELECT' && field.editMode">
             <option selected>Choose One...</option>
             <option [value]="option.name" *ngFor="let option of field.options">
                 {{option.value}}

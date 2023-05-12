@@ -37,6 +37,13 @@ export class CreateNewEntryComponent implements OnInit {
         // retrieve the fields for specific type
         this.http.get('parts/fields/' + this.type).subscribe((any: CustomField[]) => {
             this.fields = any;
+
+            if (this.fields && this.fields.length) {
+                for (let i = 0; i < this.fields.length; i += 1) {
+                    const customField: CustomField = this.fields[i];
+                    customField.editMode = 'FULL';
+                }
+            }
         })
 
         // create new part from server if none in progress
@@ -110,8 +117,10 @@ export class CreateNewEntryComponent implements OnInit {
         }
 
         // do not make call to backend if any field has an error
-        if (hasErrors)
+        if (hasErrors) {
+            console.log("Errors available");
             return;
+        }
 
         this.newPart.fields = this.fields;
 

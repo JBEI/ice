@@ -1,21 +1,24 @@
 <div class="row">
-    <div class="col-2 d-flex">
+    <div class="col-2 text-nowrap">
         <label [for]="field.label" [ngClass]="{'fw-bold': field.active}">
-            <span [ngClass]="{'text-muted': !inEditMode}">{{field.label}}</span>
+            <span [ngClass]="{'text-muted': !field.editMode}">{{field.label}}</span>
             <span class="text-danger" *ngIf="field.required" style="font-size: larger">*</span>
         </label>
     </div>
 
     <div class="col" [id]="field.label">
 
-        <div class="field-value" *ngIf="!inEditMode">
+        <div class="field-value" *ngIf="!field.editMode">
             {{field.value}} <i class="bi bi-pencil" (click)="switchEditMode()"></i>
         </div>
 
-        <div class="d-flex" *ngIf="inEditMode">
-            <input class="form-control form-control-sm w-50" (focusout)="textInputFocusOut(field)"
-                   (focusin)="textInputFocusIn(field)"> <i
-            class="bi bi-plus text-success" style="font-size: x-large"></i>
+        <div *ngIf="field.editMode">
+            <div class="d-flex mb-1" *ngFor="let value of values; index as i">
+                <input class="form-control form-control-sm w-50" (focusout)="textInputFocusOut(field)"
+                       (focusin)="textInputFocusIn(field)" (change)="changed($event)">
+                <i class="bi bi-plus text-success fs-4 cursor-pointer" (click)="addNewInput()"></i>
+                <i class="bi bi-dash text-danger fs-4 cursor-pointer" (click)="removeInput(i)" *ngIf="i"></i>
+            </div>
         </div>
     </div>
 

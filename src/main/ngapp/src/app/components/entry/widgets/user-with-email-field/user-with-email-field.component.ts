@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {CustomField} from "../../../../models/custom-field";
 import {User} from "../../../../models/User";
 import {Part} from "../../../../models/Part";
-import {HttpService} from "../../../../services/http.service";
+import {EntryFieldService} from "../../../../services/entry-field.service";
 
 @Component({
     selector: 'app-user-with-email-field',
@@ -15,16 +15,15 @@ export class UserWithEmailFieldComponent implements OnInit {
     @Input() user: User;
     appendString: string = ' Email';
     @Input() part: Part;
-    @Input() inEditMode: boolean = false;
 
-    constructor(private http: HttpService) {
+    constructor(private fieldService: EntryFieldService) {
     }
 
     ngOnInit(): void {
     }
 
     switchEditMode(): void {
-        this.inEditMode = !this.inEditMode;
+        this.fieldService.setQuickEdit(this.field);
     }
 
     textInputFocusOut(field: CustomField, removeAppend: boolean = false): void {

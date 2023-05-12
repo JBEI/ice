@@ -1,28 +1,33 @@
 <div class="row">
     <div class="col-2">
         <span [ngClass]="{'fw-bold': field.active}">
-            <span [ngClass]="{'text-muted': !inEditMode}">{{field.label}}</span>
-            <span class="text-danger" *ngIf="field.required && inEditMode" style="font-size: larger">*</span>
+            <span [ngClass]="{'text-muted': !field.editMode}">{{field.label}}</span>
+            <span class="text-danger" *ngIf="field.required && field.editMode" style="font-size: larger">*</span>
         </span>
     </div>
 
     <div class="col">
 
-        <div class="field-value" *ngIf="!inEditMode">
+        <div class="field-value" *ngIf="!field.editMode">
             {{field.value}} <i class="bi bi-pencil" (click)="switchEditMode()"></i>
         </div>
 
-        <div *ngIf="inEditMode" class="d-flex">
-            <input class="form-control form-control-sm" [(ngModel)]="field.value"
+        <div *ngIf="field.editMode" class="d-flex">
+            <input class="form-control form-control-sm" [(ngModel)]="field.value" [disabled]="updating"
                    (focusout)="textInputFocusOut(field)" name="field-value"
                    [ngClass]="{'w-75': longText, ' w-50': !longText, 'is-invalid': field.isInvalid}"
                    (focusin)="textInputFocusIn(field)" maxlength="127">
 
-            <button class="btn btn-sm border ms-1" (click)="switchEditMode()">
+            <img src="assets/img/loader-mini.gif" alt="Loading..." width="16" height="16" class="mt-2 ms-2"
+                 *ngIf="updating">
+
+            <button class="btn btn-sm ms-1 opacity_hover" *ngIf="field.editMode==='QUICK' && !updating"
+                    (click)="cancelEdit()">
                 <i class="bi bi-x-lg"></i>
             </button>
 
-            <button class="btn btn-sm" (click)="updateField()">
+            <button class="btn btn-sm opacity_hover" (click)="updateField()"
+                    *ngIf="field.editMode==='QUICK' && !updating">
                 <i class="bi bi-check-lg"></i>
             </button>
         </div>

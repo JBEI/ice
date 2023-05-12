@@ -5,8 +5,9 @@
 
             <div class="d-flex justify-content-between">
                 <h2 class="text-secondary">
-                    {{collectionName | titlecase}}  <i class="bi bi-chevron-right font-80em"></i>
-                    {{folderDetails.folderName}}
+                    <span class="cursor-pointer"
+                          (click)="goToCollection(collectionName)">{{collectionName | titlecase}}</span>
+                    <i class="bi bi-chevron-right font-80em ps-2"></i> {{folderDetails.folderName}}
                     <div ngbDropdown class="d-inline-block" #myDrop="ngbDropdown">
                         <button class="btn p-0" ngbDropdownAnchor (focus)="myDrop.open()"></button>
                         <div ngbDropdownMenu aria-labelledby="dropdownManual">
@@ -16,25 +17,42 @@
                     </div>
                 </h2>
 
-                <div *ngIf="folderDetails.canEdit">
-                    <button type="button" class="btn btn-white border font-95em" [ngClass]="{'text-muted': false}"
-                            (click)="shareFolder()">
-                        <!--                            [disabled]="!selectedFolderId"-->
-                        <i class="bi bi-people-fill"></i> Share
-                    </button>
+                <div class="d-flex justify-content-end">
+                    <div *ngIf="folderDetails.canEdit">
+                        <button type="button" class="btn btn-white border font-95em" [ngClass]="{'text-muted': false}"
+                                (click)="shareFolder()">
+                            <!--                            [disabled]="!selectedFolderId"-->
+                            <i class="bi bi-people-fill"></i> Share
+                        </button>
 
-                    <button class="btn btn-primary ms-3 font-95em" (click)="showUploadModal()">
-                        <i class="bi bi-upload"></i> Upload
-                    </button>
+                        <button class="btn btn-primary ms-2 font-95em" (click)="showUploadModal()">
+                            <i class="bi bi-upload"></i> Upload
+                        </button>
 
 
-                    <button type="button" class="btn btn-white ms-3 border font-95em">
-                        <i class="bi bi-download"></i> Export
-                    </button>
+                        <button type="button" class="btn btn-white ms-2 border font-95em">
+                            <i class="bi bi-download"></i> Export
+                        </button>
 
+                    </div>
+
+                    <div ngbDropdown class="ms-3 d-inline-block">
+                        <button type="button" class="btn btn-white border font-95em" ngbDropdownToggle>Actions</button>
+
+                        <div ngbDropdownMenu aria-labelledby="folderActionDropDownOptions">
+                            <div ngbDropdownItem class="small">Create Samples</div>
+                            <div ngbDropdownItem class="small">Export</div>
+                            <div ngbDropdownItem class="small">Bulk Edit</div>
+                            <div ngbDropdownItem class="small">Upload</div>
+
+                            <div class="dropdown-divider"></div>
+
+                            <div ngbDropdownItem class="small">Transfer</div>
+                            <div ngbDropdownItem class="small">Promote</div>
+                            <div ngbDropdownItem class="small">Accept</div>
+                        </div>
+                    </div>
                 </div>
-
-
             </div>
         </div>
     </div>

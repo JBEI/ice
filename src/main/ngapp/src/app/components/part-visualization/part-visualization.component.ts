@@ -48,6 +48,9 @@ export class PartVisualizationComponent implements OnInit {
 
     // sequence visualization
     showSequenceVisualization(file: Sequence): void {
+        if (!file)
+            return;
+
         this.data = {
             sequenceData: {
                 sequence: file.sequence,

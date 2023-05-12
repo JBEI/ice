@@ -49,4 +49,12 @@ export class EntryDetailComponent implements OnInit {
             }
         }
     }
+
+    editAction(): void {
+        this.expandMetaData = true;
+        for (let i = 0; i < this.entry.fields.length; i += 1) {
+            const customField: CustomField = this.entry.fields[i];
+            customField.editMode = 'FULL';
+        }
+    }
 }
