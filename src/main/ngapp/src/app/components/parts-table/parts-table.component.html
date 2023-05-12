@@ -42,7 +42,9 @@
                 </td>
 
                 <td *ngFor="let field of part.fields">
-                    {{field.value || '&nbsp'}}
+                    <div class="text-nowrap bp3-text-overflow-ellipsis" style="max-width: 250px">
+                        {{field.value || '&nbsp'}}
+                    </div>
                 </td>
 
                 <td style="vertical-align: middle; white-space: nowrap">
