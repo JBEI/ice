@@ -53,7 +53,7 @@ public class VisibleEntries {
 
         ArrayList<PartData> data = new ArrayList<>();
         for (Long id : resultIds) {
-            PartData info = ModelToInfoFactory.createTableView(id, fields);
+            PartData info = ModelToInfoFactory.createTableView(id);
             data.add(info);
         }
 

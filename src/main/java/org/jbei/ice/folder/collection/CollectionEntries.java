@@ -206,7 +206,7 @@ public class CollectionEntries {
         List<Long> entries = entryDAO.getByVisibility(user, visibility, field, asc, offset, limit, filter);
         Results<PartData> results = new Results<>();
         for (Long id : entries) {
-            PartData info = ModelToInfoFactory.createTableView(id, fields);
+            PartData info = ModelToInfoFactory.createTableView(id);
             results.getData().add(info);
         }
 

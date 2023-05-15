@@ -7,9 +7,7 @@ import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.EntryFieldValueModel;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Factory for converting {@link Entry}s to a {@link PartData}
@@ -55,19 +53,7 @@ public class ModelToInfoFactory {
     }
 
 
-    public static PartData createTableView(long entryId, List<String> fields) {
-        Set<String> fieldsToProcess;
-        if (fields == null)
-            fieldsToProcess = new HashSet<>();
-        else
-            fieldsToProcess = new HashSet<>(fields);
-
-        fieldsToProcess.add("name");
-        fieldsToProcess.add("status");
-        fieldsToProcess.add("recordType");
-        fieldsToProcess.add("creation_time");
-        fieldsToProcess.add("short_description");
-
+    public static PartData createTableView(long entryId) {
         // minimum set of values
         Entry entry = DAOFactory.getEntryDAO().get(entryId);
         EntryType type = EntryType.nameToType(entry.getRecordType());
@@ -83,12 +69,6 @@ public class ModelToInfoFactory {
             view.getFields().add(valueModel.toDataTransferObject());
         }
 
-//        view.setName(entry.getName());
-//        view.setShortDescription(entry.getShortDescription());
-//        view.setCreationTime(entry.getCreationTime().getTime());
-//        view.setStatus(entry.getStatus());
-//        view.setShortDescription(entry.getShortDescription());
-
         // has sample
         view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
 
@@ -100,27 +80,6 @@ public class ModelToInfoFactory {
             SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
             view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
             view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
-        }
-
-        // optional values
-        if (fieldsToProcess.contains("alias")) {
-        }
-
-        if (fieldsToProcess.contains("links")) {
-            for (Entry linkedEntry : entry.getLinkedEntries()) {
-                PartData linkedPartData = new PartData(EntryType.nameToType(linkedEntry.getRecordType()));
-                linkedPartData.setId(linkedEntry.getId());
-                view.getLinkedParts().add(linkedPartData);
-            }
-
-            List<Entry> parents = DAOFactory.getEntryDAO().getParents(entry.getId());
-            if (parents != null) {
-                for (Entry parentEntry : parents) {
-                    PartData partData = new PartData(EntryType.nameToType(parentEntry.getRecordType()));
-                    partData.setId(parentEntry.getId());
-                    view.getParents().add(partData);
-                }
-            }
         }
 
         return view;

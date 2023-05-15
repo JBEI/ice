@@ -82,18 +82,23 @@ export class PartsTableComponent implements OnInit {
 
     getCollectionEntries(): void {
         this.paging.processing = true;
-        this.http.get('collections/' + this.collection + '/entries', this.paging).subscribe((result: Result<Part>) => {
-            this.paging.processing = false;
-            if (!result)
-                return;
+        this.http.get('collections/' + this.collection + '/entries', this.paging).subscribe(
+            {
+                next: (result: Result<Part>) => {
+                    console.log(result.data);
 
-            this.paging.available = result.resultCount;
-            this.parts = result.data;
+                    this.paging.processing = false;
+                    if (!result)
+                        return;
 
-            this.setDisplayCounts();
-        }, (error: any) => {
-            this.paging.processing = false;
-        });
+                    this.paging.available = result.resultCount;
+                    this.parts = result.data;
+
+                    this.setDisplayCounts();
+                }, error: (error: any) => {
+                    this.paging.processing = false;
+                }
+            });
     }
 
     setDisplayCounts(): void {

@@ -350,7 +350,7 @@ public class FolderContents {
         // retrieve folder contents
         List<Long> results = folderDAO.retrieveFolderContents(folderId, pageParameters, visibleOnly);
         for (Long entryId : results) {
-            PartData info = ModelToInfoFactory.createTableView(entryId, fields);
+            PartData info = ModelToInfoFactory.createTableView(entryId);
             details.getEntries().add(info);
         }
         return details;
@@ -459,7 +459,7 @@ public class FolderContents {
         // retrieve folder contents
         List<Long> results = folderDAO.retrieveFolderContents(folderId, pageParameters, true);
         for (Long entryId : results) {
-            PartData info = ModelToInfoFactory.createTableView(entryId, fields);
+            PartData info = ModelToInfoFactory.createTableView(entryId);
             info.setCanEdit(canEdit);
             details.getEntries().add(info);
         }

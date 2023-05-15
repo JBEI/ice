@@ -121,7 +121,7 @@ public class FolderController {
 
         for (Long id : results) {
             try {
-                PartData info = ModelToInfoFactory.createTableView(id, fields);
+                PartData info = ModelToInfoFactory.createTableView(id);
                 info.setPublicRead(true);
                 details.getEntries().add(info);
             } catch (Exception e) {

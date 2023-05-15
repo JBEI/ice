@@ -52,6 +52,8 @@ public class EntryFieldValueModelDAO extends HibernateRepository<EntryFieldValue
                 getBuilder().equal(entryJoin.get("id"), entryId)
             );
 
+            query.orderBy(getBuilder().asc(from.get("label")));
+
             return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);

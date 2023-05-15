@@ -48,7 +48,7 @@ public class SharedEntries {
 
         ArrayList<PartData> data = new ArrayList<>();
         for (Long id : entries) {
-            PartData info = ModelToInfoFactory.createTableView(id, fields);
+            PartData info = ModelToInfoFactory.createTableView(id);
             data.add(info);
         }
         return data;

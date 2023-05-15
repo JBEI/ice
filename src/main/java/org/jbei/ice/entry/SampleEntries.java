@@ -37,7 +37,7 @@ public class SampleEntries {
 
         ArrayList<PartData> data = new ArrayList<>();
         for (Long entry : entries) {
-            PartData info = ModelToInfoFactory.createTableView(entry, fields);
+            PartData info = ModelToInfoFactory.createTableView(entry);
             data.add(info);
         }
         return data;
