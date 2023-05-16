@@ -55,6 +55,20 @@ export class CreateNewEntryComponent implements OnInit {
                     sessionStorage.setItem('in-progress-entry', JSON.stringify(this.newPart));
                 }
             });
+        } else {
+            // if same entry is selected
+            if (this.newPart.type === this.type)
+                return;
+
+            console.log("existing type", this.newPart, this.newPart.type === this.type);
+            sessionStorage.removeItem('in-progress-entry');
+
+            this.http.post('parts', {type: this.type.toUpperCase()}).subscribe({
+                next: (part: Part) => {
+                    this.newPart = part;
+                    sessionStorage.setItem('in-progress-entry', JSON.stringify(this.newPart));
+                }
+            });
         }
     }
 
