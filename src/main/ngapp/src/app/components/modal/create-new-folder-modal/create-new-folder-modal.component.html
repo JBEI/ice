@@ -1,25 +1,27 @@
 <div class="modal-header">
-    <h3 class="modal-title">Create new folder</h3>
+    <h3 class="modal-title fs-5">Create New Folder</h3>
     <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()">
     </button>
 </div>
 
 <div class="modal-body">
-    <b>Folder Name</b>
-    <input type="text" placeholder="Enter folder name"
+    <h6 class="text-secondary">Folder Name <span class="text-danger">*</span></h6>
+    <input type="text" maxlength="256"
            [(ngModel)]="newFolder.folderName"
-           class="form-control form-control-sm w-75">
+           class="form-control form-control-sm">
 
     <br>
-    <b>Description</b>
-    <textarea class="form-control form-control-sm" [(ngModel)]="newFolder.description"></textarea>
+    <h6 class="text-secondary">Description</h6>
+    <textarea class="form-control form-control-sm" [(ngModel)]="newFolder.description"
+              placeholder="Optional brief folder description" maxlength="512" rows="3"></textarea>
 </div>
 
 <div class="modal-footer">
-    <button type="button" class="btn btn-primary" [disabled]="!newFolder.folderName" (click)="createFolder()">
+    <button type="button" class="btn btn-sm btn-muted" (click)="activeModal.close()">Cancel</button>
+
+    <button type="button" class="btn btn-sm btn-primary" [disabled]="!newFolder.folderName" (click)="createFolder()">
         Create
     </button>
-    <button type="button" class="btn btn-link" (click)="activeModal.close()">Cancel</button>
 </div>
 
 
