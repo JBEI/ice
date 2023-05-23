@@ -59,6 +59,12 @@ export class PartSelectionService {
         this.allSelection = !this.allSelection;
     }
 
+    // effectively clears the selection of entries
+    selectNone(): void {
+        this.selectedParts = [];
+        this.allSelection = false;
+    }
+
     allSelected(): boolean {
         return this.allSelection;
     }

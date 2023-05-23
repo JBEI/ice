@@ -152,9 +152,9 @@ html body {
     color: #16192c;
 }
 
-.btn-primary {
-    --bs-btn-bg: #206bc4;
-}
+/*.btn-primary {*/
+/*    --bs-btn-bg: #206bc4;*/
+/*}*/
 
 .field-value i {
     color: #cccccc;

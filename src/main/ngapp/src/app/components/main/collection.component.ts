@@ -11,6 +11,7 @@ import {Paging} from "../../models/paging";
 import {Folder} from "../../models/folder";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {CreateNewFolderModalComponent} from "../modal/create-new-folder-modal/create-new-folder-modal.component";
+import {PartSelectionService} from "../../services/part-selection.service";
 
 @Component({
     selector: 'app-collection',
@@ -33,7 +34,7 @@ export class CollectionComponent implements OnInit {
 
     constructor(private menuService: CollectionMenuService, private userService: UserService,
                 private router: Router, private http: HttpService, private activatedRoute: ActivatedRoute,
-                private modalService: NgbModal) {
+                private modalService: NgbModal, private selection: PartSelectionService) {
         this.collections = this.menuService.menuOptions;
         this.user = this.userService.getUser();
         this.paging = new Paging('created');
@@ -113,5 +114,22 @@ export class CollectionComponent implements OnInit {
         // }, error => {
         //
         // });
+    }
+
+    // callback action to take when folder action (add to folder, remove etc) is completed
+    folderActionCompleted(folders: Folder[]): void {
+        if (!folders)
+            return;
+
+        for (let i = 0; i < this.folders.length; i += 1) {
+            for (let j = 0; j < folders.length; j += 1) {
+                if (this.folders[i].id === folders[j].id) {
+                    this.folders[i].count = folders[j].count;
+                    break;
+                }
+            }
+        }
+
+        this.selection.selectNone();
     }
 }

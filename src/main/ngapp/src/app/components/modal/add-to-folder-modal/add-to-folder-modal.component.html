@@ -5,7 +5,7 @@
 </div>
 
 <div class="modal-body p-0">
-    <div class="input-group flex-nowrap p-3">
+    <div class="input-group flex-nowrap p-2">
         <span class="input-group-text p-1">
             <i class="bi bi-filter"></i>
         </span>
@@ -29,7 +29,7 @@
 </div>
 
 <div class="modal-footer">
-    <button type="button" class="btn btn-link btn-sm" (click)="activeModal.close()">Cancel</button>
+    <button type="button" class="btn btn-muted btn-sm" (click)="activeModal.close()">Cancel</button>
     <button type="button" class="btn btn-primary btn-sm" (click)="submitAddToFolder()"
             [disabled]="!selectedFolders.length">Submit
     </button>

@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {PartSelectionService} from "../../services/part-selection.service";
 import {NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
 import {AddToFolderModalComponent} from "../modal/add-to-folder-modal/add-to-folder-modal.component";
@@ -13,6 +13,7 @@ export class FolderActionsComponent implements OnInit {
 
     @Input() folder: Folder;
     filterModeOn: boolean;
+    @Output() actionCompleted: EventEmitter<any> = new EventEmitter<any>();
 
     constructor(private service: PartSelectionService, private modalService: NgbModal) {
     }
@@ -35,6 +36,11 @@ export class FolderActionsComponent implements OnInit {
         modalRef.result.then((result) => {
             modalRef.close();
             console.log(result);
+
+            if (!result)
+                return;
+
+            this.actionCompleted.emit(result);
         });
     }
 }

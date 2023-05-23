@@ -41,6 +41,7 @@ export class AddToFolderModalComponent {
             destination: this.selectedFolders
         }).subscribe(result => {
             console.log(result);
+            this.activeModal.close(result);
         });
     }
 

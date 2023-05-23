@@ -176,8 +176,7 @@ public class FolderResource extends RestResource {
                     entrySelection, registryPartner));
         } else {
             log(userId, "adding entries to folders");
-            folderContents.addEntrySelection(userId, entrySelection);
-            return super.respond(true);
+            return super.respond(folderContents.addEntrySelection(userId, entrySelection));
         }
     }
 
