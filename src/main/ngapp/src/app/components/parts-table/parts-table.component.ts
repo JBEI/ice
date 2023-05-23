@@ -85,8 +85,6 @@ export class PartsTableComponent implements OnInit {
         this.http.get('collections/' + this.collection + '/entries', this.paging).subscribe(
             {
                 next: (result: Result<Part>) => {
-                    console.log(result.data);
-
                     this.paging.processing = false;
                     if (!result)
                         return;
