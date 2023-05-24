@@ -5,7 +5,6 @@ import {User} from "../../models/User";
 import {UserService} from "../../services/user.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {HttpService} from "../../services/http.service";
-import {Result} from "../../models/result";
 import {Entry} from "../../models/entry";
 import {Paging} from "../../models/paging";
 import {Folder} from "../../models/folder";
@@ -55,7 +54,7 @@ export class CollectionComponent implements OnInit {
             else
                 this.selectedOption = this.menuService.getOptionForName(collectionName);
 
-            // retrieve
+            // retrieve sub folders for selected collections
             this.getSubFolders(this.selectedOption);
 
             // get collection entries
@@ -74,27 +73,26 @@ export class CollectionComponent implements OnInit {
         });
     }
 
-    getCollectionEntries(collection?: CollectionMenuOption): void {
-        this.paging.processing = true;
-
-        if (!collection)
-            collection = this.selectedOption;
-        this.http.get('collections/' + collection.name + '/entries', this.paging).subscribe((result: Result<Entry>) => {
-            this.paging.processing = false;
-            if (!result)
-                return;
-
-            this.paging.available = result.resultCount;
-            this.entries = result.data;
-        }, error => {
-            this.paging.processing = false;
-        });
-    }
-
-    pageCollectionEntries(page: number): void {
-        this.paging.offset = ((page - 1) * this.paging.limit);
-        this.getCollectionEntries();
-    }
+    // getCollectionEntries(collection?: CollectionMenuOption): void {
+    //     this.paging.processing = true;
+    //
+    //     if (!collection)
+    //         collection = this.selectedOption;
+    //
+    //     if (collection.name === this.menuService.DRAFT) {
+    //     } else {
+    //         this.http.get('collections/' + collection.name + '/entries', this.paging).subscribe((result: Result<Entry>) => {
+    //             this.paging.processing = false;
+    //             if (!result)
+    //                 return;
+    //
+    //             this.paging.available = result.resultCount;
+    //             this.entries = result.data;
+    //         }, error => {
+    //             this.paging.processing = false;
+    //         });
+    //     }
+    // }
 
     collectionSelected(option: CollectionMenuOption): void {
         this.selectedOption = option;
@@ -131,5 +129,9 @@ export class CollectionComponent implements OnInit {
         }
 
         this.selection.selectNone();
+    }
+
+    showDraftDetails(): void {
+
     }
 }

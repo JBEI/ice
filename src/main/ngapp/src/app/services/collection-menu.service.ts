@@ -9,6 +9,8 @@ export class CollectionMenuService {
     private readonly _menuOptions: CollectionMenuOption[];
     private _selected: CollectionMenuOption;
 
+    public DRAFT: string = "drafts";
+
     constructor() {
         this._menuOptions = [
             {
@@ -44,7 +46,7 @@ export class CollectionMenuService {
                 alwaysVisible: false
             },
             {
-                name: 'drafts',
+                name: this.DRAFT,
                 description: 'Entries from bulk upload still in progress',
                 display: 'Drafts',
                 icon: 'bi-pen',

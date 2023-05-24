@@ -69,17 +69,36 @@
                                                 </div>
                                             </div>
 
-                                            <div class="row pt-3">
+                                            <div class="row pt-3"
+                                                 *ngIf="selectedOption && selectedOption.name !== 'drafts'">
                                                 <div class="col px-4">
                                                     <app-folder-actions
                                                         (actionCompleted)="folderActionCompleted($event)"></app-folder-actions>
 
-                                                    <br>
 
                                                     <app-parts-table
                                                         [collection]="selectedOption.name"></app-parts-table>
 
                                                 </div>
+                                            </div>
+
+                                            <div class="row pt-3"
+                                                 *ngIf="selectedOption && selectedOption.name === 'drafts'">
+
+
+                                                <!--                                                <div class="card ms-4 mb-4 shadow-sm opacity-hover" style="width: 18rem"-->
+                                                <!--                                                     (click)="showDraftDetails()">-->
+                                                <!--                                                    <div class="card-body pb-1 text-center pt-5">-->
+                                                <!--                                                        <h5>Add new organism</h5>-->
+                                                <!--                                                    </div>-->
+                                                <!--                                                </div>-->
+
+                                                <div class="card ms-4 mb-4 shadow-sm" style="width: 28rem"
+                                                     *ngFor="let folder of folders">
+                                                    <div class="card-body pb-1">
+                                                    </div>
+                                                </div>
+
                                             </div>
 
                                         </div>
