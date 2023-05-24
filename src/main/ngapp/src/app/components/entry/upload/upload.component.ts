@@ -24,7 +24,7 @@ export class UploadComponent implements OnInit {
     upload: BulkUpload;
 
     hotSettings: Handsontable.GridSettings = {
-        startRows: 100,
+        startRows: 40,
         rowHeaders: true,
         colWidths: 100,
         stretchH: 'all',
