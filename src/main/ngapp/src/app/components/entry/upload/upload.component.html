@@ -28,26 +28,136 @@
                         </div>
                     </div>
 
-                    <div class="row" *ngIf="fields && fields.length">
-                        <div class="col p-0">
-                            <div>
+                    <ng-container *ngIf="!fields || !fields.length">
+                        <div class="row p-3">
+                            <div class="col p-3 bg-white shadow-sm ">
 
-                                <hot-table
-                                    [hotId]="hotid"
-                                    [settings]="hotSettings"
-                                    licenseKey="non-commercial-and-evaluation">
-                                    <hot-column *ngFor="let field of fields" [type]="getFieldType(field)"
-                                                [width]="150" [source]="getSelectOptions(field)"
-                                                [allowInvalid]="false"
-                                                [title]="getFieldLabel(field)">
-                                    </hot-column>
-                                </hot-table>
+                                <form>
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            Upload multiple {{type}} entries
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-sm-2">
+                                            <label for="linkedSelection" class="col-form-label fw-bold text-muted">Link
+                                                to</label>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <select class="form-select" name="linkedOptions" id="linkedSelection"
+                                                    [(ngModel)]="linkedType">
+                                                <option value="undefined">None</option>
+                                                <option [value]="option"
+                                                        *ngFor="let option of options">{{option}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <fieldset class="row mb-3">
+                                        <legend class="col-form-label col-sm-2 pt-0  fw-bold text-muted">Upload type
+                                        </legend>
+                                        <div class="col-sm-10">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="gridRadios"
+                                                       id="gridRadios1" [value]="'web'" [(ngModel)]="uploadMode">
+                                                <label class="form-check-label" for="gridRadios1">
+                                                    Web interface
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="gridRadios"
+                                                       id="gridRadios2" [value]="'file'" [(ngModel)]="uploadMode">
+                                                <label class="form-check-label" for="gridRadios2">
+                                                    File Upload
+                                                </label>
+                                            </div>
+
+                                        </div>
+                                    </fieldset>
+
+                                    <div class="row mb-3">
+                                        <div class="col-sm-2">
+                                        </div>
+
+                                        <div class="col-sm-10">
+                                            <div class="bg-light p-3 shadow-sm rounded-2 w-50">
+                                                <a class="cursor-pointer" (click)="downloadCSVTemplate()"><i
+                                                    class="bi bi-download"></i> Click here to download CSV template</a>
+                                                <br>
+                                                <div class="small text-muted mt-2">After downloading, fill it out and
+                                                    upload
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-5 offset-2 text-center">
+                                            <label for="file-upload" class="p-4 rounded-3 cursor-pointer w-100"
+                                                   style="border: 1px dashed #0082c0">
+                                                <i class="bi bi-cloud-upload fs-2" style="color: #0082c0"></i>
+                                                <div style="color: #0082c0">Click to select file for upload</div>
+                                                <div class="small text-muted">Maximum file size: 50Mb</div>
+                                            </label>
+
+                                            <div>
+                                                <input id="file-upload" type="file" style="display: none"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-3">
+                                        <div class="col-5 offset-2">
+                                            <div style="background-color: #e9f0ff" class="rounded-1 p-2">
+                                                <i class="bi bi-filetype-csv fs-2 float-start"
+                                                   style="color: #0082c0"></i>
+
+                                                Uploading.... 50%
+                                                <br>
+                                                <ngb-progressbar type="primary" [value]="75"
+                                                                 height="10px"></ngb-progressbar>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                </form>
                             </div>
                         </div>
-                    </div>
 
+                        <div class="row p-3">
+                            <div class="col-sm">
+                                <button class="btn btn-sm btn-muted">Cancel</button>
+                                <button class="btn btn-sm btn-primary ms-3">Submit</button>
+                            </div>
+                        </div>
+
+                    </ng-container>
 
                 </div>
+
+                <div class="row" *ngIf="fields && fields.length">
+                    <div class="col p-0">
+
+                        <div>
+
+                            <!--                                <hot-table-->
+                            <!--                                    [hotId]="hotid"-->
+                            <!--                                    [settings]="hotSettings"-->
+                            <!--                                    licenseKey="non-commercial-and-evaluation">-->
+                            <!--                                    <hot-column *ngFor="let field of fields" [type]="getFieldType(field)"-->
+                            <!--                                                [width]="150" [source]="getSelectOptions(field)"-->
+                            <!--                                                [allowInvalid]="false"-->
+                            <!--                                                [title]="getFieldLabel(field)">-->
+                            <!--                                    </hot-column>-->
+                            <!--                                </hot-table>-->
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </div>
     </div>

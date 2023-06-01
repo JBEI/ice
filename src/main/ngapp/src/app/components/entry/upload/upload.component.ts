@@ -9,6 +9,7 @@ import {BreakpointObserver} from "@angular/cdk/layout";
 import {CellChange, ChangeSource} from "handsontable/common";
 import {BulkUpload} from "../../../models/bulk-upload";
 import {Location} from "@angular/common";
+import {environment} from "../../../../environments/environment";
 
 @Component({
     selector: 'app-upload',
@@ -22,6 +23,8 @@ export class UploadComponent implements OnInit {
     fields: EntryField[];
     partsMap: Map<number, Part>;
     upload: BulkUpload;
+    options: string[];
+    uploadMode: string = 'web';
 
     hotSettings: Handsontable.GridSettings = {
         startRows: 40,
@@ -40,22 +43,23 @@ export class UploadComponent implements OnInit {
                 private location: Location) {
         this.partsMap = new Map<number, Part>();
         this.upload = new BulkUpload();
+        this.options = ['Strain', 'Plasmid', 'Existing'];
     }
 
     ngOnInit(): void {
         this.type = this.route.snapshot.paramMap.get('type');
 
-        if (!isNaN(parseInt(this.type))) {
-            // retrieve upload from server
-            console.log('retrieving upload with id', this.type);
-            this.http.get('uploads/' + parseInt(this.type)).subscribe((result: BulkUpload) => {
-                this.upload = result;
-                this.type = this.upload.type;
-                this.retrieveTypeFields(this.upload.type);
-            });
-        } else {
-            this.retrieveTypeFields(this.type);
-        }
+        // if (!isNaN(parseInt(this.type))) {
+        //     // retrieve upload from server
+        //     console.log('retrieving upload with id', this.type);
+        //     this.http.get('uploads/' + parseInt(this.type)).subscribe((result: BulkUpload) => {
+        //         this.upload = result;
+        //         this.type = this.upload.type;
+        //         this.retrieveTypeFields(this.upload.type);
+        //     });
+        // } else {
+        //     this.retrieveTypeFields(this.type);
+        // }
 
         // this.newPart = JSON.parse(sessionStorage.getItem('in-progress-entry'));
         // if (!this.newPart) {
@@ -178,5 +182,14 @@ export class UploadComponent implements OnInit {
                 return "checkbox";
         }
         return "text";
+    }
+
+    downloadCSVTemplate(): void {
+        let url = "/file/upload/" + this.type;
+        if (this.linkedType)
+            url += "?link=" + this.linkedType;
+
+        console.log(url);
+        window.open(environment.apiUrl + url, "_self");
     }
 }
