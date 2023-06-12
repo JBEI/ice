@@ -55,9 +55,9 @@ public class BulkUploadResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/partNumbers")
     public Response getPartNumbersForUpload(
-            @QueryParam("type") EntryType uploadType,
-            @QueryParam("token") String token,
-            @DefaultValue("8") @QueryParam("limit") int limit) {
+        @QueryParam("type") EntryType uploadType,
+        @QueryParam("token") String token,
+        @DefaultValue("8") @QueryParam("limit") int limit) {
         requireUserId();
         ArrayList<String> results = bulkUploads.getMatchingPartNumbersForLinks(uploadType, token, limit);
         return super.respond(results);
@@ -244,6 +244,39 @@ public class BulkUploadResource extends RestResource {
         String userId = getUserId();
         Logger.info(userId + ": retrieving bulk upload drafts");
         return bulkUploads.retrieveByUser(userId, userId);
+    }
+
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/file")
+    public Response createUploadFromFile(@FormDataParam("file") InputStream inputStream,
+                                         @FormDataParam("type") String type,
+                                         @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
+        String userId = getUserId();
+        EntryType addType = EntryType.valueOf(type.toUpperCase());
+        String filename = contentDispositionHeader.getFileName();
+
+        try (FileBulkUpload upload = new FileBulkUpload(userId, inputStream, filename, addType)) {
+            return super.respond(upload.uploadFile());
+        } catch (IOException e) {
+            Logger.error(e);
+            ProcessedBulkUpload processedBulkUpload = new ProcessedBulkUpload();
+            processedBulkUpload.setUserMessage(e.getMessage());
+            processedBulkUpload.setSuccess(false);
+            return Response.status(Response.Status.BAD_REQUEST).entity(processedBulkUpload).build();
+        }
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/validation")
+    public Response validateFileUpload(@PathParam("id") long uploadId) {
+        String userId = getUserId();
+        BulkUploadValidation validation = new BulkUploadValidation(userId, uploadId);
+        validation.perform();
+        return super.respond(false);
     }
 
     /**

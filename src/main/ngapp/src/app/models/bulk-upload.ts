@@ -8,5 +8,5 @@ export class BulkUpload {
     count: number;
     account: User;
     status: string;
-
+    file: string;
 }

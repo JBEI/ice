@@ -21,6 +21,7 @@ public class BulkUpload extends AbstractFolder {
     private int count;
     private long created;
     private long lastUpdate;
+    private String file;
     private Account account;
     private BulkUploadStatus status;
     private final ArrayList<PartData> entryList;
@@ -91,5 +92,13 @@ public class BulkUpload extends AbstractFolder {
 
     public void setStatus(BulkUploadStatus status) {
         this.status = status;
+    }
+
+    public String getFile() {
+        return this.file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
     }
 }

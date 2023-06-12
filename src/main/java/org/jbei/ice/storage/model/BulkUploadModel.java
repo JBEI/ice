@@ -49,6 +49,9 @@ public class BulkUploadModel implements DataModel {
     @Column(name = "last_update_time", nullable = false)
     private Date lastUpdateTime;
 
+    @Column(name = "file_upload_id")
+    private String fileIdentifier;
+
     @Enumerated(value = EnumType.STRING)
     @Column(name = "status")
     private BulkUploadStatus status;
@@ -127,6 +130,14 @@ public class BulkUploadModel implements DataModel {
 
     public void setStatus(BulkUploadStatus status) {
         this.status = status;
+    }
+
+    public String getFileIdentifier() {
+        return this.fileIdentifier;
+    }
+
+    public void setFileIdentifier(String fileIdentifier) {
+        this.fileIdentifier = fileIdentifier;
     }
 
     public BulkUpload toDataTransferObject() {

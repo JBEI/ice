@@ -10,6 +10,8 @@ import {CellChange, ChangeSource} from "handsontable/common";
 import {BulkUpload} from "../../../models/bulk-upload";
 import {Location} from "@angular/common";
 import {environment} from "../../../../environments/environment";
+import {UploadService} from "../../../services/upload.service";
+import {HttpEventType, HttpResponse} from "@angular/common/http";
 
 @Component({
     selector: 'app-upload',
@@ -19,12 +21,14 @@ import {environment} from "../../../../environments/environment";
 export class UploadComponent implements OnInit {
 
     type: string;
-    linkedType: string;
+    linkedType: string = '';
     fields: EntryField[];
     partsMap: Map<number, Part>;
     upload: BulkUpload;
     options: string[];
-    uploadMode: string = 'web';
+    uploadMode: string = 'file'; // or file
+
+    uploadProgress: number = 0;
 
     hotSettings: Handsontable.GridSettings = {
         startRows: 40,
@@ -40,7 +44,7 @@ export class UploadComponent implements OnInit {
     hotid = 'hotid';
 
     constructor(private route: ActivatedRoute, private http: HttpService, private breakpointObserver: BreakpointObserver,
-                private location: Location) {
+                private location: Location, private uploadService: UploadService) {
         this.partsMap = new Map<number, Part>();
         this.upload = new BulkUpload();
         this.options = ['Strain', 'Plasmid', 'Existing'];
@@ -191,5 +195,46 @@ export class UploadComponent implements OnInit {
 
         console.log(url);
         window.open(environment.apiUrl + url, "_self");
+    }
+
+    onFileChange(event): void {
+        let files: FileList = event.target.files;
+        this.uploadProgress = 0;
+
+        if (files.length === 0) {
+            console.log('No file selected!');
+            return;
+        }
+
+        // todo : show user a prompt to confirm reset of design
+
+        this.uploadService.uploadFile(environment.apiUrl + '/uploads/file', files)
+            .subscribe(
+                (xmlResult: any) => {
+                    if (xmlResult.type === HttpEventType.UploadProgress) {
+                        const percentDone = Math.round(100 * xmlResult.loaded / xmlResult.total);
+                        console.log(`File is ${percentDone}% loaded.`);
+                        this.uploadProgress = percentDone;
+                    } else if (xmlResult instanceof HttpResponse) {
+                        this.uploadProgress = 100;
+                        console.log(xmlResult); // bulk upload
+
+                        if (xmlResult.status === 200) {
+                            // if successful
+// Clear the input
+//                             event.target.value = null;
+                        } else {
+                            // failure
+                            // event.target.value = null;
+                        }
+                    }
+                },
+                (err) => {
+                    console.log('Upload Error:', err);
+                }, () => {
+                    console.log('Upload done');
+                }
+            );
+
     }
 }

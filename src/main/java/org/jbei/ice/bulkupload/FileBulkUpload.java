@@ -1,14 +1,24 @@
 package org.jbei.ice.bulkupload;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.dto.ConfigurationKey;
 import org.jbei.ice.dto.entry.*;
 import org.jbei.ice.logging.Logger;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.AccountModel;
+import org.jbei.ice.storage.model.BulkUploadModel;
+import org.jbei.ice.utils.Utils;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,6 +36,7 @@ public class FileBulkUpload implements Closeable {
     private final InputStream inputStream;
     private final FileUploadFormat format;
     private final long bulkUploadId;
+    private final String filename;
 
     public FileBulkUpload(String userId, InputStream inputStream, long bulkUploadId, EntryType entryType, FileUploadFormat format) {
         this.userId = userId;
@@ -33,6 +44,16 @@ public class FileBulkUpload implements Closeable {
         this.inputStream = inputStream;
         this.format = format;
         this.bulkUploadId = bulkUploadId;
+        this.filename = null;
+    }
+
+    public FileBulkUpload(String userId, InputStream stream, String filename, EntryType type) {
+        this.userId = userId;
+        this.addType = type;
+        this.inputStream = stream;
+        this.format = FileUploadFormat.CSV;
+        this.bulkUploadId = 0;
+        this.filename = filename;
     }
 
     private static void appendHeader(StringBuilder sb, boolean isRequired, String label, String link) {
@@ -148,6 +169,36 @@ public class FileBulkUpload implements Closeable {
                 return upload.processUpload();
             }
         }
+    }
+
+    public BulkUpload uploadFile() throws IOException {
+        // file
+        BulkUploadModel model = new BulkUploadModel();
+        AccountModel account = DAOFactory.getAccountDAO().getByEmail(this.userId);
+        if (account == null)
+            throw new IllegalArgumentException("Invalid user id: " + this.userId);
+
+        model.setAccount(account);
+        model.setCreationTime(new Date());
+        model.setLastUpdateTime(new Date());
+        model.setImportType(this.addType.getName());
+        model.setFileIdentifier(Utils.generateUUID());
+
+        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+
+        // todo : use a reference to file storage (include filename here)
+        try {
+            if (inputStream != null) {
+                Path path = Paths.get(dataDir, "bulk-uploads", model.getFileIdentifier());
+                Files.write(path, IOUtils.toByteArray(inputStream));
+            }
+        } catch (IOException e) {
+            Logger.error(e);
+            return null;
+        }
+
+
+        return model.toDataTransferObject();
     }
 
     @Override

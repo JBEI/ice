@@ -1,6 +1,8 @@
 package org.jbei.ice.bulkupload;
 
 import org.jbei.ice.dto.entry.EntryFieldLabel;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.BulkUploadDAO;
 import org.jbei.ice.storage.model.BulkUploadModel;
 
 import java.util.HashSet;
@@ -14,11 +16,20 @@ import java.util.Set;
 public class BulkUploadValidation {
 
     private final Set<EntryFieldLabel> failedFields;
+    private final BulkUploadModel model;
+    private final BulkUploadDAO dao;
 
-    public BulkUploadValidation(BulkUploadModel upload) {
-        if (upload == null)
-            throw new IllegalArgumentException("Cannot validate null upload");
+    public BulkUploadValidation(String userId, long uploadId) {
+        this.dao = DAOFactory.getBulkUploadDAO();
+        this.model = this.dao.get(uploadId);
+
+        if (this.model == null)
+            throw new IllegalArgumentException("Invalid bulk upload id: " + uploadId);
         this.failedFields = new HashSet<>();
+    }
+
+    public void perform() {
+
     }
 
     /**
