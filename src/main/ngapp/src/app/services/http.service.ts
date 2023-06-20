@@ -20,23 +20,21 @@ export class HttpService {
 
     constructor(private http: HttpClient, private userService: UserService, private router: Router) {
         this.apiUrl = environment.apiUrl;
-
-        // this.get('settings/register').subscribe(result => {
-        //     console.log(result);
-        // }, error => {
-        //     console.error(error);
-        // });
     }
 
-    get<T>(api: string, options?: any, redirect?: boolean): Observable<T> {
-        this.setOptions(options);
-        if (this.userService.getUser(redirect)) {
+    private setHeaders(): void {
+        if (this.userService.getUser() && this.userService.getUser().sessionId) {
             const sid = this.userService.getUser().sessionId;
             this.httpOptions.headers = new HttpHeaders({
                 'Content-Type': 'application/json',
                 'X-ICE-Authentication-SessionId': sid
             });
         }
+    }
+
+    get<T>(api: string, options?: any, redirect?: boolean): Observable<T> {
+        this.setOptions(options);
+        this.setHeaders();
 
         const url = `${this.apiUrl}/${api}`;
         return this.http.get<T>(url, this.httpOptions)
@@ -47,17 +45,21 @@ export class HttpService {
 
     post<T>(api: string, payload: T, options?: any): Observable<any> {
         this.setOptions(options);
+        this.setHeaders();
         const url = `${this.apiUrl}/${api}`;
         return this.http.post<T>(url, payload, this.httpOptions);
     }
 
     delete<T>(api: string): Observable<any> {
+        this.setOptions(undefined);
+        this.setHeaders();
         const url = `${this.apiUrl}/${api}`;
         return this.http.delete(url, this.httpOptions);
     }
 
     put<T>(api: string, payload: T, options?: any): Observable<any> {
         this.setOptions(options);
+        this.setHeaders();
         const url = `${this.apiUrl}/${api}`;
         return this.http.put(url, payload, this.httpOptions);
     }
