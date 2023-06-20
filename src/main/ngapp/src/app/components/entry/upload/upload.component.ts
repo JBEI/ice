@@ -11,7 +11,6 @@ import {BulkUpload} from "../../../models/bulk-upload";
 import {Location} from "@angular/common";
 import {environment} from "../../../../environments/environment";
 import {UploadService} from "../../../services/upload.service";
-import {HttpEventType, HttpResponse} from "@angular/common/http";
 
 @Component({
     selector: 'app-upload',
@@ -206,35 +205,42 @@ export class UploadComponent implements OnInit {
             return;
         }
 
+        this.validate(8);
+
         // todo : show user a prompt to confirm reset of design
 
-        this.uploadService.uploadFile(environment.apiUrl + '/uploads/file', files)
-            .subscribe(
-                (xmlResult: any) => {
-                    if (xmlResult.type === HttpEventType.UploadProgress) {
-                        const percentDone = Math.round(100 * xmlResult.loaded / xmlResult.total);
-                        console.log(`File is ${percentDone}% loaded.`);
-                        this.uploadProgress = percentDone;
-                    } else if (xmlResult instanceof HttpResponse) {
-                        this.uploadProgress = 100;
-                        console.log(xmlResult); // bulk upload
+        // this.uploadService.uploadFile('/uploads/file', files, {name: "type", value: this.type})
+        //     .subscribe(
+        //         (xmlResult: any) => {
+        //             if (xmlResult.type === HttpEventType.UploadProgress) {
+        //                 const percentDone = Math.round(100 * xmlResult.loaded / xmlResult.total);
+        //                 console.log(`File is ${percentDone}% loaded.`);
+        //                 this.uploadProgress = percentDone;
+        //             } else if (xmlResult instanceof HttpResponse) {
+        //                 this.uploadProgress = 100;
+        //                 console.log("completed", xmlResult); // bulk upload
+        //
+        //                 if (xmlResult.status === 200 && xmlResult.body) {
+        //                     // if successful
+        //                     console.log("success", xmlResult.body);
+        //                     this.validate(xmlResult.body.id);
+        //                     // event.target.value = null;
+        //                 } else {
+        //                     // failure
+        //                     // event.target.value = null;
+        //                 }
+        //             }
+        //         },
+        //         (err) => {
+        //             console.log('Upload Error:', err);
+        //         }, () => {
+        //             console.log('Upload done');
+        //         }
+        //     );
 
-                        if (xmlResult.status === 200) {
-                            // if successful
-// Clear the input
-//                             event.target.value = null;
-                        } else {
-                            // failure
-                            // event.target.value = null;
-                        }
-                    }
-                },
-                (err) => {
-                    console.log('Upload Error:', err);
-                }, () => {
-                    console.log('Upload done');
-                }
-            );
+    }
 
+    private validate(id: number): void {
+        this.http.post('uploads/' + id + '/validation', null).subscribe({});
     }
 }

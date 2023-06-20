@@ -74,9 +74,6 @@ export class CreateNewEntryComponent implements OnInit {
 
     private createPartData(): Observable<Part> {
         return this.http.post('parts', this.newPart);
-        // .subscribe(result => {
-        //     this.newPart = result;
-        // });
     }
 
     private updateField(field: CustomField): void {
