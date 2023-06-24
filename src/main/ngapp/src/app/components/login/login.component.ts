@@ -64,7 +64,6 @@ export class LoginComponent implements OnInit {
 
     loginUser(): void {
         this.submitted = true;
-        console.log(this.form.get('userId').value);
 
         if (this.form.invalid)
             return;
