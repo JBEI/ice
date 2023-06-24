@@ -47,6 +47,7 @@ import {ConfirmActionComponent} from "./components/shared/confirm-action/confirm
 import {UploadToFolderModalComponent} from './components/modal/upload-to-folder-modal/upload-to-folder-modal.component';
 import {AddToFolderModalComponent} from './components/modal/add-to-folder-modal/add-to-folder-modal.component';
 import {FilterPipe} from './filters/filter.pipe';
+import {RegisterComponent} from './components/register/register.component';
 
 // register Handsontable's modules
 registerAllModules();
@@ -96,7 +97,8 @@ registerAllModules();
         ConfirmActionComponent,
         UploadToFolderModalComponent,
         AddToFolderModalComponent,
-        FilterPipe
+        FilterPipe,
+        RegisterComponent
     ],
     imports: [
         BrowserModule,

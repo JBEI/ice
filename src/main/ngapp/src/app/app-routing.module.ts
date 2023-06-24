@@ -10,6 +10,7 @@ import {FolderComponent} from "./components/collection/folder/folder.component";
 import {ProfileComponent} from "./components/profile/profile/profile.component";
 import {CreateNewEntryComponent} from "./components/entry/create-new-entry/create-new-entry.component";
 import {ConfigureComponent} from "./components/configure-component/configure.component";
+import {RegisterComponent} from "./components/register/register.component";
 
 const routes: Routes = [
     {path: '', redirectTo: '/collection/personal', pathMatch: 'full'},
@@ -24,7 +25,8 @@ const routes: Routes = [
     {path: 'entry/:id', component: EntryDetailComponent, resolve: {entry: EntryResolver}},
     {path: 'login', component: LoginComponent},
     {path: 'profile/:id', component: ProfileComponent},
-    {path: 'create/:type', component: CreateNewEntryComponent}
+    {path: 'create/:type', component: CreateNewEntryComponent},
+    {path: 'register', component: RegisterComponent}
 ];
 
 @NgModule({
