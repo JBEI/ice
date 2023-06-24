@@ -1,0 +1,99 @@
+<div class="min-vh-100 d-flex align-items-center">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-lg-5 mx-auto p-5 border shadow-sm bg-white rounded">
+
+                <div class="text-center">
+                    <img src="assets/img/img.png" alt="logo" style="height: 60px">
+                </div>
+
+                <hr class="border-top">
+
+                <div class="pt-3">
+                    <div class="alert alert-success">
+                        <!--                        <i class="bi bi-check-lg fs-5"></i>-->
+                        Account successfully created. Please check your email for
+                        login details<br><br>
+                        <a class="icon-link icon-link-hover" href="/login">
+                            Login <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="pt-3">
+
+                    <div class="alert alert-danger p-2" *ngIf="submitted && form.invalid"><i
+                        class="bi bi-exclamation-triangle"></i> &nbsp; All fields required. Please try again.
+                    </div>
+
+
+                    <form id="login-form" [formGroup]="form" (ngSubmit)="registerNewUser($event)">
+
+                        <div class="mb-2">
+                            Name
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <input type="email" class="form-control" id="firstName" formControlName="firstName"
+                                       name="userId" [ngClass]="{'is-invalid': submitted && f['firstName'].errors}"
+                                       required>
+                            </div>
+                            <div class="ms-1">
+                                <input type="email" class="form-control" id="lastName" formControlName="lastName"
+                                       name="userId" [ngClass]="{'is-invalid': submitted && f['lastName'].errors}"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-around mb-4 small text-muted">
+                            <div>First Name</div>
+                            <div>Last Name</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="userId" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="userId" formControlName="userId"
+                                   name="userId" [ngClass]="{'is-invalid': submitted && f['userId'].errors}"
+                                   required>
+                        </div>
+
+                        <div class="mb-4">
+                            <div><label class="form-label" for="institution">Institution</label></div>
+                            <input type="text" class="form-control" id="institution" name="institution" required
+                                   formControlName="institution"
+                                   [ngClass]="{'is-invalid': submitted && f['institution'].errors}">
+                        </div>
+
+                        <div class="mb-2">
+                            <div><label class="form-label" for="description">About you</label></div>
+                            <textarea class="form-control" id="description" name="description" required
+                                      formControlName="description"
+                                      [ngClass]="{'is-invalid': submitted && f['description'].errors}">
+                            </textarea>
+                        </div>
+
+                        <div class="mt-5">
+                            <button [disabled]="processing"
+                                    class="w-100 btn btn-primary pull-right py-2" id="submit">
+                                <div *ngIf="processing" class="spinner-border spinner-border-sm text-light"
+                                     role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                Sign In
+                            </button>
+                        </div>
+
+                        <button class="mt-2 w-100 btn btn-link" (click)="cancel()">Cancel</button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
