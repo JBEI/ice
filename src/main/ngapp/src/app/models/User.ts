@@ -17,6 +17,7 @@ export class User {
     updatingType?: boolean;
     updatingJ5Status?: boolean;
     type?: string;
+    institution?: string;
 
     constructor() {
         this.usingTemporaryPassword = false;
