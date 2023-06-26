@@ -75,9 +75,10 @@
                                                     <app-folder-actions
                                                         (actionCompleted)="folderActionCompleted($event)"></app-folder-actions>
 
-
-                                                    <app-parts-table
-                                                        [collection]="selectedOption.name"></app-parts-table>
+                                                    <div class="pt-2">
+                                                        <app-parts-table
+                                                            [collection]="selectedOption.name"></app-parts-table>
+                                                    </div>
 
                                                 </div>
                                             </div>

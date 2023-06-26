@@ -114,7 +114,7 @@ public class FileBulkUpload implements Closeable {
     }
 
     /**
-     * Creates a CSV template for download based on the the type of entries
+     * Creates a CSV template for download based on the type of entries
      *
      * @param addType        entry type that is to be uploaded
      * @param linked         optional type that is linked to this entry. Should be one of {@link EntryType} or null
@@ -197,7 +197,7 @@ public class FileBulkUpload implements Closeable {
             return null;
         }
 
-
+        model = DAOFactory.getBulkUploadDAO().create(model);
         return model.toDataTransferObject();
     }
 

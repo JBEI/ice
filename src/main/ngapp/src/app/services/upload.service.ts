@@ -13,7 +13,7 @@ export class UploadService {
     }
 
     // file from event.target.files[0]
-    uploadFile(url: string, list: FileList): Observable<HttpEvent<any>> {
+    uploadFile(url: string, list: FileList, formParam?: { name: string, value: string }): Observable<HttpEvent<any>> {
 
         const formData = new FormData();
         for (let i = 0; i < list.length; i += 1) {
@@ -22,6 +22,10 @@ export class UploadService {
                 continue;
             }
             formData.append('file', file);
+        }
+
+        if (formParam) {
+            formData.append(formParam.name, formParam.value);
         }
 
         const params = new HttpParams();

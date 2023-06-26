@@ -30,7 +30,7 @@ public class BulkUploadResource extends RestResource {
     /**
      * Retrieves specified bulk upload resource including
      *
-     * @param id
+     * @param id     unique idenfier for upload
      * @param offset
      * @param limit
      * @return model object for bulk upload
@@ -273,10 +273,9 @@ public class BulkUploadResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/validation")
     public Response validateFileUpload(@PathParam("id") long uploadId) {
-        String userId = getUserId();
+        String userId = requireUserId();
         BulkUploadValidation validation = new BulkUploadValidation(userId, uploadId);
-        validation.perform();
-        return super.respond(false);
+        return super.respond(validation.perform());
     }
 
     /**
