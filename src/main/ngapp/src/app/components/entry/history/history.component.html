@@ -1,0 +1,9 @@
+<div class="p-4">
+    <span class="text-muted fst-italic" *ngIf="processing">
+        <img src="assets/img/loader-mini.gif"> retrieving history...
+    </span>
+
+    <div *ngIf="result">
+        <span *ngIf="!result.resultCount">No history data available</span>
+    </div>
+</div>

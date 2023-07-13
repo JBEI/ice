@@ -11,7 +11,6 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
 import {EntryDetailComponent} from './components/entry/entry-detail/entry-detail.component';
 import {EntryResolver} from "./components/entry/entry.resolver";
-import {PartVisualizationComponent} from "./components/part-visualization/part-visualization.component";
 import {UploadComponent} from './components/entry/upload/upload.component';
 import {registerAllModules} from "handsontable/registry";
 import {HotTableModule} from "@handsontable/angular";
@@ -23,21 +22,12 @@ import {PartsTableComponent} from "./components/parts-table/parts-table.componen
 import {ProfileComponent} from './components/profile/profile/profile.component';
 import {CreateNewEntryComponent} from './components/entry/create-new-entry/create-new-entry.component';
 import {EntryFieldsResolver} from "./components/entry/entry-fields.resolver";
-import {DatePickerComponent} from "./components/date-picker/date-picker.component";
-import {TextFieldComponent} from './components/entry/widgets/text-field/text-field.component';
 import {
     CreateNewFolderModalComponent
 } from './components/modal/create-new-folder-modal/create-new-folder-modal.component';
 import {
     SequenceVisualizationComponent
 } from './components/entry/widgets/sequence-visualization/sequence-visualization.component';
-import {SelectFieldComponent} from './components/entry/widgets/select-field/select-field.component';
-import {
-    UserWithEmailFieldComponent
-} from './components/entry/widgets/user-with-email-field/user-with-email-field.component';
-import {MultiTextFieldComponent} from './components/entry/widgets/multi-text-field/multi-text-field.component';
-import {TextareaFieldComponent} from './components/entry/widgets/textarea-field/textarea-field.component';
-import {BooleanFieldComponent} from './components/entry/widgets/boolean-field/boolean-field.component';
 import {FolderActionsComponent} from './components/folder-actions/folder-actions.component';
 import {ConfigureComponent} from './components/configure-component/configure.component';
 import {ShareFolderModalComponent} from './components/modal/share-folder-modal/share-folder-modal.component';
@@ -48,6 +38,15 @@ import {UploadToFolderModalComponent} from './components/modal/upload-to-folder-
 import {AddToFolderModalComponent} from './components/modal/add-to-folder-modal/add-to-folder-modal.component';
 import {FilterPipe} from './filters/filter.pipe';
 import {RegisterComponent} from './components/register/register.component';
+import {SequenceAnalysisComponent} from "./components/entry/sequence-analysis/sequence-analysis.component";
+import {TextFieldComponent} from "./components/entry/widgets/text-field/text-field.component";
+import {SelectFieldComponent} from "./components/entry/widgets/select-field/select-field.component";
+import {
+    UserWithEmailFieldComponent
+} from "./components/entry/widgets/user-with-email-field/user-with-email-field.component";
+import {TextareaFieldComponent} from "./components/entry/widgets/textarea-field/textarea-field.component";
+import {BooleanFieldComponent} from "./components/entry/widgets/boolean-field/boolean-field.component";
+import {MultiTextFieldComponent} from "./components/entry/widgets/multi-text-field/multi-text-field.component";
 
 // register Handsontable's modules
 registerAllModules();
@@ -72,7 +71,6 @@ registerAllModules();
         CollectionComponent,
         HeaderComponent,
         EntryDetailComponent,
-        PartVisualizationComponent,
         UploadComponent,
         MainSidebarMenuComponent,
         FooterComponent,
@@ -81,15 +79,8 @@ registerAllModules();
         PartsTableComponent,
         ProfileComponent,
         CreateNewEntryComponent,
-        DatePickerComponent,
-        TextFieldComponent,
         CreateNewFolderModalComponent,
         SequenceVisualizationComponent,
-        SelectFieldComponent,
-        UserWithEmailFieldComponent,
-        MultiTextFieldComponent,
-        TextareaFieldComponent,
-        BooleanFieldComponent,
         FolderActionsComponent,
         ConfigureComponent,
         ShareFolderModalComponent,
@@ -110,7 +101,14 @@ registerAllModules();
         HttpClientModule,
         HotTableModule,
         ReactiveFormsModule,
-        NgOptimizedImage
+        NgOptimizedImage,
+        SequenceAnalysisComponent,
+        TextFieldComponent,
+        SelectFieldComponent,
+        UserWithEmailFieldComponent,
+        TextareaFieldComponent,
+        BooleanFieldComponent,
+        MultiTextFieldComponent
     ],
     providers: [EntryResolver, EntryFieldsResolver],
     bootstrap: [AppComponent]

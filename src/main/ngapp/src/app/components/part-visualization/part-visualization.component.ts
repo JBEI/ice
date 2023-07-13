@@ -7,10 +7,20 @@ import {Part} from "../../models/Part";
 import {UploadService} from "../../services/upload.service";
 import {HttpEventType, HttpResponse} from "@angular/common/http";
 import {ConfirmActionComponent} from "../shared/confirm-action/confirm-action.component";
-import {NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
+import {
+    NgbDropdown,
+    NgbDropdownItem,
+    NgbDropdownMenu,
+    NgbDropdownToggle,
+    NgbModal,
+    NgbModalOptions
+} from "@ng-bootstrap/ng-bootstrap";
+import {CommonModule} from "@angular/common";
 
 @Component({
     selector: 'app-part-visualization',
+    standalone: true,
+    imports: [CommonModule, NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbDropdownItem],
     templateUrl: './part-visualization.component.html',
     styleUrls: ['./part-visualization.component.css']
 })

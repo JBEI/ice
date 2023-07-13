@@ -2,9 +2,13 @@ import {Component, Input, OnInit} from '@angular/core';
 import {CustomField} from "../../../../models/custom-field";
 import {Part} from "../../../../models/Part";
 import {EntryFieldService} from "../../../../services/entry-field.service";
+import {CommonModule} from "@angular/common";
+import {FormsModule} from "@angular/forms";
 
 @Component({
     selector: 'app-textarea-field',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
     templateUrl: './textarea-field.component.html',
     styleUrls: ['./textarea-field.component.css']
 })

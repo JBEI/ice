@@ -3,9 +3,13 @@ import {CustomField} from "../../../../models/custom-field";
 import {User} from "../../../../models/User";
 import {Part} from "../../../../models/Part";
 import {EntryFieldService} from "../../../../services/entry-field.service";
+import {CommonModule} from "@angular/common";
+import {FormsModule} from "@angular/forms";
 
 @Component({
     selector: 'app-user-with-email-field',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
     templateUrl: './user-with-email-field.component.html',
     styleUrls: ['./user-with-email-field.component.css']
 })

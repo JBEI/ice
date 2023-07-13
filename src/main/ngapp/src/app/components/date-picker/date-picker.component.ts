@@ -1,12 +1,22 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {NgbCalendar, NgbDate, NgbDateParserFormatter, NgbDateStruct} from "@ng-bootstrap/ng-bootstrap";
+import {
+    NgbCalendar,
+    NgbDate,
+    NgbDateParserFormatter,
+    NgbDateStruct,
+    NgbInputDatepicker
+} from "@ng-bootstrap/ng-bootstrap";
 import {DateParserFormatterService} from "../../services/date-parser-formatter.service";
 import {DateUtilsService} from "../../services/date-utils.service";
 import {CustomField} from "../../models/custom-field";
 import {Part} from "../../models/Part";
+import {CommonModule} from "@angular/common";
+import {FormsModule} from "@angular/forms";
 
 @Component({
     selector: 'app-date-picker',
+    standalone: true,
+    imports: [CommonModule, NgbInputDatepicker, FormsModule],
     templateUrl: './date-picker.component.html',
     styleUrls: ['./date-picker.component.css'],
     providers: [

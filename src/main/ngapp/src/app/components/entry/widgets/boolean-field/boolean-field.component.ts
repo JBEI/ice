@@ -1,9 +1,12 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {CustomField} from "../../../../models/custom-field";
 import {Part} from "../../../../models/Part";
+import {CommonModule} from "@angular/common";
 
 @Component({
     selector: 'app-boolean-field',
+    standalone: true,
+    imports: [CommonModule],
     templateUrl: './boolean-field.component.html',
     styleUrls: ['./boolean-field.component.css']
 })

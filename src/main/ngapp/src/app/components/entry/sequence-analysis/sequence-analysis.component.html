@@ -1,0 +1,108 @@
+<div class="p-4">
+
+    <div class="d-flex justify-content-between">
+        <div class="text-muted">PACBIO/MISEQ TRACES</div>
+        <div>
+            <button class="btn btn-link btn-sm">Add PacBio/MiSeq Trace</button>
+        </div>
+    </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>PacBio/MiSeq</th>
+            <th>Uploaded</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr>
+            <td>ACP1_KanMX_with_Mod.zip</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>ACP1_KanMX_with_Mod.zip</td>
+            <td></td>
+            <td></td>
+        </tr>
+
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between pt-2">
+        <ngb-pagination [collectionSize]="paging.available" [pageSize]="paging.limit" [(page)]="paging.currentPage"
+                        [boundaryLinks]="true" [maxSize]="5" (pageChange)="pageChange($event)" size="sm">
+            <ng-template ngbPaginationFirst><i
+                class="fa fa-fw fa-angle-double-left"></i> First
+            </ng-template>
+            <ng-template ngbPaginationPrevious><i
+                class="fa fa-fw fa-angle-left"></i>Prev
+            </ng-template>
+            <!--                            <ng-template ngbPaginationNumber let-p><button class="btn btn-sm btn-white">{{p}}</button></ng-template>-->
+            <ng-template ngbPaginationNext>Next<i
+                class="fa fa-fw fa-angle-right"></i></ng-template>
+            <ng-template ngbPaginationLast>Last<i
+                class="fa fa-fw fa-angle-double-right"></i>
+            </ng-template>
+        </ngb-pagination>
+
+        <strong class="small" [ngClass]="{'text-muted': this.paging.processing}">
+            {{pageNumber | number}} - {{pageCount | number}} of {{paging.available}}
+        </strong>
+    </div>
+
+
+    <div class="d-flex justify-content-between mt-5">
+        <div class="text-muted">SANGER TRACES</div>
+        <div>
+            <button class="btn btn-link btn-sm">Add Sanger Trace</button>
+        </div>
+    </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Sanger Trace</th>
+            <th>Uploaded</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr>
+            <td>ACP1_KanMX_with_Mod.zip</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>ACP1_KanMX_with_Mod.zip</td>
+            <td></td>
+            <td></td>
+        </tr>
+
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between pt-2">
+        <ngb-pagination [collectionSize]="paging.available" [pageSize]="paging.limit" [(page)]="paging.currentPage"
+                        [boundaryLinks]="true" [maxSize]="5" (pageChange)="pageChange($event)" size="sm">
+            <ng-template ngbPaginationFirst><i
+                class="fa fa-fw fa-angle-double-left"></i> First
+            </ng-template>
+            <ng-template ngbPaginationPrevious><i
+                class="fa fa-fw fa-angle-left"></i>Prev
+            </ng-template>
+            <!--                            <ng-template ngbPaginationNumber let-p><button class="btn btn-sm btn-white">{{p}}</button></ng-template>-->
+            <ng-template ngbPaginationNext>Next<i
+                class="fa fa-fw fa-angle-right"></i></ng-template>
+            <ng-template ngbPaginationLast>Last<i
+                class="fa fa-fw fa-angle-double-right"></i>
+            </ng-template>
+        </ngb-pagination>
+
+        <strong class="small" [ngClass]="{'text-muted': this.paging.processing}">
+            {{pageNumber | number}} - {{pageCount | number}} of {{paging.available}}
+        </strong>
+
+    </div>
+</div>

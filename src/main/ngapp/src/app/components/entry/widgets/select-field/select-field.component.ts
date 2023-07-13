@@ -1,14 +1,18 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {CustomField} from "../../../../models/custom-field";
 import {Part} from "../../../../models/Part";
 import {EntryFieldService} from "../../../../services/entry-field.service";
+import {CommonModule} from "@angular/common";
+import {FormsModule} from "@angular/forms";
 
 @Component({
     selector: 'app-select-field',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
     templateUrl: './select-field.component.html',
     styleUrls: ['./select-field.component.css']
 })
-export class SelectFieldComponent implements OnInit {
+export class SelectFieldComponent {
 
     @Input() field: CustomField;
     @Input() part: Part;

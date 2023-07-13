@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {HttpService} from "../../../services/http.service";
 import {Part} from "../../../models/Part";
 import {CustomField} from "../../../models/custom-field";
@@ -13,48 +13,35 @@ import {LocalStorageService} from "../../../services/local-storage.service";
 export class EntryDetailComponent implements OnInit {
 
     entry: Part;
-    expandMetaData: boolean;
     summaryFields: CustomField[];
     summaryFieldTypes: string[];
+    active: string = 'general';
 
-    constructor(private http: HttpService, private route: ActivatedRoute, private local: LocalStorageService) {
+    constructor(private http: HttpService, private route: ActivatedRoute, private local: LocalStorageService,
+                private router: Router) {
         this.summaryFieldTypes = ['NAME', 'STATUS', 'SUMMARY', 'BIO_SAFETY_LEVEL', 'CREATOR'];
         this.summaryFields = [];
+
+        route.url.subscribe(() => {
+            this.active = route.snapshot.children[0].url[0].path;
+            console.log(this.active);
+        });
     }
 
     ngOnInit(): void {
         this.route.data.subscribe((data) => {
             this.entry = data.entry;
-
-            this.expandMetaData = (this.local.getDisplayMetaData() === 'true');
-            if (!this.expandMetaData)
-                this.retrieveSummaryDataFields();
         });
     }
 
-    expandCollapseMetaData(): void {
-        this.expandMetaData = !this.expandMetaData;
-        this.local.storeDisplayMetadata(this.expandMetaData);
-
-        if (!this.expandMetaData && !this.summaryFields.length) {
-            this.retrieveSummaryDataFields();
-        }
-    }
-
-    retrieveSummaryDataFields(): void {
-        for (let i = 0; i < this.entry.fields.length; i += 1) {
-            const customField: CustomField = this.entry.fields[i];
-            if (this.summaryFieldTypes.indexOf(customField.fieldType) !== -1) {
-                this.summaryFields.push(customField);
-            }
-        }
-    }
-
     editAction(): void {
-        this.expandMetaData = true;
         for (let i = 0; i < this.entry.fields.length; i += 1) {
             const customField: CustomField = this.entry.fields[i];
             customField.editMode = 'FULL';
         }
+    }
+
+    goTo(path: string): void {
+        this.router.navigate((['/entry', this.entry.id, path]));
     }
 }

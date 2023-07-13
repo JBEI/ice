@@ -2,9 +2,13 @@ import {Component, Input, OnInit} from '@angular/core';
 import {CustomField} from "../../../../models/custom-field";
 import {Part} from "../../../../models/Part";
 import {EntryFieldService} from "../../../../services/entry-field.service";
+import {CommonModule} from "@angular/common";
+import {FormsModule} from "@angular/forms";
 
 @Component({
     selector: 'app-text-field',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
     templateUrl: './text-field.component.html',
     styleUrls: ['./text-field.component.css']
 })

@@ -40,6 +40,7 @@
                                         <div ngbDropdownMenu aria-labelledby="actionDropDownOptions">
                                             <div ngbDropdownItem class="small" (click)="editAction()">Edit</div>
                                             <div ngbDropdownItem class="small">Delete</div>
+                                            <div ngbDropdownItem class="small">Share</div>
                                             <div ngbDropdownItem class="small">Export</div>
 
                                             <div class="dropdown-divider"></div>
@@ -61,93 +62,37 @@
                         </div>
                     </div>
 
-                    <ng-container *ngIf="!expandMetaData">
-                        <div class="row bg-white mx-4 mb-2 rounded">
-                            <div class="col py-3 ps-3">
+                    <div class="row mx-4 rounded-top-3 bg-light">
+                        <div class="col ps-4">
+                            <ul ngbNav #nav="ngbNav" class="nav nav-underline d-flex justify-content-between">
+                                <li class="nav-item">
+                                    <a class="nav-link" [ngClass]="{'active': active === 'general'}"
+                                       aria-current="page" (click)="goTo('general')">General Information</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" [ngClass]="{'active': active === 'sequences'}"
+                                       (click)="goTo('sequences')">Sequence Analysis</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" [ngClass]="{'active': active === 'samples'}"
+                                       (click)="goTo('samples')">Samples</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" [ngClass]="{'active': active === 'history'}"
+                                       (click)="goTo('history')">History</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" [ngClass]="{'active': active === 'experiments'}"
+                                       (click)="goTo('experiments')">Experiment Data</a>
+                                </li>
 
-                                <div class="d-flex justify-content-between">
-                                    <div *ngFor="let field of summaryFields"
-                                         class="text-center text-nowrap bp3-text-overflow-ellipsis"
-                                         style="max-width: 250px">
-                                        <div class="small text-uppercase text-muted">
-                                            {{field.label}}
-                                        </div>
-                                        {{field.value}}
-                                    </div>
-
-                                    <div class="cursor-pointer fs-5" (click)="expandCollapseMetaData()">
-                                        <i class="bi "
-                                           [ngClass]="{'bi-chevron-down': !expandMetaData, 'bi-chevron-up': expandMetaData}"></i>
-                                    </div>
-                                </div>
-
-                            </div>
+                            </ul>
                         </div>
-                    </ng-container>
+                    </div>
 
-                    <ng-container *ngIf="expandMetaData">
-                        <div class="row bg-white mx-4">
-                            <div class="col pt-2 pb-3">
-
-
-                                <ng-container *ngIf="entry.fields && entry.fields.length">
-                                    <div class="row p-1" *ngFor="let field of entry.fields">
-
-                                        <ng-container *ngIf="field.fieldInputType === 'TEXT' || !field.fieldInputType
-                                                                        || field.fieldInputType === 'LONG_TEXT'">
-                                            <app-text-field [field]="field" [part]="entry"
-                                                            [longText]="field.fieldInputType === 'LONG_TEXT'"></app-text-field>
-                                        </ng-container>
-
-
-                                        <ng-container *ngIf="field.fieldInputType === 'SELECT'">
-                                            <app-select-field [field]="field" [part]="entry"></app-select-field>
-                                        </ng-container>
-
-
-                                        <ng-container *ngIf="field.fieldInputType === 'DATE'">
-                                            <app-date-picker [field]="field" [part]="entry"></app-date-picker>
-                                        </ng-container>
-
-
-                                        <ng-container *ngIf="field.fieldInputType === 'USER_WITH_EMAIL'">
-                                            <app-user-with-email-field [field]="field"
-                                                                       [part]="entry"></app-user-with-email-field>
-                                        </ng-container>
-
-
-                                        <ng-container *ngIf="field.fieldInputType === 'TEXTAREA'">
-                                            <app-textarea-field [field]="field" [part]="entry"></app-textarea-field>
-                                        </ng-container>
-
-
-                                        <ng-container *ngIf="field.fieldInputType === 'BOOLEAN'">
-                                            <app-boolean-field [field]="field" [part]="entry"></app-boolean-field>
-                                        </ng-container>
-
-
-                                        <ng-container *ngIf="field.fieldInputType === 'MULTI_TEXT'">
-                                            <app-multi-text-field [field]="field" [part]="entry"></app-multi-text-field>
-                                        </ng-container>
-
-                                    </div>
-                                </ng-container>
-                            </div>
-
-                            <div class="col-1">
-                                <div class="cursor-pointer pt-2" (click)="expandCollapseMetaData()">
-                                    <i class="bi float-end font-12em fs-5"
-                                       [ngClass]="{'bi-chevron-down': !expandMetaData, 'bi-chevron-up': expandMetaData}"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </ng-container>
-
-                    <div class="row mt-4">
+                    <div class="row">
                         <div class="col">
-                            <div class="mx-4">
-                                <app-part-visualization [entry]="entry"></app-part-visualization>
-                            </div>
+                            <router-outlet></router-outlet>
                         </div>
                     </div>
 

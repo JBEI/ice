@@ -5,10 +5,11 @@
 <div class="bg-white px-3 pt-3 rounded-bottom" *ngIf="parts && parts.length">
     <div>
         <table class="table border-bottom table-hover table-bordered" [ngClass]="{'opacity-25':paging.processing}">
-            <thead class="text-uppercase text-muted bg-light font-80em">
+            <thead class="text-uppercase font-80em">
             <tr>
-                <th scope="col"><i class="bi font-12em cursor-pointer" (click)="selection.selectAll()"
-                                   [ngClass]="{'bi-dash-square': selection.hasAtLeastOneSelected(),
+                <th scope="col" class="text-center">
+                    <i class="bi font-12em cursor-pointer" (click)="selection.selectAll()"
+                       [ngClass]="{'bi-dash-square': selection.hasAtLeastOneSelected(),
             'bi-check-square': selection.allSelected(), 'bi-square': !selection.hasAtLeastOneSelected() && !selection.allSelected()}"></i>
                 </th>
                 <th scope="col">Type</th>
@@ -25,8 +26,8 @@
             <tr *ngFor="let part of parts"
                 [ngClass]="{'row-disabled':part.visible !== 'OK', 'table-primary': isSelected(part)}" class="">
 
-                <td style="width: 43px" class="cursor-pointer align-middle">
-                    <i class="bi text-muted" (click)="select(part)"
+                <td style="width: 35px" class="text-center">
+                    <i class="bi text-muted cursor-pointer " (click)="select(part)"
                        [ngClass]="{'bi-square':!isSelected(part), 'bi-check-square':isSelected(part)}">
                     </i>
                 </td>

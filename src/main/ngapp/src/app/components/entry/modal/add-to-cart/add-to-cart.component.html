@@ -1,0 +1,64 @@
+<div class="modal-header">
+    <h4 class="modal-title">Add Sample To Cart</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()">
+    </button>
+</div>
+
+<div class="modal-body">
+
+    <div class="pb-2 fw-bold text-muted text-uppercase">Sample type</div>
+
+    <div class="ps-5">
+        <div class="form-check" (click)="selectedSampleType('LIQUID_CULTURE')">
+            <input class="form-check-input" [(ngModel)]="sampleType" type="radio" name="radioLiquidCulture"
+                   id="radioLiquidCulture" value="LIQUID_CULTURE">
+            <label class="form-check-label" for="radioLiquidCulture">
+                Liquid Culture
+            </label>
+        </div>
+
+        <div class="form-check" (click)="selectedSampleType('STREAK_ON_AGAR_PLATE')">
+            <input class="form-check-input" [(ngModel)]="sampleType" type="radio" name="radioStreakOnAgarPlate"
+                   id="radioStreakOnAgarPlate" value="STREAK_ON_AGAR_PLATE">
+            <label class="form-check-label" for="radioStreakOnAgarPlate">
+                Streak on Agar Plate
+            </label>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="pb-2 fw-bold text-muted text-uppercase">Requested Growth Temp °C</div>
+
+    <div class="ps-5">
+
+        <select class="form-select form-select-sm" id="growthTempSelect" [(ngModel)]="growthTemp"
+                style="width: 65px;">
+            <option selected>Choose One...</option>
+            <option [value]="option" *ngFor="let option of growthTempOptions">
+                {{option}}
+            </option>
+        </select>
+
+    </div>
+
+    <br>
+
+    <div class="pb-2 fw-bold text-muted text-uppercase">Specify Media Antibiotics &amp; Carbon source</div>
+
+    <div class="ps-5">
+        <select class="form-select form-select-sm w-50" id="inputGroupSelect01" [(ngModel)]="plateDescription">
+            <option [value]="undefined" selected>Choose One...</option>
+            <option [value]="option" *ngFor="let option of getPlateDescriptionOptions()">
+                {{option}}
+            </option>
+        </select>
+
+        <!-- ngIf: userData.plateDescription.value =='I will deliver my own media' -->
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="submit" class="btn btn-sm btn-primary" (click)="addSampleToCart()">Add Sample to Cart</button>
+    <button type="button" class="btn btn-sm btn-muted" (click)="activeModal.close()">Cancel</button>
+</div>
