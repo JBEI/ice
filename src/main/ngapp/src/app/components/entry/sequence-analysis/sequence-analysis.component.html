@@ -3,10 +3,11 @@
     <div class="d-flex justify-content-between">
         <div class="text-muted">PACBIO/MISEQ TRACES</div>
         <div>
-            <button class="btn btn-link btn-sm">Add PacBio/MiSeq Trace</button>
+            <input type="file" #file [multiple]="false" (change)="onFileChange($event)" style="display:none"/>
+            <button class="btn btn-link btn-sm" (click)="file.click()">Add PacBio/MiSeq Trace</button>
         </div>
     </div>
-    <table class="table">
+    <table class="table border-top">
         <thead>
         <tr>
             <th>PacBio/MiSeq</th>
@@ -16,15 +17,12 @@
         </thead>
 
         <tbody>
-        <tr>
-            <td>ACP1_KanMX_with_Mod.zip</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>ACP1_KanMX_with_Mod.zip</td>
-            <td></td>
-            <td></td>
+        <tr *ngFor="let shotgun of shotgunSequences">
+            <td class="w-50 bp3-text-overflow-ellipsis">{{shotgun.filename}}</td>
+            <td class="w-25">{{shotgun.depositor.firstName}} {{shotgun.depositor.lastName}}
+                <div class="small text-muted font-80em">on {{shotgun.created | date}}</div>
+            </td>
+            <td class="w-25"><i class="bi bi-trash3" (click)="deleteShotgun(shotgun.fileId)"></i></td>
         </tr>
 
         </tbody>
@@ -56,10 +54,13 @@
     <div class="d-flex justify-content-between mt-5">
         <div class="text-muted">SANGER TRACES</div>
         <div>
-            <button class="btn btn-link btn-sm">Add Sanger Trace</button>
+            <input type="file" #tracesFile [multiple]="false" (change)="onFileChange($event, true)"
+                   style="display:none"/>
+            <button class="btn btn-link btn-sm" (click)="tracesFile.click()">Add Sanger Trace</button>
         </div>
     </div>
-    <table class="table">
+
+    <table class="table border-top">
         <thead>
         <tr>
             <th>Sanger Trace</th>
@@ -69,11 +70,6 @@
         </thead>
 
         <tbody>
-        <tr>
-            <td>ACP1_KanMX_with_Mod.zip</td>
-            <td></td>
-            <td></td>
-        </tr>
         <tr>
             <td>ACP1_KanMX_with_Mod.zip</td>
             <td></td>
