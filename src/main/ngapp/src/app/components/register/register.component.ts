@@ -1,13 +1,19 @@
 import {Component} from '@angular/core';
-import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
+import {AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {HttpService} from "../../services/http.service";
 import {Router} from "@angular/router";
 import {UserService} from "../../services/user.service";
 import {User} from "../../models/User";
+import {NgClass} from "@angular/common";
 
 @Component({
     selector: 'app-register',
+    standalone: true,
     templateUrl: './register.component.html',
+    imports: [
+        ReactiveFormsModule,
+        NgClass
+    ],
     styleUrls: ['./register.component.css']
 })
 export class RegisterComponent {

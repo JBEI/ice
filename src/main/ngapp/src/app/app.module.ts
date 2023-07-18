@@ -37,7 +37,6 @@ import {ConfirmActionComponent} from "./components/shared/confirm-action/confirm
 import {UploadToFolderModalComponent} from './components/modal/upload-to-folder-modal/upload-to-folder-modal.component';
 import {AddToFolderModalComponent} from './components/modal/add-to-folder-modal/add-to-folder-modal.component';
 import {FilterPipe} from './filters/filter.pipe';
-import {RegisterComponent} from './components/register/register.component';
 import {SequenceAnalysisComponent} from "./components/entry/sequence-analysis/sequence-analysis.component";
 import {TextFieldComponent} from "./components/entry/widgets/text-field/text-field.component";
 import {SelectFieldComponent} from "./components/entry/widgets/select-field/select-field.component";
@@ -89,7 +88,6 @@ registerAllModules();
         UploadToFolderModalComponent,
         AddToFolderModalComponent,
         FilterPipe,
-        RegisterComponent
     ],
     imports: [
         BrowserModule,
