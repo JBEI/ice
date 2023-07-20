@@ -39,6 +39,8 @@ export class EntryDetailComponent implements OnInit {
             const customField: CustomField = this.entry.fields[i];
             customField.editMode = 'FULL';
         }
+        if (this.active !== 'general')
+            this.goTo('general');
     }
 
     goTo(path: string): void {
