@@ -46,6 +46,8 @@ import {
 import {TextareaFieldComponent} from "./components/entry/widgets/textarea-field/textarea-field.component";
 import {BooleanFieldComponent} from "./components/entry/widgets/boolean-field/boolean-field.component";
 import {MultiTextFieldComponent} from "./components/entry/widgets/multi-text-field/multi-text-field.component";
+import {ExportEntriesComponent} from './components/entry/modal/export-entries/export-entries.component';
+import {CreateSamplesComponent} from './components/entry/modal/create-samples/create-samples.component';
 
 // register Handsontable's modules
 registerAllModules();
@@ -88,6 +90,8 @@ registerAllModules();
         UploadToFolderModalComponent,
         AddToFolderModalComponent,
         FilterPipe,
+        ExportEntriesComponent,
+        CreateSamplesComponent,
     ],
     imports: [
         BrowserModule,
