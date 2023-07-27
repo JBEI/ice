@@ -35,15 +35,17 @@ export class LoginComponent implements OnInit {
         this.loggedInUser = this.userService.getUser(false);
         if (this.loggedInUser && this.loggedInUser.sessionId) {
 
-            this.http.get('accesstokens').subscribe((result: any) => {
-                if (!result) {
-                    this.userService.clearUser();
-                    return;
-                }
+            this.http.get('accesstokens').subscribe({
+                next: (result: any) => {
+                    if (!result) {
+                        this.userService.clearUser();
+                        return;
+                    }
 
-                this.router.navigate(['/']);
-            }, error => {
-                this.userService.clearUser();
+                    this.router.navigate(['/']);
+                }, error: (error: any) => {
+                    this.userService.clearUser();
+                }
             });
             return;
         }
