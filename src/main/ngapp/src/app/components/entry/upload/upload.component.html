@@ -13,24 +13,26 @@
 
                 <div class="container">
 
-                    <div class="row p-3">
-                        <div class="col">
-                            <h5 class="fw-bold"><span class="text-uppercase text-muted">{{type}}</span> UPLOAD<br>
-                                <small class="text-muted fst-italic fw-normal" style="margin-top: -5px">saving
-                                    ...</small></h5>
-                        </div>
+                    <ng-container *ngIf="fields && fields.length">
+                        <div class="row p-3">
+                            <div class="col">
+                                <h5 class="fw-bold"><span class="text-uppercase text-muted">{{type}}</span> UPLOAD<br>
+                                    <small class="text-muted fst-italic fw-normal" style="margin-top: -5px">saving
+                                        ...</small></h5>
+                            </div>
 
-                        <div class="col">
-                            <div class="float-end">
-                                <button class="btn btn-sm btn-primary">Submit</button>
-                                <button class="btn btn-sm btn-white ms-2">Reset</button>
+                            <div class="col">
+                                <div class="float-end">
+                                    <button class="btn btn-sm btn-primary">Submit</button>
+                                    <button class="btn btn-sm btn-white ms-2">Reset</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </ng-container>
 
                     <ng-container *ngIf="!fields || !fields.length">
 
-                        <div class="row">
+                        <div class="row p-2 mt-4">
                             <div class="col">
                                 <h6 class="fw-bold text-uppercase">
                                     Upload multiple <span class="text-muted">{{type}}
@@ -40,7 +42,7 @@
                             </div>
                         </div>
 
-                        <div class="row p-3">
+                        <div class="row px-3">
                             <div class="col p-3 bg-white shadow-sm ">
 
                                 <form>
@@ -97,81 +99,94 @@
                                         </div>
                                     </div>
 
-                                    <div class="row">
-                                        <div class="col-5 offset-2 text-center">
-                                            <label for="file-upload" class="p-4 rounded-3 cursor-pointer w-100"
-                                                   style="border: 1px dashed #0082c0">
-                                                <i class="bi bi-cloud-upload fs-2" style="color: #0082c0"></i>
-                                                <div style="color: #0082c0">Click to select file for upload</div>
-                                                <div class="small text-muted">Maximum file size: 50Mb</div>
-                                            </label>
 
-                                            <div>
-                                                <input id="file-upload" type="file" style="display: none"
-                                                       (change)="onFileChange($event)"/>
+                                    <ng-container *ngIf="templateRequested">
+                                        <div class="row">
+                                            <div class="col-5 offset-2 text-center">
+                                                <label for="file-upload" class="p-4 rounded-3 cursor-pointer w-100"
+                                                       style="border: 1px dashed #0082c0">
+                                                    <i class="bi bi-cloud-upload fs-2" style="color: #0082c0"></i>
+                                                    <div style="color: #0082c0">Click to select file for upload</div>
+                                                    <div class="small text-muted">Maximum file size: 50Mb</div>
+                                                </label>
+
+                                                <div>
+                                                    <input id="file-upload" type="file" style="display: none"
+                                                           (change)="onFileChange($event)"/>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="row mt-3">
-                                        <div class="col-5 offset-2">
-                                            <div style="background-color: #e9f0ff" class="rounded-2 p-3">
+                                        <div class="row mt-3">
+                                            <div class="col-5 offset-2">
+                                                <div style="background-color: #e9f0ff" class="rounded-2 p-3">
 
-                                                <div class="row">
-                                                    <div class="col-1">
-                                                        <i class="bi bi-filetype-csv fs-2" style="color: #0082c0"></i>
-                                                    </div>
-
-                                                    <div class="col">
-
-                                                        <div class="d-flex justify-content-between">
-                                                            <div>Uploading file ...</div>
-                                                            <div *ngIf="uploadProgress < 100">{{uploadProgress}}%</div>
-                                                            <div *ngIf="uploadProgress === 100"><i
-                                                                class="bi bi-check-lg text-success"></i></div>
+                                                    <div class="row">
+                                                        <div class="col-1">
+                                                            <i class="bi bi-filetype-csv fs-2"
+                                                               style="color: #0082c0"></i>
                                                         </div>
 
-                                                        <ngb-progressbar type="primary" [value]="uploadProgress"
-                                                                         class="mt-2" height="10px"></ngb-progressbar>
+                                                        <div class="col">
+
+                                                            <div class="d-flex justify-content-between">
+                                                                <div>Uploading file ...</div>
+                                                                <div *ngIf="uploadProgress < 100">{{uploadProgress}}%
+                                                                </div>
+                                                                <div *ngIf="uploadProgress === 100"><i
+                                                                    class="bi bi-check-lg text-success"></i></div>
+                                                            </div>
+
+                                                            <ngb-progressbar [type]="uploadProgressType"
+                                                                             [value]="uploadProgress"
+                                                                             class="mt-2"
+                                                                             height="10px"></ngb-progressbar>
+
+                                                        </div>
+
                                                     </div>
 
                                                 </div>
 
                                             </div>
-
                                         </div>
-                                    </div>
 
 
-                                    <div class="row mt-3">
-                                        <!--                                        *ngIf="uploadProgress === 100> -->
-                                        <div class="col-5 offset-2">
-                                            <div style="background-color: #e9f0ff" class="rounded-2 p-3">
+                                        <div class="row mt-3">
+                                            <!--                                        *ngIf="uploadProgress === 100> -->
+                                            <div class="col-5 offset-2">
+                                                <div style="background-color: #e9f0ff" class="rounded-2 p-3">
 
-                                                <div class="row">
-                                                    <div class="col-1">
-                                                        <i class="bi bi-filetype-csv fs-2" style="color: #0082c0"></i>
-                                                    </div>
-
-                                                    <div class="col">
-
-                                                        <div class="d-flex justify-content-between">
-                                                            <div>Validating....</div>
-                                                            <div><img src="assets/img/loader-mini.gif"/></div>
+                                                    <div class="row">
+                                                        <div class="col-1">
+                                                            <i class="bi bi-filetype-csv fs-2"
+                                                               style="color: #0082c0"></i>
                                                         </div>
 
-                                                        <ngb-progressbar [type]="'secondary'" [value]="100"
-                                                                         class="mt-2" [striped]="true" [animated]="true"
-                                                                         height="10px"></ngb-progressbar>
+                                                        <div class="col">
+
+                                                            <div class="d-flex justify-content-between">
+                                                                <div>Validating....</div>
+                                                                <div><img src="assets/img/loader-mini.gif"/></div>
+                                                            </div>
+
+                                                            <ngb-progressbar [type]="'secondary'" [value]="100"
+                                                                             class="mt-2" [striped]="true"
+                                                                             [animated]="true"
+                                                                             height="10px"></ngb-progressbar>
+
+                                                            <ngb-alert [type]="'danger'">Error validation bulk upload
+                                                                file
+                                                            </ngb-alert>
+                                                        </div>
+
                                                     </div>
 
                                                 </div>
 
                                             </div>
-
                                         </div>
-                                    </div>
-
+                                    </ng-container>
 
                                 </form>
                             </div>

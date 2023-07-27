@@ -11,6 +11,7 @@ import {BulkUpload} from "../../../models/bulk-upload";
 import {Location} from "@angular/common";
 import {environment} from "../../../../environments/environment";
 import {UploadService} from "../../../services/upload.service";
+import {HttpEventType, HttpResponse} from "@angular/common/http";
 
 @Component({
     selector: 'app-upload',
@@ -28,6 +29,8 @@ export class UploadComponent implements OnInit {
     uploadMode: string = 'file'; // or file
 
     uploadProgress: number = 0;
+    uploadProgressType = 'primary';
+    templateRequested: boolean;
 
     hotSettings: Handsontable.GridSettings = {
         startRows: 40,
@@ -51,6 +54,7 @@ export class UploadComponent implements OnInit {
 
     ngOnInit(): void {
         this.type = this.route.snapshot.paramMap.get('type');
+        this.templateRequested = false;
 
         // if (!isNaN(parseInt(this.type))) {
         //     // retrieve upload from server
@@ -194,6 +198,7 @@ export class UploadComponent implements OnInit {
 
         console.log(url);
         window.open(environment.apiUrl + url, "_self");
+        this.templateRequested = true;
     }
 
     onFileChange(event): void {
@@ -205,42 +210,47 @@ export class UploadComponent implements OnInit {
             return;
         }
 
-        this.validate(8);
 
         // todo : show user a prompt to confirm reset of design
 
-        // this.uploadService.uploadFile('/uploads/file', files, {name: "type", value: this.type})
-        //     .subscribe(
-        //         (xmlResult: any) => {
-        //             if (xmlResult.type === HttpEventType.UploadProgress) {
-        //                 const percentDone = Math.round(100 * xmlResult.loaded / xmlResult.total);
-        //                 console.log(`File is ${percentDone}% loaded.`);
-        //                 this.uploadProgress = percentDone;
-        //             } else if (xmlResult instanceof HttpResponse) {
-        //                 this.uploadProgress = 100;
-        //                 console.log("completed", xmlResult); // bulk upload
-        //
-        //                 if (xmlResult.status === 200 && xmlResult.body) {
-        //                     // if successful
-        //                     console.log("success", xmlResult.body);
-        //                     this.validate(xmlResult.body.id);
-        //                     // event.target.value = null;
-        //                 } else {
-        //                     // failure
-        //                     // event.target.value = null;
-        //                 }
-        //             }
-        //         },
-        //         (err) => {
-        //             console.log('Upload Error:', err);
-        //         }, () => {
-        //             console.log('Upload done');
-        //         }
-        //     );
+        this.uploadService.uploadFile('/uploads/file', files, {name: "type", value: this.type})
+            .subscribe({
+                next:
+                    (xmlResult: any) => {
+                        if (xmlResult.type === HttpEventType.UploadProgress) {
+                            const percentDone = Math.round(100 * xmlResult.loaded / xmlResult.total);
+                            console.log(`File is ${percentDone}% loaded.`);
+                            this.uploadProgress = percentDone;
+                        } else if (xmlResult instanceof HttpResponse) {
+                            this.uploadProgress = 100;
+                            console.log("completed", xmlResult); // bulk upload
+
+                            if (xmlResult.status === 200 && xmlResult.body) {
+                                // if successful
+                                console.log("success uploading", xmlResult.body);
+                                this.uploadProgressType = 'success';
+                                // validate
+                                this.validate(xmlResult.body.id);
+                                // event.target.value = null;
+                            } else {
+                                // failure
+                                // event.target.value = null;
+                            }
+                        }
+                    }, error: (err) => {
+                    console.log('Upload Error:', err);
+                }
+            });
 
     }
 
     private validate(id: number): void {
-        this.http.post('uploads/' + id + '/validation', null).subscribe({});
+        this.http.post('uploads/' + id + '/validation', null).subscribe({
+            next: (result: any) => {
+
+            }, error: err => {
+
+            }
+        });
     }
 }
