@@ -30,7 +30,7 @@
                         </button>
 
 
-                        <button type="button" class="btn btn-white ms-2 border font-95em">
+                        <button type="button" class="btn btn-white ms-2 border font-95em" (click)="showExportModal()">
                             <i class="bi bi-download"></i> Export
                         </button>
 
@@ -40,7 +40,7 @@
                         <button type="button" class="btn btn-white border font-95em" ngbDropdownToggle>Actions</button>
 
                         <div ngbDropdownMenu aria-labelledby="folderActionDropDownOptions">
-                            <div ngbDropdownItem class="small">Create Samples</div>
+                            <div ngbDropdownItem class="small" (click)="showCreateSamplesModal()">Create Samples</div>
                             <div ngbDropdownItem class="small">Export</div>
                             <div ngbDropdownItem class="small">Bulk Edit</div>
                             <div ngbDropdownItem class="small">Upload</div>

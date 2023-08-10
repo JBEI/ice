@@ -7,6 +7,8 @@ import {ShareFolderModalComponent} from "../../modal/share-folder-modal/share-fo
 import {UploadToFolderModalComponent} from "../../modal/upload-to-folder-modal/upload-to-folder-modal.component";
 import {Folder} from "../../../models/folder";
 import {FolderService} from "../../../services/folder.service";
+import {ExportEntriesComponent} from "../../entry/modal/export-entries/export-entries.component";
+import {CreateSamplesComponent} from "../../entry/modal/create-samples/create-samples.component";
 
 @Component({
     selector: 'app-folder',
@@ -50,7 +52,8 @@ export class FolderComponent implements OnInit {
     }
 
     shareFolder(): void {
-        const modalRef = this.modalService.open(ShareFolderModalComponent);
+        const options: NgbModalOptions = {backdrop: 'static', size: 'md'};
+        const modalRef = this.modalService.open(ShareFolderModalComponent, options);
         modalRef.componentInstance.folder = this.folderDetails;
         modalRef.result.then((result) => {
 
@@ -64,6 +67,16 @@ export class FolderComponent implements OnInit {
         modalRef.result.then((result) => {
 
         });
+    }
+
+    showExportModal(): void {
+        const options: NgbModalOptions = {backdrop: 'static', size: 'md'};
+        const modalRef = this.modalService.open(ExportEntriesComponent, options);
+    }
+
+    showCreateSamplesModal(): void {
+        const options: NgbModalOptions = {backdrop: 'static', size: 'md'};
+        const modalRef = this.modalService.open(CreateSamplesComponent, options);
     }
 
     navigateToFolder(folder: Folder): void {
