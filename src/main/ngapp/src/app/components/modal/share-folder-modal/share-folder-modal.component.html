@@ -5,14 +5,39 @@
 </div>
 
 <div class="modal-body bg-light">
-    <span class="fw-bold fst-italic text-muted cursor-pointer" (click)="folderPermissionsOnly = !folderPermissionsOnly">
-        <i class="bi" [ngClass]="{'bi-check-square': folderPermissionsOnly, 'bi-square': !folderPermissionsOnly}"></i> &nbsp;Folder permissions only
-    </span>
 
-    <div>
-        <input class="">
-    </div>
+    <ng-container *ngIf="permissions">
+
+        <span class="fw-bold fst-italic text-muted cursor-pointer"
+              (click)="folderPermissionsOnly = !folderPermissionsOnly">
+            <i class="bi"
+               [ngClass]="{'bi-check-square': folderPermissionsOnly, 'bi-square': !folderPermissionsOnly}"></i> &nbsp;Folder permissions only
+        </span>
+
+        <div style="overflow: auto; max-height: 200px">
+            <div *ngIf="!permissions.length">
+                No assigned permissions
+            </div>
+
+            <div class="list-group list-group-flush" *ngIf="permissions.length">
+                <li class="list-group-item" *ngFor="let permission of permissions">
+                    <div class="d-flex w-100 justify-content-between">
+                    </div>
+                </li>
+            </div>
+        </div>
+
+        <div>
+            <input class="form-control" placeholder="Add users or groups">
+        </div>
+    </ng-container>
+
+
+    <ng-container *ngIf="!permissions">
+        <img src="assets/img/loader-mini.gif"> Loading permissions...
+    </ng-container>
 </div>
+
 
 <div class="modal-footer">
     <button type="button" class="btn btn-primary font-95em" (click)="activeModal.close()">
