@@ -133,4 +133,8 @@ export class PartsTableComponent implements OnInit {
         this.paging.offset = ((page - 1) * this.paging.limit);
         this.getParts();
     }
+
+    partDetailsRequested(id: number): void {
+
+    }
 }
