@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {FormsModule} from "@angular/forms";
 import {HttpService} from "../../services/http.service";
-import {Router} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
 import {UserService} from "../../services/user.service";
 import {User} from "../../models/User";
 import {CommonModule, NgClass} from "@angular/common";
@@ -14,6 +14,7 @@ import {CommonModule, NgClass} from "@angular/common";
         CommonModule,
         NgClass,
         FormsModule,
+        RouterLink,
     ],
     styleUrls: ['./register.component.css']
 })
@@ -52,11 +53,11 @@ export class RegisterComponent {
         });
     }
 
-    cancel(): void {
-        this.submitted = false;
-        this.accountCreated = false;
-        this.router.navigate(['login']);
-    }
+    // cancel(): void {
+    //     this.submitted = false;
+    //     this.accountCreated = false;
+    //     this.router.navigate(['login']);
+    // }
 
     userInformationValid(): boolean {
         this.newUser.firstNameValid = this.newUser.firstName !== undefined;
