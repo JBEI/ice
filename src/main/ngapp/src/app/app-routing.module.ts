@@ -18,7 +18,6 @@ import {SamplesComponent} from "./components/entry/samples/samples.component";
 import {HistoryComponent} from "./components/entry/history/history.component";
 import {ProfileResolver} from "./resolvers/profile.resolver";
 import {GeneralComponent} from "./components/profile/general/general.component";
-import {ProfileSettingsComponent} from "./components/profile/profile-settings/profile-settings.component";
 import {ProfileGroupsComponent} from "./components/profile/profile-groups/profile-groups.component";
 import {ProfileKeysComponent} from "./components/profile/profile-keys/profile-keys.component";
 
@@ -60,7 +59,6 @@ const routes: Routes = [
         children: [
             {path: '', redirectTo: 'general', pathMatch: 'full'},
             {path: 'general', component: GeneralComponent},
-            {path: 'settings', component: ProfileSettingsComponent},
             {path: 'groups', component: ProfileGroupsComponent},
             {path: 'keys', component: ProfileKeysComponent},
         ]

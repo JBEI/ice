@@ -11,10 +11,8 @@ export class ProfileComponent implements OnInit {
 
     user: User;
     active: string = 'general';
-    tabs: string[];
 
     constructor(private route: ActivatedRoute, private router: Router) {
-        this.tabs = ['general', 'settings']
         route.url.subscribe(() => {
             if (route.snapshot.children)
                 this.active = route.snapshot.children[0].url[0].path;
