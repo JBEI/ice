@@ -32,7 +32,7 @@
     <div>
         <i class="bi bi-bell"></i>
         <span class="text-light"> |</span>
-        {{loggedInUser.email}}
+        <a [href]="'profile/' + loggedInUser.id">{{loggedInUser.email}}</a>
         <span class="text-light"> |</span>
         <button class="btn btn-sm btn-link" (click)="logout()">Logout</button>
     </div>

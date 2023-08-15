@@ -1,16 +1,9 @@
-import {Injectable} from "@angular/core";
-import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from "@angular/router";
+import {inject} from "@angular/core";
+import {ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot} from "@angular/router";
 import {HttpService} from "../../services/http.service";
 import {Observable} from "rxjs";
-import {Entry} from "../../models/entry";
 
-@Injectable()
-export class EntryFieldsResolver implements Resolve<any> {
-
-    constructor(private http: HttpService) {
-    }
-
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Entry> {
-        return undefined;
-    }
+export const EntryFieldsResolver: ResolveFn<any> = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> => {
+    const httpService = inject(HttpService);
+    return undefined;
 }

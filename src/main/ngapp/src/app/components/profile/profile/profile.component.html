@@ -1,1 +1,61 @@
-<p>profile works!</p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="px-0 col d-flex">
+
+            <div class="bg-white" style="flex:0 0 250px">
+                <app-main-sidebar-menu></app-main-sidebar-menu>
+            </div>
+
+            <div class="flex-grow-1">
+                <div class="bg-white border-bottom p-3">
+                    <app-header></app-header>
+                </div>
+
+                <div class="container" *ngIf="user">
+
+                    <div class="row px-4 pt-4 pb-3">
+                        <div class="col">
+                            <div class="d-flex justify-content-between">
+                                <div>
+
+                                    &nbsp;<h2 class="page-title"><span class="text-muted">Profile</span>
+                                    &nbsp;{{user.firstName}} {{user.lastName}}</h2>
+                                    <span style="letter-spacing: .04em; line-height: 1rem;"
+                                          class="small text-muted"> {{user.description}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mx-4 rounded-top-3 bg-light">
+                        <div class="col ps-4">
+                            <ul ngbNav #nav="ngbNav" class="nav nav-underline d-flex justify-content-between">
+                                <li class="nav-item" *ngFor="let tab of tabs">
+                                    <a class="nav-link" [ngClass]="{'active': active === tab}"
+                                       aria-current="page" (click)="goToActiveTab(tab)">{{tab | titlecase}}</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" [ngClass]="{'active': active === 'groups'}"
+                                       aria-current="page" (click)="goToActiveTab('groups')">User Groups</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" [ngClass]="{'active': active === 'keys'}"
+                                       aria-current="page" (click)="goToActiveTab('keys')">API Keys</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="bg-white mx-4">
+                                <router-outlet></router-outlet>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

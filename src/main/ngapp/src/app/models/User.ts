@@ -25,6 +25,7 @@ export class User {
     firstNameValid: boolean;
     lastNameValid: boolean;
     descriptionValid: boolean;
+    isAdmin: boolean;
 
     constructor() {
         this.usingTemporaryPassword = false;

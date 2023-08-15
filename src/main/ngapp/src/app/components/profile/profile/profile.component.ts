@@ -1,4 +1,6 @@
 import {Component, OnInit} from '@angular/core';
+import {User} from "../../../models/User";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
     selector: 'app-profile',
@@ -7,10 +9,25 @@ import {Component, OnInit} from '@angular/core';
 })
 export class ProfileComponent implements OnInit {
 
-    constructor() {
+    user: User;
+    active: string = 'general';
+    tabs: string[];
+
+    constructor(private route: ActivatedRoute, private router: Router) {
+        this.tabs = ['general', 'settings']
+        route.url.subscribe(() => {
+            if (route.snapshot.children)
+                this.active = route.snapshot.children[0].url[0].path;
+        });
     }
 
     ngOnInit(): void {
+        this.route.data.subscribe((data) => {
+            this.user = data.profile;
+        });
     }
 
+    goToActiveTab(active: string): void {
+        this.router.navigate((['/profile/' + this.user.id + '/' + active]));
+    }
 }

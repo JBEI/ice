@@ -10,7 +10,6 @@ import {NgbDropdownModule, NgbModule, NgbNavModule} from "@ng-bootstrap/ng-boots
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
 import {EntryDetailComponent} from './components/entry/entry-detail/entry-detail.component';
-import {EntryResolver} from "./components/entry/entry.resolver";
 import {UploadComponent} from './components/entry/upload/upload.component';
 import {registerAllModules} from "handsontable/registry";
 import {HotTableModule} from "@handsontable/angular";
@@ -21,7 +20,6 @@ import {PersonalCollectionComponent} from './components/collection/personal-coll
 import {PartsTableComponent} from "./components/parts-table/parts-table.component";
 import {ProfileComponent} from './components/profile/profile/profile.component';
 import {CreateNewEntryComponent} from './components/entry/create-new-entry/create-new-entry.component';
-import {EntryFieldsResolver} from "./components/entry/entry-fields.resolver";
 import {
     CreateNewFolderModalComponent
 } from './components/modal/create-new-folder-modal/create-new-folder-modal.component';
@@ -91,7 +89,7 @@ registerAllModules();
         AddToFolderModalComponent,
         FilterPipe,
         ExportEntriesComponent,
-        CreateSamplesComponent,
+        CreateSamplesComponent
     ],
     imports: [
         BrowserModule,
@@ -112,7 +110,7 @@ registerAllModules();
         BooleanFieldComponent,
         MultiTextFieldComponent
     ],
-    providers: [EntryResolver, EntryFieldsResolver],
+    providers: [],
     bootstrap: [AppComponent]
 })
 export class AppModule {

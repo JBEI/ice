@@ -1,0 +1,46 @@
+<div class="modal-header">
+    <h3 class="modal-title">Request API Key</h3>
+    <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()">
+    </button>
+</div>
+
+<div class="modal-body">
+    <div class="alert alert-info" style="padding: 8px">
+        <i style="font-size: 60px; float: left; padding-right: 10px; color: #3a87ad"
+           class="bi bi-exclamation-circle-fill"></i>
+        <span class="font-90em">
+            Enter a <b>client identifier</b> to request an API key. API keys enable third party application access to
+            this ICE instance. If your application is web-based, the use of the domain name is recommended.
+            Duplicate domain names are not permitted.
+        </span>
+    </div>
+
+    <div>
+        <form class="ng-pristine ng-valid">
+            <label>Client ID</label> &nbsp;
+            <input type="text" placeholder="app.example.com"
+                   [ngClass]="{'input_box':!clientIdValidationError, 'input_box_error':clientIdValidationError}"
+                   style="width: 280px; padding: 6px" class="input_box">
+
+            <div class="btn-group font-80em">
+            <span class="cursor_pointer" (click)="client.readOnly = !client.readOnly">
+                <i class="fa fa-fw fa-check-square-o"
+                   [ngClass]="{'fa-square-o': !client.readOnly, 'fa-check-square-o' : client.readOnly}"></i>
+                <span [ngClass]="{'font-bold': client.readOnly}" class="font-bold">read only</span>
+            </span>
+                <br>
+                <!-- ngIf: user.isAdmin --><span *ngIf="user.isAdmin" class="cursor_pointer ng-scope"
+                                                 (click)="client.allowDelegate = !client.allowDelegate">
+                <i class="fa fa-fw fa-square-o" [ngClass]="{'fa-square-o': !client.allowDelegate,
+                'fa-check-square-o' : client.allowDelegate}"></i>
+                <span [ngClass]="{'font-bold': client.allowDelegate}">allow delegation</span>
+            </span><!-- end ngIf: user.isAdmin -->
+            </div>
+
+            &nbsp; &nbsp; &nbsp;
+
+            <button type="button" class="btn btn-sm btn-primary" ng-click="generateToken()">Generate</button>
+        </form>
+    </div>
+
+</div>

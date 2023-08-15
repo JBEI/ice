@@ -4,7 +4,10 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.account.*;
+import org.jbei.ice.account.Account;
+import org.jbei.ice.account.AccountPasswords;
+import org.jbei.ice.account.Accounts;
+import org.jbei.ice.account.PreferencesController;
 import org.jbei.ice.dto.AccountResults;
 import org.jbei.ice.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.dto.entry.PartData;
@@ -33,7 +36,6 @@ import java.util.List;
 @Path("/users")
 public class UserResource extends RestResource {
 
-    private final AccountController controller = new AccountController();
     private final GroupController groupController = new GroupController();
     private final RequestRetriever requestRetriever = new RequestRetriever();
 

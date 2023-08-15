@@ -16,6 +16,11 @@ import {GeneralInformationComponent} from "./components/entry/general-informatio
 import {ExperimentsComponent} from "./components/entry/experiments/experiments.component";
 import {SamplesComponent} from "./components/entry/samples/samples.component";
 import {HistoryComponent} from "./components/entry/history/history.component";
+import {ProfileResolver} from "./resolvers/profile.resolver";
+import {GeneralComponent} from "./components/profile/general/general.component";
+import {ProfileSettingsComponent} from "./components/profile/profile-settings/profile-settings.component";
+import {ProfileGroupsComponent} from "./components/profile/profile-groups/profile-groups.component";
+import {ProfileKeysComponent} from "./components/profile/profile-keys/profile-keys.component";
 
 const routes: Routes = [
     {path: '', redirectTo: '/collection/personal', pathMatch: 'full'},
@@ -50,7 +55,16 @@ const routes: Routes = [
             }]
     },
     {path: 'login', component: LoginComponent},
-    {path: 'profile/:id', component: ProfileComponent},
+    {
+        path: 'profile/:id', component: ProfileComponent, resolve: {profile: ProfileResolver},
+        children: [
+            {path: '', redirectTo: 'general', pathMatch: 'full'},
+            {path: 'general', component: GeneralComponent},
+            {path: 'settings', component: ProfileSettingsComponent},
+            {path: 'groups', component: ProfileGroupsComponent},
+            {path: 'keys', component: ProfileKeysComponent},
+        ]
+    },
     {path: 'create/:type', component: CreateNewEntryComponent},
     {path: 'register', component: RegisterComponent}
 ];
