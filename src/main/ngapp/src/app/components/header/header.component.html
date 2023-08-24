@@ -1,7 +1,7 @@
 <div class="d-flex justify-content-between">
-    <div>
+    <div class="mt-2">
         <div ngbDropdown class="d-inline-block">
-            <button class="btn btn-sm btn-primary" ngbDropdownToggle>
+            <button class="btn btn-primary" ngbDropdownToggle>
                 <span><i class="bi bi-plus"></i> Add entry</span>
             </button>
             <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
@@ -11,7 +11,7 @@
         &nbsp;
 
         <div ngbDropdown class="d-inline-block">
-            <button class="btn btn-sm btn-primary" ngbDropdownToggle>
+            <button class="btn btn-primary" ngbDropdownToggle>
                 <span class="small"><i class="bi bi-table"></i> Upload entries</span>
             </button>
             <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
@@ -22,19 +22,30 @@
         </div>
     </div>
 
-    <div style="width: 350px">
+    <div style="width: 350px" class="mt-2">
         <input class="form-control" placeholder="Search">
     </div>
 
     <div>
+        <a class="btn">
+            <i class="bi bi-bell font-14em"></i>
+            <div style="margin-top: -5px; font-size: x-small">Notifications</div>
+        </a>
 
-    </div>
-    <div>
-        <i class="bi bi-bell"></i>
-        <span class="text-light"> |</span>
-        <a [href]="'profile/' + loggedInUser.id">{{loggedInUser.email}}</a>
-        <span class="text-light"> |</span>
-        <button class="btn btn-sm btn-link" (click)="logout()">Logout</button>
+        <a [href]="'profile/' + loggedInUser.id" class="btn"><i class="bi bi-person-circle font-14em"></i>
+            <div style="margin-top: -5px; font-size: x-small">Profile</div>
+        </a>
+
+        <a class="btn" href="/admin"><i class="bi bi-sliders2 font-14em" *ngIf="loggedInUser.isAdmin"></i>
+            <div style="margin-top: -5px; font-size: x-small">Administration</div>
+        </a>
+
+        <a class="btn border-start rounded-0 ps-4" (click)="logout()">
+            <i class="bi bi-box-arrow-right font-14em"></i>
+            <div
+                style="margin-top: -10px; font-size: x-small">Logout
+            </div>
+        </a>
     </div>
 </div>
 
