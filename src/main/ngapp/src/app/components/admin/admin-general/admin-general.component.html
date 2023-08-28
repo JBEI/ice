@@ -1,0 +1,19 @@
+<div class="px-5">
+    <div class="py-4">
+        <button class="btn btn-white btn-sm">Rebuild Search Index</button>
+        &nbsp;
+        <button class="btn btn-white btn-sm">Rebuild BLAST Index</button>
+    </div>
+
+    <div class="container-fluid border-top">
+        <div class="row p-2 border-bottom" *ngFor="let res of result">
+            <div class="col-3"></div>
+            <div class="col-3">
+                <span class="text-muted">{{res.key | titlecase}}</span>
+            </div>
+            <div class="col-6">
+                {{res.value}}
+            </div>
+        </div>
+    </div>
+</div>

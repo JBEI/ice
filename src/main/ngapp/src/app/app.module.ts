@@ -46,6 +46,7 @@ import {BooleanFieldComponent} from "./components/entry/widgets/boolean-field/bo
 import {MultiTextFieldComponent} from "./components/entry/widgets/multi-text-field/multi-text-field.component";
 import {ExportEntriesComponent} from './components/entry/modal/export-entries/export-entries.component';
 import {CreateSamplesComponent} from './components/entry/modal/create-samples/create-samples.component';
+import {AdminComponent} from "./components/admin/admin/admin.component";
 
 // register Handsontable's modules
 registerAllModules();
@@ -89,7 +90,8 @@ registerAllModules();
         AddToFolderModalComponent,
         FilterPipe,
         ExportEntriesComponent,
-        CreateSamplesComponent
+        CreateSamplesComponent,
+        AdminComponent,
     ],
     imports: [
         BrowserModule,
@@ -108,7 +110,7 @@ registerAllModules();
         UserWithEmailFieldComponent,
         TextareaFieldComponent,
         BooleanFieldComponent,
-        MultiTextFieldComponent
+        MultiTextFieldComponent,
     ],
     providers: [],
     bootstrap: [AppComponent]

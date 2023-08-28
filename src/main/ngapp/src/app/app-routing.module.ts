@@ -20,6 +20,8 @@ import {ProfileResolver} from "./resolvers/profile.resolver";
 import {GeneralComponent} from "./components/profile/general/general.component";
 import {ProfileGroupsComponent} from "./components/profile/profile-groups/profile-groups.component";
 import {ProfileKeysComponent} from "./components/profile/profile-keys/profile-keys.component";
+import {AdminComponent} from "./components/admin/admin/admin.component";
+import {AdminGeneralComponent} from "./components/admin/admin-general/admin-general.component";
 
 const routes: Routes = [
     {path: '', redirectTo: '/collection/personal', pathMatch: 'full'},
@@ -63,8 +65,15 @@ const routes: Routes = [
             {path: 'keys', component: ProfileKeysComponent},
         ]
     },
+    {
+        path: 'admin', component: AdminComponent,
+        children: [
+            {path: '', redirectTo: 'general', pathMatch: 'full'},
+            {path: 'general', component: AdminGeneralComponent}
+        ]
+    }, // todo resolver
     {path: 'create/:type', component: CreateNewEntryComponent},
-    {path: 'register', component: RegisterComponent}
+    {path: 'register', component: RegisterComponent},
 ];
 
 @NgModule({
