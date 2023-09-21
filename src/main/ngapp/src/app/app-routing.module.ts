@@ -22,6 +22,7 @@ import {ProfileGroupsComponent} from "./components/profile/profile-groups/profil
 import {ProfileKeysComponent} from "./components/profile/profile-keys/profile-keys.component";
 import {AdminComponent} from "./components/admin/admin/admin.component";
 import {AdminGeneralComponent} from "./components/admin/admin-general/admin-general.component";
+import {PageNotFoundComponent} from "./components/page-not-found/page-not-found.component";
 
 const routes: Routes = [
     {path: '', redirectTo: '/collection/personal', pathMatch: 'full'},
@@ -74,6 +75,7 @@ const routes: Routes = [
     }, // todo resolver
     {path: 'create/:type', component: CreateNewEntryComponent},
     {path: 'register', component: RegisterComponent},
+    {path: '**', component: PageNotFoundComponent}
 ];
 
 @NgModule({
