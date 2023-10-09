@@ -51,18 +51,20 @@
                                                         <div class="text-nowrap"
                                                              style="width: 100vw; overflow-y: hidden">
 
-                                                            <div *ngFor="let folder of this.folders"
-                                                                 class="small rounded-1 p-2 me-2 shadow-sm border d-inline-block text-truncate folder">
-                                                                <i class="bi bi-folder"></i>&nbsp;
-                                                                <a [routerLink]="'folder/' + folder.id"
-                                                                   (click)="selectFolder(folder)"
-                                                                   class="cursor-pointer">{{folder.folderName}}</a>
-                                                                <div class="border-top mt-2 pt-2 text-muted">
-                                                                    {{folder.count | number}} entries
-                                                                    <div
-                                                                        class="mt-1">{{folder.creationTime | date}}</div>
+                                                            <ng-container *ngIf="folders && folders.length">
+                                                                <div *ngFor="let folder of this.folders"
+                                                                     class="small rounded-1 p-2 me-2 shadow-sm border d-inline-block text-truncate folder">
+                                                                    <i class="bi bi-folder"></i>&nbsp;
+                                                                    <a [routerLink]="'folder/' + folder.id"
+                                                                       (click)="selectFolder(folder)"
+                                                                       class="cursor-pointer">{{folder.folderName}}</a>
+                                                                    <div class="border-top mt-2 pt-2 text-muted">
+                                                                        {{folder.count | number}} entries
+                                                                        <div
+                                                                            class="mt-1">{{folder.creationTime | date}}</div>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            </ng-container>
                                                         </div>
                                                     </div>
 

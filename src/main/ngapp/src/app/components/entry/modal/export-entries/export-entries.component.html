@@ -5,11 +5,36 @@
 </div>
 
 <div class="modal-body">
+    <div style="max-height: 200px; overflow: auto">
+        <div class="p-2" *ngIf="!registryPartners || !registryPartners.partners.length">
+            No web of registries partners available
+        </div>
+
+        <table class="table font-90em table-hover table-condensed table-border-bottom"
+               style="margin-bottom: 0" *ngIf="registryPartners">
+            <tr *ngFor="let partner of registryPartners.partners" (click)="selectPartnerForTransfer(partner)"
+                class="cursor_pointer">
+                <td style="width: 35px">
+                    <i class="fa font-12em fa-fw" style="margin-left: 25px"
+                       [ngClass]="{'fa-square-o':!partner.selected, 'fa-check-square-o':partner.selected==true}"></i>
+                </td>
+                <td>
+                    {{partner.name}}
+                    <br>
+                    <small class="text-muted">{{partner.url}}</small>
+                </td>
+            </tr>
+        </table>
+    </div>
 
 </div>
 
 <div class="modal-footer">
-    <button type="button" class="btn btn-primary font-95em" (click)="activeModal.close()">
-        Done
+    <button type="button" class="btn btn-light font-95em" (click)="activeModal.close()">
+        Cancel
+    </button>
+    <button class="btn btn-sm btn-primary" [disabled]="selectedPartner"
+            *ngIf="registryPartners && registryPartners.partners.length" (click)="transferEntriesToRegistry()">
+        Submit
     </button>
 </div>

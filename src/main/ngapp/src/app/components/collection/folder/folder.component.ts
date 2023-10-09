@@ -79,6 +79,15 @@ export class FolderComponent implements OnInit {
         const modalRef = this.modalService.open(CreateSamplesComponent, options);
     }
 
+    showTransferModal(): void {
+        const options: NgbModalOptions = {backdrop: 'static', size: "md"};
+        const modalRef = this.modalService.open(ExportEntriesComponent, options);
+        modalRef.componentInstance.folder = this.folderDetails;
+        modalRef.result.then((result) => {
+
+        });
+    }
+
     navigateToFolder(folder: Folder): void {
         this.router.navigate((['collection', this.collectionName, 'folder', folder.id]));
     }

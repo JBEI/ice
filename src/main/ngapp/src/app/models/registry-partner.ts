@@ -6,4 +6,7 @@ export class RegistryPartner {
     apiKey: string;
     sent: number;
     fetched: number;
+
+    // ui
+    selected: boolean;
 }
