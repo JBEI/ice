@@ -26,6 +26,10 @@ export class User {
     lastNameValid: boolean;
     descriptionValid: boolean;
     isAdmin: boolean;
+    registerDate: number;
+    lastLogin: number;
+    accountType: string;
+    visibleEntryCount: number;
 
     constructor() {
         this.usingTemporaryPassword = false;

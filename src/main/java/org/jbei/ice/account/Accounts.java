@@ -3,8 +3,8 @@ package org.jbei.ice.account;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.jbei.ice.access.PermissionException;
-import org.jbei.ice.dto.AccountResults;
 import org.jbei.ice.dto.ConfigurationKey;
+import org.jbei.ice.dto.common.Results;
 import org.jbei.ice.email.EmailFactory;
 import org.jbei.ice.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
@@ -137,12 +137,12 @@ public class Accounts {
      * @param sort   account sort type
      * @return wrapper around list of retrieved requested records and number available for retrieval
      */
-    public AccountResults getAvailable(String userId, int offset, int limit, boolean asc, String sort, String filter) {
+    public Results<Account> getAvailable(String userId, int offset, int limit, boolean asc, String sort, String filter) {
         AccountModel account = dao.getByEmail(userId);
         if (!isAdministrator(userId))
             throw new PermissionException(userId + " does not have the privilege to access all accounts");
 
-        AccountResults results = new AccountResults();
+        Results<Account> results = new Results<>();
         List<AccountModel> accounts = dao.getAccounts(offset, limit, sort, asc, filter);
 
         for (AccountModel userAccount : accounts) {
@@ -150,7 +150,7 @@ public class Accounts {
             long entryCount = getNumberOfOwnerEntries(account, userAccount.getEmail());
             info.setUserEntryCount(entryCount);
             info.setAdmin(account.getType() == AccountType.ADMIN);
-            results.getResults().add(info);
+            results.getData().add(info);
         }
 
         long count = dao.getAccountsCount(filter);

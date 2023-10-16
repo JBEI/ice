@@ -47,6 +47,7 @@ import {MultiTextFieldComponent} from "./components/entry/widgets/multi-text-fie
 import {ExportEntriesComponent} from './components/entry/modal/export-entries/export-entries.component';
 import {CreateSamplesComponent} from './components/entry/modal/create-samples/create-samples.component';
 import {AdminComponent} from "./components/admin/admin/admin.component";
+import {AdminUsersComponent} from './components/admin/admin-users/admin-users.component';
 
 // register Handsontable's modules
 registerAllModules();
@@ -92,6 +93,7 @@ registerAllModules();
         ExportEntriesComponent,
         CreateSamplesComponent,
         AdminComponent,
+        AdminUsersComponent,
     ],
     imports: [
         BrowserModule,

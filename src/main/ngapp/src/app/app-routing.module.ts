@@ -23,6 +23,7 @@ import {ProfileKeysComponent} from "./components/profile/profile-keys/profile-ke
 import {AdminComponent} from "./components/admin/admin/admin.component";
 import {AdminGeneralComponent} from "./components/admin/admin-general/admin-general.component";
 import {PageNotFoundComponent} from "./components/page-not-found/page-not-found.component";
+import {AdminUsersComponent} from "./components/admin/admin-users/admin-users.component";
 
 const routes: Routes = [
     {path: '', redirectTo: '/collection/personal', pathMatch: 'full'},
@@ -67,10 +68,11 @@ const routes: Routes = [
         ]
     },
     {
-        path: 'admin', component: AdminComponent,
+        path: 'admin', component: AdminComponent, // todo: guard
         children: [
             {path: '', redirectTo: 'general', pathMatch: 'full'},
-            {path: 'general', component: AdminGeneralComponent}
+            {path: 'general', component: AdminGeneralComponent},
+            {path: 'users', component: AdminUsersComponent}
         ]
     }, // todo resolver
     {path: 'create/:type', component: CreateNewEntryComponent},

@@ -8,8 +8,8 @@ import org.jbei.ice.account.Account;
 import org.jbei.ice.account.AccountPasswords;
 import org.jbei.ice.account.Accounts;
 import org.jbei.ice.account.PreferencesController;
-import org.jbei.ice.dto.AccountResults;
 import org.jbei.ice.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.dto.common.Results;
 import org.jbei.ice.dto.entry.PartData;
 import org.jbei.ice.dto.folder.FolderDetails;
 import org.jbei.ice.dto.group.UserGroup;
@@ -55,7 +55,7 @@ public class UserResource extends RestResource {
         log(userId, "retrieving available accounts");
         try {
             Accounts accounts = new Accounts();
-            AccountResults result = accounts.getAvailable(userId, offset, limit, asc, sort, filter);
+            Results<Account> result = accounts.getAvailable(userId, offset, limit, asc, sort, filter);
             return super.respond(result);
         } catch (PermissionException pe) {
             return super.respond(Response.Status.UNAUTHORIZED);
