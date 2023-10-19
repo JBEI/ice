@@ -48,6 +48,9 @@ import {ExportEntriesComponent} from './components/entry/modal/export-entries/ex
 import {CreateSamplesComponent} from './components/entry/modal/create-samples/create-samples.component';
 import {AdminComponent} from "./components/admin/admin/admin.component";
 import {AdminUsersComponent} from './components/admin/admin-users/admin-users.component';
+import {
+    AdminWebOfRegistriesComponent
+} from './components/admin/admin-web-of-registries/admin-web-of-registries.component';
 
 // register Handsontable's modules
 registerAllModules();
@@ -94,6 +97,7 @@ registerAllModules();
         CreateSamplesComponent,
         AdminComponent,
         AdminUsersComponent,
+        AdminWebOfRegistriesComponent,
     ],
     imports: [
         BrowserModule,

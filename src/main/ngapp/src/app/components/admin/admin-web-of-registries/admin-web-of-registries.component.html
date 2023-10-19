@@ -1,0 +1,117 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <button type="button" class="btn btn-sm btn-white" (click)="enableDisableWor()">
+                <span *ngIf="isWorEnabled"><b>DISABLE</b></span>
+                <span *ngIf="!isWorEnabled"><b>ENABLE</b></span>
+                <i style="font-size: 14px" class="fa fa-fw"
+                   [ngClass]="{'fa-toggle-on green':isWorEnabled, 'fa-toggle-off':!isWorEnabled}"></i>
+            </button>
+
+            <div class="pull-right" (click)="restrictPublicEnable()">
+                <i class="fa fa-fw fa-question-circle cursor_default"
+                   [ngbTooltip]="'Only admins can make an entry/folder public'"></i>
+                <small>Admins only</small>
+                <i class="fa fa-fw"
+                   [ngClass]="{'fa-toggle-on green':restrictPublic, 'fa-toggle-off':!restrictPublic}"></i>
+            </div>
+
+            <!--                <div class=" margin-top-10 panel panel-default font-95em" ng-show="showAddRegistryForm">-->
+            <!--                    <form class="panel-body" role="form" ng-submit="addWebPartner()">-->
+            <!--                        <div class="col-md-2 pad-top-5">-->
+            <!--                            <span style="white-space:nowrap">Registry Name <span class="required">*</span> </span>-->
+            <!--                        </div>-->
+            <!--                        <div class="col-md-10 pad-top-5">-->
+            <!--                            <input placeholder="Unique display identifier" type="text" class="input_box"-->
+            <!--                                   ng-model="newPartner.name"-->
+            <!--                                   maxlength="125" style="width: 235px;">-->
+            <!--                        </div>-->
+
+            <!--                        <div class="col-md-2 pad-top-5">-->
+            <!--                            <span style="white-space: nowrap">Registry URL <span class="required">*</span></span>-->
+            <!--                        </div>-->
+            <!--                        <div class="col-md-10 pad-top-5">-->
+            <!--                            <input placeholder="Valid url for remote ice instance" type="text" class="input_box"-->
+            <!--                                   ng-model="newPartner.url" maxlength="125" style="width: 235px;">-->
+            <!--                        </div>-->
+
+            <!--                        <br>-->
+
+            <!--                        <div class="col-xs-offset-2 col-md-10 pad_top">-->
+            <!--                            <button type="submit" class="btn btn-xs btn-primary">Save</button>-->
+            <!--                            <button type="button" ng-click="showAddRegistryForm=false; newPartner=undefined"-->
+            <!--                                    class="btn btn-xs btn-default">Cancel-->
+            <!--                            </button>-->
+            <!--                        </div>-->
+            <!--                    </form>-->
+            <!--                </div>-->
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <table class="table table-hover table-border-bottom font-95em">
+                    <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>
+                            <span class="entry-table-header">Partner</span>
+                        </th>
+                        <th><span class="entry-table-header">Added</span></th>
+                        <th style="width: 150px"><span class="entry-table-header">Status</span></th>
+                        <th style="width: 120px">&nbsp;</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let partner of wor.partners">
+                        <td style="vertical-align: middle; line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"
+                            class="font-14em">
+                        </td>
+                        <td><a target="_blank" [href]="'https://' + partner.url">{{partner.name}}</a> <br>
+                            <small class="color-888">{{partner.url}}</small>
+                        </td>
+                        <td style="vertical-align: middle">{{partner.addTime | date:'MMM d, y, h:mm a'}}</td>
+                        <!--lastContactTime-->
+                        <td style="vertical-align: middle">
+                            <div class="btn-group" ngbDropdown>
+                                <button type="button" class="btn btn-xs uib-dropdown-toggle strong" ngbDropdownToggle
+                                        [ngClass]="{
+                                'btn-success':partner.status === 'APPROVED',
+                                'btn-warning':partner.status === 'PENDING',
+                                'btn-danger':partner.status === 'BLOCKED'
+                                }">
+                                    {{partner.status | titlecase}} <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" ngbDropdownMenu>
+                                    <li *ngIf="partner.status != 'BLOCKED'"
+                                        (click)="setPartnerStatus(partner, 'BLOCKED')">
+                                        <a class="font-90em" href="#">Block</a>
+                                    </li>
+                                    <li *ngIf="partner.status != 'APPROVED'"
+                                        (click)="setPartnerStatus(partner, 'APPROVED')">
+                                        <a class="font-90em" href="#">Approve</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            &nbsp;
+                            <i *ngIf="partner.status == 'NOT_CONTACTED'" [ngbTooltip]="'Retry'"
+                               (click)="retryRemotePartnerContact()"
+                               class="fa fa-fw fa-refresh fa-spin blue cursor_pointer opacity_hover"></i>
+                        </td>
+                        <td class="font-14em" style="vertical-align: middle">
+                            <div class="pull-right">
+                                <i class="fa fa-fw fa-refresh edit_icon"
+                                   *ngIf="partner.status=='APPROVED' && !partner.refreshing"
+                                   (click)="refreshPartner(partner)" [ngbTooltip]="'Refresh'"></i>
+                                <i class="fa fa-fw fa-refresh opacity_3 fa-spin"
+                                   *ngIf="partner.status=='APPROVED' && partner.refreshing"></i>
+                                &nbsp;
+                                <i class="fa fa-fw fa-trash-o fa-fw delete_icon" [ngbTooltip]="'Delete'"
+                                   (click)="removePartner(partner)"></i>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>

@@ -30,7 +30,8 @@
                             <div>
                                 <ul ngbNav #nav="ngbNav" class="nav nav-underline d-flex justify-content-between">
                                     <li class="nav-item">
-                                        <div class="nav-link" [ngClass]="{'active': active === 'general'}"
+                                        <div class="nav-link cursor-pointer"
+                                             [ngClass]="{'active': active === 'general'}"
                                              aria-current="page" (click)="goToActiveTab('general')">General Settings
                                         </div>
                                     </li>
@@ -56,8 +57,8 @@
                                         </div>
                                     </li>
                                     <li class="nav-item">
-                                        <div class="nav-link cursor-pointer" [ngClass]="{'active': active === 'keys'}"
-                                             aria-current="page" (click)="goToActiveTab('keys')">Web of Registries
+                                        <div class="nav-link cursor-pointer" [ngClass]="{'active': active === 'web'}"
+                                             aria-current="page" (click)="goToActiveTab('web')">Web of Registries
                                         </div>
                                     </li>
 

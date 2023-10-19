@@ -24,6 +24,9 @@ import {AdminComponent} from "./components/admin/admin/admin.component";
 import {AdminGeneralComponent} from "./components/admin/admin-general/admin-general.component";
 import {PageNotFoundComponent} from "./components/page-not-found/page-not-found.component";
 import {AdminUsersComponent} from "./components/admin/admin-users/admin-users.component";
+import {
+    AdminWebOfRegistriesComponent
+} from "./components/admin/admin-web-of-registries/admin-web-of-registries.component";
 
 const routes: Routes = [
     {path: '', redirectTo: '/collection/personal', pathMatch: 'full'},
@@ -72,7 +75,8 @@ const routes: Routes = [
         children: [
             {path: '', redirectTo: 'general', pathMatch: 'full'},
             {path: 'general', component: AdminGeneralComponent},
-            {path: 'users', component: AdminUsersComponent}
+            {path: 'users', component: AdminUsersComponent},
+            {path: 'web', component: AdminWebOfRegistriesComponent}
         ]
     }, // todo resolver
     {path: 'create/:type', component: CreateNewEntryComponent},
