@@ -51,6 +51,8 @@ import {AdminUsersComponent} from './components/admin/admin-users/admin-users.co
 import {
     AdminWebOfRegistriesComponent
 } from './components/admin/admin-web-of-registries/admin-web-of-registries.component';
+import {AdminSampleRequestsComponent} from './components/admin/admin-sample-requests/admin-sample-requests.component';
+import {AdminPublicGroupsComponent} from './components/admin/admin-public-groups/admin-public-groups.component';
 
 // register Handsontable's modules
 registerAllModules();
@@ -98,6 +100,8 @@ registerAllModules();
         AdminComponent,
         AdminUsersComponent,
         AdminWebOfRegistriesComponent,
+        AdminSampleRequestsComponent,
+        AdminPublicGroupsComponent,
     ],
     imports: [
         BrowserModule,

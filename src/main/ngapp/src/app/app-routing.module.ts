@@ -27,6 +27,8 @@ import {AdminUsersComponent} from "./components/admin/admin-users/admin-users.co
 import {
     AdminWebOfRegistriesComponent
 } from "./components/admin/admin-web-of-registries/admin-web-of-registries.component";
+import {AdminSampleRequestsComponent} from "./components/admin/admin-sample-requests/admin-sample-requests.component";
+import {AdminPublicGroupsComponent} from "./components/admin/admin-public-groups/admin-public-groups.component";
 
 const routes: Routes = [
     {path: '', redirectTo: '/collection/personal', pathMatch: 'full'},
@@ -76,7 +78,9 @@ const routes: Routes = [
             {path: '', redirectTo: 'general', pathMatch: 'full'},
             {path: 'general', component: AdminGeneralComponent},
             {path: 'users', component: AdminUsersComponent},
-            {path: 'web', component: AdminWebOfRegistriesComponent}
+            {path: 'web', component: AdminWebOfRegistriesComponent},
+            {path: 'samples', component: AdminSampleRequestsComponent},
+            {path: 'groups', component: AdminPublicGroupsComponent}
         ]
     }, // todo resolver
     {path: 'create/:type', component: CreateNewEntryComponent},
