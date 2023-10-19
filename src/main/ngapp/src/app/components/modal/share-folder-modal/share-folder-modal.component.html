@@ -11,7 +11,8 @@
         <span class="fw-bold fst-italic text-muted cursor-pointer"
               (click)="folderPermissionsOnly = !folderPermissionsOnly">
             <i class="bi"
-               [ngClass]="{'bi-check-square': folderPermissionsOnly, 'bi-square': !folderPermissionsOnly}"></i> &nbsp;Folder permissions only
+               [ngClass]="{'bi-check-square': folderPermissionsOnly, 'bi-square': !folderPermissionsOnly}"></i>
+            &nbsp;Folder permissions only
         </span>
 
         <div style="overflow: auto; max-height: 200px">
@@ -34,7 +35,7 @@
 
 
     <ng-container *ngIf="!permissions">
-        <img src="assets/img/loader-mini.gif"> Loading permissions...
+        <img ngSrc="assets/img/loader-mini.gif" height="16" width="16" alt=""> Loading permissions...
     </ng-container>
 </div>
 

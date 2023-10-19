@@ -9,6 +9,7 @@ import {Folder} from "../../../models/folder";
 import {FolderService} from "../../../services/folder.service";
 import {ExportEntriesComponent} from "../../entry/modal/export-entries/export-entries.component";
 import {CreateSamplesComponent} from "../../entry/modal/create-samples/create-samples.component";
+import {UserService} from "../../../services/user.service";
 
 @Component({
     selector: 'app-folder',
@@ -23,7 +24,7 @@ export class FolderComponent implements OnInit {
     userFolders: Folder[];
 
     constructor(private http: HttpService, private activatedRoute: ActivatedRoute, private modalService: NgbModal,
-                private folders: FolderService, private router: Router) {
+                private folders: FolderService, private router: Router, private userService: UserService) {
     }
 
     ngOnInit(): void {
@@ -41,6 +42,10 @@ export class FolderComponent implements OnInit {
         this.folders.getUserFolders().subscribe(result => {
             this.userFolders = result;
         });
+    }
+
+    isAdmin(): boolean {
+        return this.userService.getUser().isAdmin;
     }
 
     getFolderEntries(folderId: number): void {

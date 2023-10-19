@@ -3,54 +3,55 @@
     <div class="row">
         <div class="col px-0 pt-5 pb-3">
 
-            <div class="d-flex justify-content-between">
-                <h2 class="text-secondary">
+            <div class="d-flex">
+                <div class="w-75">
+                    <!--                    <div class="text-nowrap bp3-text-overflow-ellipsis" style="max-width: 250px">-->
+                    <h2 class="text-secondary">
                     <span class="cursor-pointer"
                           (click)="goToCollection(collectionName)">{{collectionName | titlecase}}</span>
-                    <i class="bi bi-chevron-right font-80em ps-2"></i> {{folderDetails.folderName}}
-                    <div ngbDropdown class="d-inline-block" #myDrop="ngbDropdown">
-                        <button class="btn p-0" ngbDropdownAnchor (focus)="myDrop.open()"></button>
-                        <div ngbDropdownMenu aria-labelledby="dropdownManual">
-                            <button ngbDropdownItem class="small" (click)="navigateToFolder(folder)"
-                                    *ngFor="let folder of userFolders">{{folder.folderName}}</button>
+                        <i class="bi bi-chevron-right font-80em ps-2"></i> {{folderDetails.folderName}}
+                        <div ngbDropdown class="d-inline-block" #myDrop="ngbDropdown">
+                            <button class="btn p-0" ngbDropdownAnchor (focus)="myDrop.open()"></button>
+                            <div ngbDropdownMenu aria-labelledby="dropdownManual">
+                                <button ngbDropdownItem class="small" (click)="navigateToFolder(folder)"
+                                        *ngFor="let folder of userFolders">{{folder.folderName}}</button>
+                            </div>
                         </div>
-                    </div>
-                </h2>
+                    </h2>
+                </div>
 
-                <div class="d-flex justify-content-end">
+                <div class="d-flex justify-content-end w-25">
                     <div *ngIf="folderDetails.canEdit">
                         <button type="button" class="btn btn-white border font-95em" [ngClass]="{'text-muted': false}"
                                 (click)="shareFolder()">
                             <!--                            [disabled]="!selectedFolderId"-->
                             <i class="bi bi-people-fill"></i> Share
                         </button>
-
-                        <button class="btn btn-primary ms-2 font-95em" (click)="showUploadModal()">
-                            <i class="bi bi-upload"></i> Upload
-                        </button>
-
-
-                        <button type="button" class="btn btn-white ms-2 border font-95em" (click)="showExportModal()">
-                            <i class="bi bi-download"></i> Export
-                        </button>
-
                     </div>
 
-                    <div ngbDropdown class="ms-3 d-inline-block">
-                        <button type="button" class="btn btn-white border font-95em" ngbDropdownToggle>Actions</button>
+                    <div ngbDropdown class="ms-1 d-inline-block">
+                        <button type="button" class="btn btn-white border font-95em" ngbDropdownToggle>
+                            <i class="bi bi-three-dots-vertical"></i> Folder Actions
+                        </button>
 
                         <div ngbDropdownMenu aria-labelledby="folderActionDropDownOptions">
-                            <div ngbDropdownItem class="small" (click)="showCreateSamplesModal()">Create Samples</div>
-                            <div ngbDropdownItem class="small">Export</div>
-                            <div ngbDropdownItem class="small">Bulk Edit</div>
-                            <div ngbDropdownItem class="small">Upload</div>
+                            <div ngbDropdownItem class="small cursor-pointer" (click)="showCreateSamplesModal()">Create
+                                Samples
+                            </div>
+                            <div ngbDropdownItem class="small cursor-pointer">Export</div>
+                            <!--                            <div ngbDropdownItem class="small cursor-pointer">Bulk Edit</div>-->
+                            <div ngbDropdownItem class="small cursor-pointer">Upload</div>
 
+                            <ng-container *ngIf="isAdmin()">
                             <div class="dropdown-divider"></div>
 
-                            <div ngbDropdownItem class="small cursor-pointer" (click)="showTransferModal()">Transfer
+                                <div ngbDropdownItem class="small cursor-pointer" (click)="showTransferModal()">Transfer
+                                    Folder
                             </div>
-                            <div ngbDropdownItem class="small">Promote</div>
-                            <div ngbDropdownItem class="small">Accept</div>
+                                <div ngbDropdownItem class="small cursor-pointer">Accept Transfer</div>
+
+                                <div ngbDropdownItem class="small cursor-pointer">Add To Featured Collection</div>
+                            </ng-container>
                         </div>
                     </div>
                 </div>
