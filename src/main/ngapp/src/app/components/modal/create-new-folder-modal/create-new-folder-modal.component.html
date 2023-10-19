@@ -6,14 +6,14 @@
 
 <div class="modal-body">
     <h6 class="text-secondary">Folder Name <span class="text-danger">*</span></h6>
-    <input type="text" maxlength="256"
+    <input type="text" maxlength="64"
            [(ngModel)]="newFolder.folderName"
            class="form-control form-control-sm">
 
     <br>
     <h6 class="text-secondary">Description</h6>
     <textarea class="form-control form-control-sm" [(ngModel)]="newFolder.description"
-              placeholder="Optional brief folder description" maxlength="512" rows="3"></textarea>
+              placeholder="Optional brief folder description" maxlength="256" rows="3"></textarea>
 </div>
 
 <div class="modal-footer">

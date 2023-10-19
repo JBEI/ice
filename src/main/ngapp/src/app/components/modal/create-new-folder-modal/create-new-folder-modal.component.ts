@@ -11,13 +11,12 @@ import {HttpService} from "../../../services/http.service";
 export class CreateNewFolderModalComponent implements OnInit {
 
     newFolder: Folder;
-
     constructor(public activeModal: NgbActiveModal, private http: HttpService) {
         this.newFolder = new Folder();
     }
 
     ngOnInit(): void {
-        // 
+        //
     }
 
     createFolder(): void {
