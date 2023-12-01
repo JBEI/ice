@@ -29,6 +29,7 @@ import {
 } from "./components/admin/admin-web-of-registries/admin-web-of-registries.component";
 import {AdminSampleRequestsComponent} from "./components/admin/admin-sample-requests/admin-sample-requests.component";
 import {AdminPublicGroupsComponent} from "./components/admin/admin-public-groups/admin-public-groups.component";
+import {AdminCustomFieldsComponent} from "./components/admin/admin-custom-fields/admin-custom-fields.component";
 
 const routes: Routes = [
     {path: '', redirectTo: '/collection/personal', pathMatch: 'full'},
@@ -80,7 +81,8 @@ const routes: Routes = [
             {path: 'users', component: AdminUsersComponent},
             {path: 'web', component: AdminWebOfRegistriesComponent},
             {path: 'samples', component: AdminSampleRequestsComponent},
-            {path: 'groups', component: AdminPublicGroupsComponent}
+            {path: 'groups', component: AdminPublicGroupsComponent},
+            {path: 'fields', component: AdminCustomFieldsComponent}
         ]
     }, // todo resolver
     {path: 'create/:type', component: CreateNewEntryComponent},

@@ -53,6 +53,10 @@ import {
 } from './components/admin/admin-web-of-registries/admin-web-of-registries.component';
 import {AdminSampleRequestsComponent} from './components/admin/admin-sample-requests/admin-sample-requests.component';
 import {AdminPublicGroupsComponent} from './components/admin/admin-public-groups/admin-public-groups.component';
+import {AdminCustomFieldsComponent} from './components/admin/admin-custom-fields/admin-custom-fields.component';
+import {
+    EditCustomFieldModalComponent
+} from './components/modal/edit-custom-field-modal/edit-custom-field-modal.component';
 
 // register Handsontable's modules
 registerAllModules();
@@ -102,6 +106,8 @@ registerAllModules();
         AdminWebOfRegistriesComponent,
         AdminSampleRequestsComponent,
         AdminPublicGroupsComponent,
+        AdminCustomFieldsComponent,
+        EditCustomFieldModalComponent,
     ],
     imports: [
         BrowserModule,

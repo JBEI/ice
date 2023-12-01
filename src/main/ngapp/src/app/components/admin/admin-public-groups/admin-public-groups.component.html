@@ -1,1 +1,88 @@
-<p>admin-public-groups works!</p>
+<div>
+    <div class="pad_top">
+        <button type="button" (click)="openCreatePublicGroupModal(null)" class="ice-button">
+            Create Public Group
+        </button>
+    </div>
+
+    <div class="pad_top" *ngIf="!groups.length">
+        <i class="text-muted">No public groups available</i>
+    </div>
+
+    <div class="pad_top" *ngIf="groups.length" style="width: 96%">
+        <table class="table  table-hover table-border-bottom" [ngClass]="{'opacity_4':loadingPage}">
+            <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th class="entry-table-header" style="width: 360px">Label</th>
+                <th class="entry-table-header" style="width: 130px">Members</th>
+                <th class="entry-table-header">Created</th>
+                <th style="width:120px"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="group in groups">
+                <td style="vertical-align: middle; line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff"
+                    class="font-14em">
+                    <b></b>
+                </td>
+                <td>{{group.label}}
+                    <br>
+                    <i class="small text-muted">{{group.description || 'No description provided'}}</i>
+                </td>
+                <td style="width:180px; white-space:nowrap; vertical-align: middle">
+                    <span class="label"
+                          [ngClass]="{
+                          'label-primary': group.memberCount,
+                          'label-default': group.memberCount == 0}">{{group.memberCount | number}}
+                    </span>
+                </td>
+                <td style="width:190px">
+                    {{group.ownerEmail}} <br>
+                    <small class="text-muted">{{group.creationTime | date:'MMM d, yyyy'}}</small>
+                </td>
+                <td style="border-left: 1px solid #EEEEEE; width:150px; white-space:nowrap; vertical-align: middle">
+                    <div *ngIf="!group.confirmDeleteGroup">
+                        <i class="fa fa-fw fa-pencil font-14em edit_icon" [ngbTooltip]="'Edit'"
+                           (click)="openCreatePublicGroupModal(group)"></i>
+                        &nbsp;
+                        <i class="fa fa-fw fa-trash font-14em delete_icon" (click)="group.confirmDeleteGroup = true"
+                           [ngbTooltip]="'Delete'"></i>
+                    </div>
+
+                    <div *ngIf="group.confirmDeleteGroup">
+                        Delete?
+                        <button class="btn btn-primary btn-xs" (click)="deletePublicGroup(group)">Yes</button>
+                        <button class="btn btn-default btn-xs" (click)="group.confirmDeleteGroup=false">No</button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="col-md-5" style="padding-left: 0">
+            <ngb-pagination [collectionSize]="paging.available" [pageSize]="paging.limit" [(page)]="paging.currentPage"
+                            [boundaryLinks]="true" [maxSize]="5" (pageChange)="pageChange($event)" size="sm">
+                <ng-template ngbPaginationFirst><i
+                    class="fa fa-fw fa-angle-double-left"></i> First
+                </ng-template>
+                <ng-template ngbPaginationPrevious><i
+                    class="fa fa-fw fa-angle-left"></i>Prev
+                </ng-template>
+                <!--                            <ng-template ngbPaginationNumber let-p><button class="btn btn-sm btn-white">{{p}}</button></ng-template>-->
+                <ng-template ngbPaginationNext>Next<i
+                    class="fa fa-fw fa-angle-right"></i></ng-template>
+                <ng-template ngbPaginationLast>Last<i
+                    class="fa fa-fw fa-angle-double-right"></i>
+                </ng-template>
+            </ngb-pagination>
+        </div>
+
+        <div class="col-md-7" style="margin-top: 25px;">
+            <strong class="small">
+                <i *ngIf="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
+                {{pageNumber | number}} - {{pageCount | number}} of {{paging.available}}
+            </strong>
+        </div>
+    </div>
+</div>
