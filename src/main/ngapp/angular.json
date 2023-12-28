@@ -76,18 +76,18 @@
                 "serve": {
                     "builder": "@angular-devkit/build-angular:dev-server",
                     "options": {
-                        "browserTarget": "ice:build"
+                        "buildTarget": "ice:build"
                     },
                     "configurations": {
                         "production": {
-                            "browserTarget": "ice:build:production"
+                            "buildTarget": "ice:build:production"
                         }
                     }
                 },
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",
                     "options": {
-                        "browserTarget": "ice:build"
+                        "buildTarget": "ice:build"
                     }
                 },
                 "test": {
