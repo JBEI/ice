@@ -1,38 +1,37 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col p-3">
-            <div ng-controller="AdminCustomFieldsController" style="height: 1050px">
-
-                <uib-tabset class="pad_top">
-                    <uib-tab select="selectedTab('plasmid')">
-                        <uib-tab-heading>Plasmid</uib-tab-heading>
-                    </uib-tab>
-
-                    <uib-tab select="selectedTab('strain')">
-                        <uib-tab-heading>Strain</uib-tab-heading>
-                    </uib-tab>
-
-                    <uib-tab select="selectedTab('part')">
-                        <uib-tab-heading>Part</uib-tab-heading>
-                    </uib-tab>
-
-                    <uib-tab select="selectedTab('seed')">
-                        <uib-tab-heading>Seed</uib-tab-heading>
-                    </uib-tab>
-
-                    <uib-tab select="selectedTab('protein')">
-                        <uib-tab-heading>Protein</uib-tab-heading>
-                    </uib-tab>
-
-                </uib-tabset>
+            <div style="height: 1050px">
+                <ul ngbNav #nav="ngbNav" class="nav nav-underline d-flex justify-content-between">
+                    <li class="nav-item">
+                        <a class="nav-link" [ngClass]="{'active': selection === 'plasmid'}"
+                           aria-current="page" (click)="selectedTab('plasmid')">Plasmid</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" [ngClass]="{'active': selection === 'strain'}"
+                           aria-current="page" (click)="selectedTab('strain')">Strain</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" [ngClass]="{'active': selection === 'part'}"
+                           aria-current="page" (click)="selectedTab('part')">Part</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" [ngClass]="{'active': selection === 'seed'}"
+                           aria-current="page" (click)="selectedTab('seed')">Seed</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" [ngClass]="{'active': selection === 'protein'}"
+                           aria-current="page" (click)="selectedTab('protein')">Protein</a>
+                    </li>
+                </ul>
 
                 <br>
-                <button class="ice-button" ng-click="addNewCustomEntryField()">Create Custom Field</button>
+                <button class="ice-button" (click)="addNewCustomEntryField()">Create Custom Field</button>
                 <br><br>
 
-                <div ng-if="partCustomFields.length">
+                <div *ngIf="partCustomFields.length">
                     <table class="table table-border-bottom table-hover table-condensed font-95em"
-                           ng-class="{'opacity_4':loadingPage}">
+                           [ngClass]="{'opacity_4':loading}">
                         <thead>
                         <th>Label</th>
                         <th>Field Type</th>
@@ -41,22 +40,22 @@
                         <th>Value(s)</th>
                         <th></th>
                         </thead>
-                        <tbody ng-repeat="field in partCustomFields">
+                        <tbody *ngFor="let field of partCustomFields">
                         <tr>
-                            <td>{{field.label}}</td>
-                            <td>{{optionsText(field.fieldType)}}</td>
-                            <td>{{field.entryType}}</td>
+                            <td>{{ field.label }}</td>
+                            <td>{{ optionsText(field.type) }}</td>
+                            <td>{{ field.entryType }}</td>
                             <td style="text-align: center; width: 80px">
-                                <i class="fa fa-fw fa-check green" ng-if="field.required"></i></td>
+                                <i class="fa fa-fw fa-check green" *ngIf="field.required"></i></td>
                             <td>
-                                <div ng-repeat="option in field.options">{{option.name}}</div>
+                                <div *ngFor="let option of field.options">{{ option.name }}</div>
                             </td>
                             <td style="width: 180px; border: 1px solid #ccc; vertical-align: middle">
-                                <i ng-if="!field.delete" class="fa fa-fw fa-trash-o opacity_hover font-14em"
-                                   ng-click="field.delete = true"></i>
-                                <span ng-if="field.delete">Permanently remove field?<br>
-                        <button class="btn btn-xs btn-primary" ng-click="deleteCustomField(field)">Yes</button>
-                        <button class="btn btn-xs btn-default" ng-click="field.delete = false">No</button>
+                                <i *ngIf="!field.delete" class="fa fa-fw fa-trash-o opacity_hover font-14em"
+                                   (click)="field.delete = true"></i>
+                                <span *ngIf="field.delete">Permanently remove field?<br>
+                        <button class="btn btn-xs btn-primary" (click)="deleteCustomField(field)">Yes</button>
+                        <button class="btn btn-xs btn-default" (click)="field.delete = false">No</button>
                     </span>
                             </td>
                         </tr>
@@ -64,8 +63,9 @@
                     </table>
                 </div>
 
-                <div class="pad_top" ng-if="!partCustomFields.length">
-                    <i>No custom fields available for parts of type <b class="text-muted">{{selection | capitalize}}</b></i>
+                <div class="pad_top" *ngIf="!partCustomFields.length">
+                    <i>No custom fields available for parts of type <b
+                        class="text-muted">{{ selection | titlecase }}</b></i>
                 </div>
 
             </div>
